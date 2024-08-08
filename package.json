@@ -16,6 +16,7 @@
     "framer-motion": "^11.3.24",
     "next": "14.2.5",
     "next-themes": "^0.3.0",
+    "prettier": "^3.3.3",
     "react": "^18",
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",
