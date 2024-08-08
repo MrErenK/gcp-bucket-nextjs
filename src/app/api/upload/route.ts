@@ -45,7 +45,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   const blob = bucket.file(file.name);
   const blobStream = blob.createWriteStream();
 
-  const origin = new URL(request.url).origin;
+  const origin = process.env.WEB_URL || "http://localhost:3000";
 
   return new Promise((resolve, reject) => {
     stream
