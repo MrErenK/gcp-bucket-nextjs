@@ -17,10 +17,11 @@ export async function GET(request: Request) {
   const [files] = await bucket.getFiles();
   const totalFiles = files.length;
   const totalPages = Math.ceil(totalFiles / limit);
+  const cdn_url = process.env.CDN_URL;
 
   const paginatedFiles = files.slice((page - 1) * limit, page * limit);
   const fileUrls = paginatedFiles.map(
-    (file) => `https://storage.googleapis.com/${bucket.name}/${file.name}`,
+    (file) => `${cdn_url}/${file.name}`,
   );
 
   return NextResponse.json({

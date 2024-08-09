@@ -1,14 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Storage } from "@google-cloud/storage";
-import { Readable } from "stream";
-
-const storage = new Storage({
-  projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-  keyFilename: "./google-cloud-key.json",
-});
-
-const bucketName = process.env.GOOGLE_CLOUD_BUCKET_NAME || "";
-const bucket = storage.bucket(bucketName);
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -19,32 +9,39 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const file = bucket.file(filename);
-    const [exists] = await file.exists();
+    const cdnUrl = `${process.env.CDN_URL}/${filename}`;
 
-    if (!exists) {
-      return NextResponse.json({ error: "File not found" }, { status: 404 });
+    // Fetch the file from the CDN
+    const cdnResponse = await fetch(cdnUrl);
+
+    if (!cdnResponse.ok) {
+      return NextResponse.json({ error: "File not found on CDN" }, { status: 404 });
     }
 
-    const fileStream = file.createReadStream();
+    // Get the content type and length from the CDN response
+    const contentType = cdnResponse.headers.get("Content-Type") || "application/octet-stream";
+    const contentLength = cdnResponse.headers.get("Content-Length");
 
-    // Create a ReadableStream for the NextResponse
-    const readableStream = new ReadableStream({
-      start(controller) {
-        fileStream.on("data", (chunk) => controller.enqueue(chunk));
-        fileStream.on("end", () => controller.close());
-        fileStream.on("error", (err) => controller.error(err));
-      },
-    });
+    // Create a ReadableStream from the CDN response
+    const stream = cdnResponse.body;
 
-    return new NextResponse(readableStream, {
+    // Create a new response with the stream
+    const response = new NextResponse(stream, {
       headers: {
         "Content-Disposition": `attachment; filename="${filename}"`,
-        "Content-Type": "application/octet-stream",
+        "Content-Type": contentType,
+        "Transfer-Encoding": "chunked",
       },
     });
+
+    // Add Content-Length header if available
+    if (contentLength) {
+      response.headers.set("Content-Length", contentLength);
+    }
+
+    return response;
   } catch (error) {
-    console.error("Error downloading file:", error);
+    console.error("Error processing file download:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

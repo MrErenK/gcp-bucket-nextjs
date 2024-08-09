@@ -11,7 +11,7 @@ export default function Pagination({
   totalPages,
   onPageChange,
 }: PaginationProps) {
-  const [showPagination, setShowPagination] = useState(true);
+  const [showPagination, setShowPagination] = useState<boolean | null>(null);
 
   useEffect(() => {
     setShowPagination(totalPages > 1);
@@ -22,6 +22,10 @@ export default function Pagination({
       onPageChange(page);
     }
   };
+
+  if (showPagination === null) {
+    return null; // Prevents flashing by not rendering until `showPagination` is determined.
+  }
 
   return showPagination ? (
     <div className="flex justify-center space-x-2 mt-4">
