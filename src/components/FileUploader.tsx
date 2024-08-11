@@ -70,15 +70,14 @@ export function FileUploader({
         className={cn(
           "flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-300 ease-in-out",
           isDragActive
-            ? "border-primary bg-primary/10"
-            : "border-gray-300 hover:border-primary hover:bg-gray-50"
+            ? "border-blue-300 bg-blue-100"
+            : "border-gray-200 hover:border-gray-500 hover:bg-gray-50/20"
         )}
       >
         <input {...getInputProps()} />
         <UploadIcon className="w-10 h-10 mb-3 text-gray-400" />
         <p className="text-sm text-gray-600 text-center">
-          <span className="font-semibold text-gray-400 text-primary">Click to upload</span> or drag and
-          drop
+          <span className="font-semibold text-blue-400">Click to upload</span> or drag and drop
         </p>
         <p className="text-xs text-gray-500 mt-2">
           {files.length > 0
@@ -122,8 +121,8 @@ export function FileUploader({
         className={cn(
           "w-full mt-2 transition-all duration-300 ease-in-out",
           files.length > 0 && !uploading
-            ? "bg-primary hover:bg-primary-dark"
-            : "bg-gray-300 cursor-not-allowed"
+            ? "bg-blue-400 hover:bg-blue-500"
+            : "bg-gray-200 text-gray-400 cursor-not-allowed"
         )}
       >
         {uploading ? (

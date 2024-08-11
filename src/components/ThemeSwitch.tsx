@@ -15,7 +15,7 @@ export function ThemeSwitch() {
 
   return (
     <motion.button
-      className="w-16 h-8 bg-sky-100 dark:bg-slate-700 rounded-full p-1 flex items-center transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-sky-400 dark:focus:ring-indigo-400 z-30"
+      className="w-16 h-8 bg-sky-100 dark:bg-slate-700 rounded-full p-1 flex items-center transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 dark:focus-visible:ring-indigo-400 z-30"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
       animate={{
         backgroundColor: theme === "dark" ? "#334155" : "#e0f2fe",
