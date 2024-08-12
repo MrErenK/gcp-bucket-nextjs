@@ -19,7 +19,11 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             <ThemeSwitch />
-            <Button variant="outline" asChild className="hover:bg-primary/10 transition-colors duration-200">
+            <Button
+              variant="outline"
+              asChild
+              className="transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary hover:text-primary-foreground"
+            >
               <a
                 href="https://github.com/MrErenK/gcp-bucket-nextjs"
                 target="_blank"

@@ -28,6 +28,9 @@ export function FileDownloader() {
       const response = await fetch(
         `/api/files?page=${currentPage}&search=${debouncedSearchTerm}`,
       );
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
       const data = await response.json();
       setFiles(data.files);
       setTotalPages(data.totalPages);

@@ -1,7 +1,17 @@
+"use client";
 import React, { useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { FileIcon, CopyIcon, DownloadIcon, SortIcon, RefreshIcon } from "./Icons";
+import {
+  FileIcon,
+  CopyIcon,
+  DownloadIcon,
+  SortIcon,
+  RefreshIcon,
+  AllFilesIcon,
+} from "./Icons";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 
 interface File {
   name: string;
@@ -16,24 +26,26 @@ interface FileListProps {
   onRefresh: () => Promise<void>;
 }
 
-const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "http://localhost:3000";
-
 export function FileList({
   files,
   onCopy,
   onDownload,
   onRefresh,
 }: FileListProps) {
-  const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>({});
-  const [downloadingStates, setDownloadingStates] = useState<{ [key: string]: boolean }>({});
+  const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>(
+    {},
+  );
+  const [downloadingStates, setDownloadingStates] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortBy, setSortBy] = useState<"name" | "date">("name");
+  const router = useRouter();
+  const pathname = usePathname();
+  const currentRoute = pathname.split("?")[0];
 
   const buttonClasses =
     "transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary hover:text-primary-foreground";
-
-  const handleClick = (url: string) => {
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
 
   const handleCopy = useCallback(
     (filename: string) => {
@@ -59,18 +71,25 @@ export function FileList({
 
   const filteredAndSortedFiles = useMemo(() => {
     return files.sort((a, b) => {
-      const comparison = a.name.localeCompare(b.name);
-      return sortOrder === "asc" ? comparison : -comparison;
+      if (sortBy === "name") {
+        const comparison = a.name.localeCompare(b.name);
+        return sortOrder === "asc" ? comparison : -comparison;
+      } else {
+        const dateA = new Date(a.updatedAt);
+        const dateB = new Date(b.updatedAt);
+        const comparison = dateA.getTime() - dateB.getTime();
+        return sortOrder === "asc" ? comparison : -comparison;
+      }
     });
-  }, [files, sortOrder]);
+  }, [files, sortOrder, sortBy]);
 
   function formatFileSize(bytes: number | undefined) {
-    if (bytes === undefined || isNaN(bytes)) return 'Unknown size';
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === undefined || isNaN(bytes)) return "Unknown size";
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   }
 
   return (
@@ -78,25 +97,54 @@ export function FileList({
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
         <h2 className="text-2xl font-bold">Files</h2>
         <div className="flex items-center gap-4 w-full sm:w-auto">
+          {currentRoute !== "/files" && (
+            <Button
+              onClick={() => router.push("/files")}
+              className={buttonClasses}
+            >
+              <AllFilesIcon className="w-4 h-4 mr-2" />
+              View All
+            </Button>
+          )}
           <Button onClick={onRefresh} className={buttonClasses}>
             <RefreshIcon className="w-4 h-4 mr-2" />
             Refresh
           </Button>
           <Button
-            onClick={() => setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))}
+            onClick={() => {
+              setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+              setSortBy("name");
+            }}
             className={buttonClasses}
           >
-            <SortIcon className="w-4 h-4 mr-2" />
-            {sortOrder === "asc" ? "A-Z" : "Z-A"}
+            <SortIcon className="w-4 h-4 mr-2" order={sortOrder} type="name" />
+            {sortBy === "name"
+              ? sortOrder === "asc"
+                ? "A-Z"
+                : "Z-A"
+              : "Sort by Name"}
+          </Button>
+          <Button
+            onClick={() => {
+              setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+              setSortBy("date");
+            }}
+            className={buttonClasses}
+          >
+            <SortIcon className="w-4 h-4 mr-2" type="date" order={sortOrder} />
+            {sortBy === "date"
+              ? sortOrder === "asc"
+                ? "Oldest"
+                : "Newest"
+              : "Sort by Date"}
           </Button>
         </div>
       </div>
       <AnimatePresence>
         {filteredAndSortedFiles.map((file) => {
-          const fileUrl = `${CDN_URL}/${file.name}`;
           const isCopied = copiedStates[file.name];
           const isDownloading = downloadingStates[file.name];
-  
+
           return (
             <motion.div
               key={file.name}
@@ -109,14 +157,18 @@ export function FileList({
               <div className="flex items-center gap-4 w-full lg:w-auto">
                 <FileIcon className="w-8 h-8 text-primary flex-shrink-0" />
                 <div className="flex-grow min-w-0 max-w-full">
-                  <p
-                    className="font-medium text-blue-600 hover:underline cursor-pointer truncate max-w-full"
-                    onClick={() => handleClick(fileUrl)}
-                    role="link"
-                    aria-label={`View ${file.name}`}
+                  <Link
+                    href={`/files/${encodeURIComponent(file.name)}`}
+                    passHref
                   >
-                    {file.name}
-                  </p>
+                    <p
+                      className="font-medium text-blue-600 hover:underline cursor-pointer truncate max-w-full"
+                      role="button"
+                      aria-label={`Preview ${file.name}`}
+                    >
+                      {file.name}
+                    </p>
+                  </Link>
                   <div className="flex flex-col sm:flex-row sm:items-center text-sm text-muted-foreground gap-2">
                     <p className="truncate">
                       Last modified:{" "}
@@ -129,7 +181,12 @@ export function FileList({
                       })}
                     </p>
                     <span className="hidden sm:inline">•</span>
-                    <p>Size: {file.size !== undefined ? formatFileSize(file.size) : 'Unknown size'}</p>
+                    <p>
+                      Size:{" "}
+                      {file.size !== undefined
+                        ? formatFileSize(file.size)
+                        : "Unknown size"}
+                    </p>
                   </div>
                 </div>
               </div>
