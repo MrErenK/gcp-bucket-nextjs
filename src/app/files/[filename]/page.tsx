@@ -45,14 +45,39 @@ export default function FilePage({ params }: { params: { filename: string } }) {
   const buttonClasses =
     "transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary hover:text-primary-foreground";
 
-  const handleDownload = () => {
-    const url = `${process.env.NEXT_PUBLIC_WEB_URL}/api/download?filename=${encodeURIComponent(fileName)}`;
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async () => {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_WEB_URL}/api/download?filename=${encodeURIComponent(fileName)}`;
+
+      // Fetch the file content
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Get the blob from the response
+      const blob = await response.blob();
+
+      // Create a URL for the blob
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      // Create a temporary anchor element
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = fileName;
+
+      // Append to the document, click, and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Revoke the blob URL to free up resources
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+      setError("Failed to download file");
+    }
   };
 
   const handleCopy = () => {
@@ -178,88 +203,91 @@ export default function FilePage({ params }: { params: { filename: string } }) {
             Back
           </Button>
         </div>
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center">
-          <FileIcon className="w-6 h-6 mr-2 text-blue-500" />
-          {fileName}
-        </h1>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 mr-2">
           <Button
             onClick={() => {
-              navigator.clipboard
-                .writeText(fileName)
-                .then(() => {
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
-                })
-                .catch(() => setError("Failed to copy filename"));
+              handleCopy();
             }}
-            variant="ghost"
-            size="sm"
+            variant="default"
             className={buttonClasses}
             disabled={copied}
           >
-            <CopyIcon className="w-4 h-4 mr-2" />
-            {copied ? "Copied!" : "Copy"}
+            <CopyIcon className="w-4 h-4" />
           </Button>
           <Button
             onClick={handleDownload}
             variant="default"
             className={buttonClasses}
           >
-            <DownloadIcon className="w-4 h-4 mr-2" />
-            Download
+            <DownloadIcon className="w-4 h-4" />
           </Button>
         </div>
       </header>
-      <main className="flex-grow container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="bg-card rounded-lg shadow-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">File Details</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <p className="text-gray-600 dark:text-gray-400">File Name:</p>
-              <p className="font-medium">{fileDetails?.name}</p>
-              <Button
-                onClick={() => {
-                  navigator.clipboard
-                    .writeText(fileName)
-                    .then(() => {
-                      setCopied(true);
-                      setTimeout(() => setCopied(false), 2000);
-                    })
-                    .catch(() => setError("Failed to copy filename"));
-                }}
-                variant="ghost"
-                size="sm"
-                className={buttonClasses}
-                disabled={copied}
-              >
-                <CopyIcon
-                  className={`w-5 h-5 ${copied ? "text-green-500" : ""}`}
-                />
-              </Button>
+      <main className="flex-grow container mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <div className="bg-card rounded-lg shadow-lg p-4 sm:p-6 mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold mb-4 text-center">
+            File Details
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                File Name:
+              </p>
+              <div className="flex items-center space-x-2">
+                <p className="font-medium text-sm sm:text-base truncate max-w-[180px] sm:max-w-[220px] lg:max-w-full">
+                  {fileDetails?.name}
+                </p>
+                <Button
+                  onClick={() => {
+                    navigator.clipboard
+                      .writeText(fileName)
+                      .then(() => {
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                      })
+                      .catch(() => setError("Failed to copy filename"));
+                  }}
+                  variant="ghost"
+                  size="sm"
+                  className={`${buttonClasses} p-1`}
+                  disabled={copied}
+                >
+                  <CopyIcon
+                    className={`w-4 h-4 ${copied ? "text-green-500" : ""}`}
+                  />
+                </Button>
+              </div>
             </div>
-            <div>
-              <p className="text-gray-600 dark:text-gray-400">File Size:</p>
-              <p className="font-medium">
+            <div className="space-y-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                File Size:
+              </p>
+              <p className="font-medium text-sm sm:text-base">
                 {formatFileSize(fileDetails?.size || 0)}
               </p>
             </div>
-            <div>
-              <p className="text-gray-600 dark:text-gray-400">Last Modified:</p>
-              <p className="font-medium">
+            <div className="space-y-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Last Modified:
+              </p>
+              <p className="font-medium text-sm sm:text-base">
                 {new Date(fileDetails?.updatedAt || "").toLocaleString()}
               </p>
             </div>
-            <div>
-              <p className="text-gray-600 dark:text-gray-400">File Type:</p>
-              <p className="font-medium">
+            <div className="space-y-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                File Type:
+              </p>
+              <p className="font-medium text-sm sm:text-base">
                 {fileType.charAt(0).toUpperCase() + fileType.slice(1)}
               </p>
             </div>
           </div>
         </div>
-        <div className="bg-card rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">File Preview</h2>
+        <div className="bg-card rounded-lg shadow-lg p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-semibold mb-4 text-center">
+            File Preview
+          </h2>
           {renderPreview()}
         </div>
       </main>

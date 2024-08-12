@@ -70,7 +70,9 @@ const config: Config = {
         },
 },
   plugins: [require("tailwindcss-animate"),
-    require("tailwind-scrollbar")
+    require("tailwind-scrollbar"),
+    require('@tailwindcss/line-clamp'),
+    require('@tailwindcss/aspect-ratio'),
   ],
 };
 export default config;

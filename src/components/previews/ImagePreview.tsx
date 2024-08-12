@@ -27,16 +27,18 @@ export function ImagePreview({ src, alt }: ImagePreviewProps) {
 
   return (
     <>
-      <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-md">
+      <div className="bg-gray-100 dark:bg-gray-800 p-2 sm:p-3 md:p-4 rounded-lg shadow-md max-w-sm mx-auto">
         <div className="relative">
           <img
             src={src}
             alt={alt}
-            className="max-w-full max-h-[60vh] object-contain cursor-pointer"
+            className="w-full h-auto max-h-[40vh] sm:max-h-[50vh] object-contain cursor-pointer rounded-md transition-transform hover:scale-[1.02]"
             onClick={openModal}
           />
         </div>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{alt}</p>
+        <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-2 sm:line-clamp-3">
+          {alt}
+        </p>
       </div>
 
       {isModalOpen && (

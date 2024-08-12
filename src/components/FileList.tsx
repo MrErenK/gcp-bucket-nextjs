@@ -94,9 +94,9 @@ export function FileList({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
         <h2 className="text-2xl font-bold">Files</h2>
-        <div className="flex items-center gap-4 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           {currentRoute !== "/files" && (
             <Button
               onClick={() => router.push("/files")}
@@ -118,11 +118,7 @@ export function FileList({
             className={buttonClasses}
           >
             <SortIcon className="w-4 h-4 mr-2" order={sortOrder} type="name" />
-            {sortBy === "name"
-              ? sortOrder === "asc"
-                ? "A-Z"
-                : "Z-A"
-              : "Sort by Name"}
+            {sortBy === "name" ? (sortOrder === "asc" ? "A-Z" : "Z-A") : "Name"}
           </Button>
           <Button
             onClick={() => {
@@ -132,11 +128,7 @@ export function FileList({
             className={buttonClasses}
           >
             <SortIcon className="w-4 h-4 mr-2" type="date" order={sortOrder} />
-            {sortBy === "date"
-              ? sortOrder === "asc"
-                ? "Oldest"
-                : "Newest"
-              : "Sort by Date"}
+            {sortBy === "date" ? (sortOrder === "asc" ? "Old" : "New") : "Date"}
           </Button>
         </div>
       </div>
@@ -148,49 +140,32 @@ export function FileList({
           return (
             <motion.div
               key={file.name}
-              className="bg-background rounded-lg p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 w-full"
+              className="bg-background rounded-lg p-4 flex flex-col gap-4 w-full"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="flex items-center gap-4 w-full lg:w-auto">
-                <FileIcon className="w-8 h-8 text-primary flex-shrink-0" />
-                <div className="flex-grow min-w-0 max-w-full">
+              <div className="flex items-start gap-4 w-full">
+                <FileIcon className="w-8 h-8 text-primary flex-shrink-0 mt-1" />
+                <div className="flex-grow min-w-0">
                   <Link
                     href={`/files/${encodeURIComponent(file.name)}`}
                     passHref
                   >
-                    <p
-                      className="font-medium text-blue-600 hover:underline cursor-pointer truncate max-w-full"
-                      role="button"
-                      aria-label={`Preview ${file.name}`}
-                    >
+                    <p className="font-medium text-blue-600 hover:underline cursor-pointer truncate">
                       {file.name}
                     </p>
                   </Link>
-                  <div className="flex flex-col sm:flex-row sm:items-center text-sm text-muted-foreground gap-2">
+                  <div className="flex flex-col text-sm text-muted-foreground gap-1 mt-1">
                     <p className="truncate">
-                      Last modified:{" "}
-                      {new Date(file.updatedAt).toLocaleDateString(undefined, {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      Modified: {new Date(file.updatedAt).toLocaleDateString()}
                     </p>
-                    <span className="hidden sm:inline">•</span>
-                    <p>
-                      Size:{" "}
-                      {file.size !== undefined
-                        ? formatFileSize(file.size)
-                        : "Unknown size"}
-                    </p>
+                    <p>Size: {formatFileSize(file.size)}</p>
                   </div>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2 w-full lg:w-auto justify-start lg:justify-end mt-2 lg:mt-0">
+              <div className="flex flex-wrap gap-2 w-full justify-start mt-2">
                 <Button
                   className={buttonClasses}
                   variant="ghost"
@@ -209,7 +184,7 @@ export function FileList({
                   disabled={isDownloading}
                 >
                   <DownloadIcon className="w-4 h-4 mr-2" />
-                  {isDownloading ? "Downloading..." : "Download"}
+                  {isDownloading ? "..." : "Download"}
                 </Button>
               </div>
             </motion.div>
