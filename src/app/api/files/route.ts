@@ -11,11 +11,15 @@ export async function GET(request: NextRequest) {
   try {
     const [files] = await bucket.getFiles();
 
-    const filteredFiles = files
+    const filteredFiles = await Promise.all(files
       .filter((file) => file.name.toLowerCase().includes(search.toLowerCase()))
-      .map((file) => ({
-        name: file.name,
-        updatedAt: file.metadata.updated,
+      .map(async (file) => {
+        const [metadata] = await file.getMetadata();
+        return {
+          name: file.name,
+          updatedAt: metadata.updated,
+          size: parseInt(String(metadata.size) || "0", 10),
+        };
       }));
 
     const totalPages = Math.ceil(filteredFiles.length / PAGE_SIZE);

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 interface File {
   name: string;
   updatedAt: string;
+  size?: number;
 }
 
 interface FileListProps {
@@ -57,12 +58,20 @@ export function FileList({
   );
 
   const filteredAndSortedFiles = useMemo(() => {
-    return files
-      .sort((a, b) => {
-        const comparison = a.name.localeCompare(b.name);
-        return sortOrder === "asc" ? comparison : -comparison;
-      });
+    return files.sort((a, b) => {
+      const comparison = a.name.localeCompare(b.name);
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
   }, [files, sortOrder]);
+
+  function formatFileSize(bytes: number | undefined) {
+    if (bytes === undefined || isNaN(bytes)) return 'Unknown size';
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
 
   return (
     <div className="space-y-4">
@@ -87,40 +96,44 @@ export function FileList({
           const fileUrl = `${CDN_URL}/${file.name}`;
           const isCopied = copiedStates[file.name];
           const isDownloading = downloadingStates[file.name];
-
+  
           return (
             <motion.div
               key={file.name}
-              className="bg-background rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between"
+              className="bg-background rounded-lg p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 w-full"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="flex items-center gap-4 flex-1">
-                <FileIcon className="w-8 h-8 text-primary" />
-                <div className="flex-1">
+              <div className="flex items-center gap-4 w-full lg:w-auto">
+                <FileIcon className="w-8 h-8 text-primary flex-shrink-0" />
+                <div className="flex-grow min-w-0 max-w-full">
                   <p
-                    className="font-medium text-blue-600 hover:underline cursor-pointer"
+                    className="font-medium text-blue-600 hover:underline cursor-pointer truncate max-w-full"
                     onClick={() => handleClick(fileUrl)}
                     role="link"
                     aria-label={`View ${file.name}`}
                   >
                     {file.name}
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    Last modified:{" "}
-                    {new Date(file.updatedAt).toLocaleDateString(undefined, {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center text-sm text-muted-foreground gap-2">
+                    <p className="truncate">
+                      Last modified:{" "}
+                      {new Date(file.updatedAt).toLocaleDateString(undefined, {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                    <span className="hidden sm:inline">•</span>
+                    <p>Size: {file.size !== undefined ? formatFileSize(file.size) : 'Unknown size'}</p>
+                  </div>
                 </div>
               </div>
-              <div className="flex gap-2 mt-2 sm:mt-0">
+              <div className="flex flex-wrap gap-2 w-full lg:w-auto justify-start lg:justify-end mt-2 lg:mt-0">
                 <Button
                   className={buttonClasses}
                   variant="ghost"
