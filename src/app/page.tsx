@@ -4,6 +4,7 @@ import { ThemeSwitch } from "@/components/ThemeSwitch";
 import { Button } from "@/components/ui/button";
 import { GithubIcon, FileIcon } from "@/components/Icons";
 import { Header } from "@/components/Header";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
@@ -40,6 +41,7 @@ export default function Home() {
           <FileDownloader />
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

@@ -368,3 +368,22 @@ export const HomeIcon = ({ className = "w-6 h-6" }) => {
     </svg>
   );
 };
+
+export function TelegramIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21.198 2.433a2.242 2.242 0 0 0-1.022.215l-17.15 6.498a2.268 2.268 0 0 0-.214 4.180l3.608 1.707a1.417 1.417 0 0 0 1.635-.409l5.725-6.950a.563.563 0 0 1 .827.758l-5.725 6.95a1.406 1.406 0 0 0-.409 1.635l1.707 3.608a2.268 2.268 0 0 0 4.180-.214l6.498-17.15a2.242 2.242 0 0 0-1.215-2.572" />
+    </svg>
+  );
+}
