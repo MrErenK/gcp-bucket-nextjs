@@ -26,7 +26,7 @@ const useScrollInfo = () => {
   }, []);
 
   useEffect(() => {
-    window.addEventListener("scroll", updateScrollInfo);
+    window.addEventListener("scroll", updateScrollInfo, { passive: true });
     return () => window.removeEventListener("scroll", updateScrollInfo);
   }, [updateScrollInfo]);
 
@@ -43,24 +43,34 @@ export function Header() {
     };
 
     checkContentScrollable();
-    window.addEventListener("resize", checkContentScrollable);
+    window.addEventListener("resize", checkContentScrollable, {
+      passive: true,
+    });
     return () => window.removeEventListener("resize", checkContentScrollable);
   }, []);
 
   return (
     <header
-      className={`sticky top-0 w-full backdrop-blur z-40 transition-all duration-300 ease-in-out
-        ${!isAtTop && isContentScrollable ? (scrollDirection === "down" ? "-translate-y-full" : "translate-y-0") : "translate-y-0"}
-        ${!isAtTop ? "bg-background/80 shadow-md" : "bg-background/50"}
+      className={`sticky top-0 w-full backdrop-blur-sm z-40 transition-all duration-300 ease-in-out
+        ${
+          !isAtTop && isContentScrollable
+            ? scrollDirection === "down"
+              ? "-translate-y-full"
+              : "translate-y-0"
+            : "translate-y-0"
+        }
+        ${!isAtTop ? "bg-background/90 shadow-md" : "bg-background/50"}
       `}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center gap-4">
-            <CloudIcon className="w-8 h-8 text-primary hover:text-secondary transition-colors duration-200" />
-            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              <Link href="/">Cloud Storage</Link>
-            </h1>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3 group">
+              <CloudIcon className="w-8 h-8 text-primary group-hover:text-secondary transition-colors duration-200" />
+              <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent group-hover:text-primary transition-all duration-200">
+                Cloud Storage
+              </h1>
+            </Link>
           </div>
         </div>
       </div>

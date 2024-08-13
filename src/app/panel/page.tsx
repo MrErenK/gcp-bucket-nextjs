@@ -5,16 +5,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import {
-  ArrowLeftIcon,
-  PlusIcon,
-  TrashIcon,
-  LockIcon,
-  CopyIcon,
-} from "@/components/Icons";
+import { HomeIcon, PlusIcon, LockIcon } from "@/components/Icons";
 import { ThemeSwitch } from "@/components/ThemeSwitch";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { Toaster, toast } from "react-hot-toast";
+import APIKeyCard from "@/components/APIKeyCard";
 
 const PanelPage = () => {
   const [apiKeys, setApiKeys] = useState<
@@ -30,7 +25,6 @@ const PanelPage = () => {
   const [newKeyDescription, setNewKeyDescription] = useState("");
   const [adminApiKey, setAdminApiKey] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [deletingKey, setDeletingKey] = useState<{
     id: string;
     description: string;
@@ -75,6 +69,18 @@ const PanelPage = () => {
 
     return () => {
       document.body.classList.remove("overlay-active");
+    };
+  }, [deletingKey]);
+
+  useEffect(() => {
+    if (deletingKey) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.body.style.overflow = "unset";
     };
   }, [deletingKey]);
 
@@ -190,103 +196,108 @@ const PanelPage = () => {
         <Toaster position="top-right" />
         <Button
           onClick={() => router.push("/")}
-          variant="outline"
-          className="absolute top-4 left-4 transition duration-300 ease-in-out hover:bg-primary hover:text-primary-foreground"
+          variant="ghost"
+          className="absolute top-4 left-4 transition duration-300 ease-in-out hover:bg-primary/10 rounded-full"
         >
-          <ArrowLeftIcon className="w-4 h-4 mr-2" />
-          Back to Home
+          <HomeIcon className="w-5 h-5 mr-2" />
+          <span className="hidden sm:inline">Back</span>
         </Button>
-        <Card className="w-full max-w-md shadow-lg border border-primary/10">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">
+        <Card className="w-full max-w-md shadow-xl border border-primary/10 rounded-xl overflow-hidden">
+          <CardHeader className="space-y-1 bg-primary/5 border-b border-primary/10 p-6">
+            <CardTitle className="text-3xl font-bold text-center text-primary">
               Admin Login
             </CardTitle>
             <p className="text-muted-foreground text-sm text-center">
               Enter your admin API key to access the panel
             </p>
           </CardHeader>
-          <CardContent>
-            <div className="flex flex-col space-y-4">
-              <div className="relative">
-                <Input
-                  type="password"
-                  placeholder="Enter admin API key"
-                  value={adminApiKey}
-                  onChange={(e) => setAdminApiKey(e.target.value)}
-                  className="pr-10"
-                />
-                <LockIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              </div>
-              <Button
-                onClick={authenticate}
-                disabled={isAuthenticating}
-                className="w-full transition duration-300 ease-in-out hover:bg-primary/90"
-              >
-                {isAuthenticating ? (
-                  <LoadingIndicator loading="login" />
-                ) : (
-                  <div className="flex items-center justify-center">
-                    <LockIcon className="w-4 h-4 mr-2" />
-                    Authenticate
-                  </div>
-                )}
-              </Button>
-              {error && (
-                <p className="text-red-500 text-sm text-center bg-red-100 p-2 rounded-md">
-                  {error}
-                </p>
-              )}
+          <CardContent className="p-6 space-y-6">
+            <div className="relative">
+              <Input
+                type="password"
+                placeholder="Enter admin API key"
+                value={adminApiKey}
+                onChange={(e) => setAdminApiKey(e.target.value)}
+                className="pr-10 py-3 rounded-lg border-2 border-primary/20 focus:border-primary focus:ring focus:ring-primary/30 transition-all duration-300"
+              />
+              <LockIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
             </div>
+            <Button
+              onClick={authenticate}
+              disabled={isAuthenticating}
+              className="w-full py-3 transition duration-300 ease-in-out bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isAuthenticating ? (
+                <LoadingIndicator loading="login" />
+              ) : (
+                <span className="flex items-center justify-center">
+                  <LockIcon className="w-5 h-5 mr-2" />
+                  Authenticate
+                </span>
+              )}
+            </Button>
+            {error && (
+              <div
+                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+                role="alert"
+              >
+                <span className="block sm:inline">{error}</span>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
     );
   }
 
+  function handleDelete(id: string): void {
+    setDeletingKey(apiKeys.find((key) => key.id === id) || null);
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-background/80">
       <Toaster position="top-right" />
-      <header className="flex justify-between items-center p-4 bg-card shadow-md">
+      <header className="flex justify-between items-center p-6 bg-card shadow-md">
         <Button
           onClick={() => router.push("/")}
           variant="outline"
-          className="transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary/10"
+          className="transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary/10 rounded-full"
         >
-          <ArrowLeftIcon className="w-4 h-4 mr-2" />
-          Back to Home
+          <HomeIcon className="w-5 h-5 mr-2" />
+          <span className="hidden sm:inline">Back</span>
         </Button>
         <ThemeSwitch />
       </header>
-      <main className="flex-grow container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <Card className="mb-8 border border-primary/10 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center sm:text-left">
+      <main className="flex-grow container mx-auto px-4 py-12 sm:px-6 lg:px-8 max-w-4xl">
+        <Card className="mb-8 border border-primary/10 shadow-lg rounded-xl overflow-hidden">
+          <CardHeader className="bg-primary/5 border-b border-primary/10">
+            <CardTitle className="text-3xl font-bold text-center sm:text-left text-primary">
               Admin Panel
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-              <div className="relative">
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+              <div className="relative flex-grow">
                 <Input
                   type="text"
                   placeholder="Enter new key description"
                   value={newKeyDescription}
                   onChange={(e) => setNewKeyDescription(e.target.value)}
-                  className="pr-10"
+                  className="pr-10 w-full rounded-lg border-2 border-primary/20 focus:border-primary focus:ring focus:ring-primary/30 transition-all duration-300"
                 />
               </div>
               <Button
                 onClick={generateNewKey}
                 disabled={isLoading}
-                className="transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary/90"
+                className="transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary/90 rounded-lg px-6 py-3 bg-primary shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
               >
                 {isLoading ? (
                   <LoadingIndicator loading="create" />
                 ) : (
-                  <div className="flex items-center justify-center">
-                    <PlusIcon className="w-4 h-4 mr-2" />
+                  <span className="flex items-center justify-center text-primary-foreground">
+                    <PlusIcon className="w-5 h-5 mr-2" />
                     Generate New Key
-                  </div>
+                  </span>
                 )}
               </Button>
             </div>
@@ -298,101 +309,85 @@ const PanelPage = () => {
             <LoadingIndicator loading="keys" />
           </div>
         ) : error ? (
-          <div className="text-red-500 text-center">{error}</div>
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg text-center">
+            {error}
+          </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {apiKeys.length === 0 ? (
-              <p className="text-center">No API keys found.</p>
+              <p className="text-center text-muted-foreground text-lg">
+                No API keys found.
+              </p>
             ) : (
               apiKeys.map((key) => (
-                <Card
-                  key={key.id}
-                  className="flex items-center justify-between p-4 border border-primary/10 shadow-sm"
-                >
-                  <CardContent>
-                    <p className="text-lg font-semibold">{key.description}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Key: {key.key}
-                    </p>
-                  </CardContent>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      className="transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary/10"
-                      onClick={() => {
-                        navigator.clipboard.writeText(String(key.key ?? ""));
-                        setCopiedId(String(key.key) || null);
-                        toast.success("API key copied to clipboard");
-                        setTimeout(() => setCopiedId(null), 2000);
-                      }}
-                    >
-                      {copiedId === key.key ? (
-                        <span className="text-green-500">Copied</span>
-                      ) : (
-                        <CopyIcon className="w-4 h-4" />
-                      )}
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      className="transition duration-300 ease-in-out transform hover:scale-105 hover:bg-destructive/90"
-                      onClick={() => setDeletingKey(key)}
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </Card>
+                <div className="max-w-2xl mx-auto" key={key.id}>
+                  <APIKeyCard
+                    apiKey={key}
+                    onDelete={handleDelete}
+                    toast={toast}
+                  />
+                </div>
               ))
             )}
           </div>
         )}
       </main>
       {deletingKey && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md p-4">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-center">
-                Confirm Deletion
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center mb-4">
-                Are you sure you want to delete the API key for{" "}
-                <strong>{deletingKey.description}</strong>? This action is{" "}
-                <strong>irreversible</strong>.
-              </p>
-              <Input
-                type="text"
-                placeholder="Type the description to confirm"
-                value={confirmDescription}
-                onChange={(e) => setConfirmDescription(e.target.value)}
-                className="mb-4"
-              />
-              {showFinalConfirmation ? (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          <div
+            className="absolute inset-0 bg-black bg-opacity-50"
+            onClick={() => setDeletingKey(null)}
+          ></div>
+          <div className="absolute inset-0 flex items-center justify-center p-4">
+            <Card className="w-full max-w-md shadow-xl border border-primary/10 rounded-xl overflow-hidden">
+              <CardHeader className="bg-primary/5 border-b border-primary/10">
+                <CardTitle className="text-2xl font-bold text-center text-primary">
+                  Confirm Deletion
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <p className="text-center">
+                  Are you sure you want to delete the API key for{" "}
+                  <strong className="text-primary">
+                    {deletingKey.description}
+                  </strong>
+                  ? This action is{" "}
+                  <strong className="text-destructive">irreversible</strong>.
+                </p>
+                <Input
+                  type="text"
+                  placeholder="Type the description to confirm"
+                  value={confirmDescription}
+                  onChange={(e) => setConfirmDescription(e.target.value)}
+                  className="w-full py-2 px-3 rounded-lg border-2 border-primary/20 focus:border-primary focus:ring focus:ring-primary/30 transition-all duration-300"
+                />
+                {showFinalConfirmation ? (
+                  <Button
+                    variant="destructive"
+                    className="w-full py-3 transition duration-300 ease-in-out hover:bg-destructive/90 rounded-lg shadow-md hover:shadow-lg"
+                    onClick={handleFinalDeleteConfirmation}
+                  >
+                    Confirm Delete
+                  </Button>
+                ) : (
+                  <Button
+                    disabled={confirmDescription !== deletingKey.description}
+                    className="w-full py-3 transition duration-300 ease-in-out hover:bg-primary/90 rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleDeleteConfirmation}
+                  >
+                    Delete Key
+                  </Button>
+                )}
                 <Button
-                  variant="destructive"
-                  className="w-full transition duration-300 ease-in-out transform hover:scale-105 hover:bg-destructive/90"
-                  onClick={handleFinalDeleteConfirmation}
+                  onClick={() => setDeletingKey(null)}
+                  variant="outline"
+                  className="w-full py-3 transition duration-300 ease-in-out hover:bg-primary/10 rounded-lg"
                 >
-                  Confirm Delete
+                  Cancel
                 </Button>
-              ) : (
-                <Button
-                  disabled={confirmDescription !== deletingKey.description}
-                  className="w-full transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary/90"
-                  onClick={handleDeleteConfirmation}
-                >
-                  Delete Key
-                </Button>
-              )}
-            </CardContent>
-            <Button
-              onClick={() => setDeletingKey(null)}
-              variant="outline"
-              className="w-full mt-4 transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary/10"
-            >
-              Cancel
-            </Button>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
     </div>

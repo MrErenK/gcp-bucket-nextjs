@@ -2,18 +2,14 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  DownloadIcon,
-  ArrowLeftIcon,
-  CopyIcon,
-  HomeIcon,
-} from "@/components/Icons";
+import { CopyIcon } from "@/components/Icons";
 import { TextPreview } from "@/components/previews/TextPreview";
 import { ImagePreview } from "@/components/previews/ImagePreview";
 import { AudioPreview } from "@/components/previews/AudioPreview";
 import { VideoPreview } from "@/components/previews/VideoPreview";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { getFileType } from "@/types/filetypes";
+import Header from "./Header";
 
 interface FileDetails {
   name: string;
@@ -183,111 +179,84 @@ export default function FilePage({ params }: { params: { filename: string } }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-background/80">
-      <header className="flex justify-between items-center p-4 bg-card shadow-md">
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => router.push("/")}
-            variant="outline"
-            className={buttonClasses}
-          >
-            <HomeIcon className="w-4 h-4 mr-2" />
-            Home
-          </Button>
-          <Button
-            onClick={() => router.push("/files")}
-            variant="outline"
-            className={buttonClasses}
-          >
-            <ArrowLeftIcon className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-        </div>
-        <div className="flex items-center gap-3 mr-2">
-          <Button
-            onClick={() => {
-              handleCopy();
-            }}
-            variant="default"
-            className={buttonClasses}
-            disabled={copied}
-          >
-            <CopyIcon className="w-4 h-4" />
-          </Button>
-          <Button
-            onClick={handleDownload}
-            variant="default"
-            className={buttonClasses}
-          >
-            <DownloadIcon className="w-4 h-4" />
-          </Button>
-        </div>
-      </header>
-      <main className="flex-grow container mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        <div className="bg-card rounded-lg shadow-lg p-4 sm:p-6 mb-6">
-          <h2 className="text-lg sm:text-xl font-semibold mb-4 text-center">
-            File Details
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="space-y-1">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                File Name:
-              </p>
-              <div className="flex items-center space-x-2">
-                <p className="font-medium text-sm sm:text-base truncate max-w-[180px] sm:max-w-[220px] lg:max-w-full">
-                  {fileDetails?.name}
-                </p>
-                <Button
-                  onClick={() => {
-                    navigator.clipboard
-                      .writeText(fileName)
-                      .then(() => {
-                        setCopied(true);
-                        setTimeout(() => setCopied(false), 2000);
-                      })
-                      .catch(() => setError("Failed to copy filename"));
-                  }}
-                  variant="ghost"
-                  size="sm"
-                  className={`${buttonClasses} p-1`}
-                  disabled={copied}
-                >
-                  <CopyIcon
-                    className={`w-4 h-4 ${copied ? "text-green-500" : ""}`}
-                  />
-                </Button>
-              </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                File Size:
-              </p>
-              <p className="font-medium text-sm sm:text-base">
-                {formatFileSize(fileDetails?.size || 0)}
-              </p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Last Modified:
-              </p>
-              <p className="font-medium text-sm sm:text-base">
-                {new Date(fileDetails?.updatedAt || "").toLocaleString()}
-              </p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                File Type:
-              </p>
-              <p className="font-medium text-sm sm:text-base">
-                {fileType.charAt(0).toUpperCase() + fileType.slice(1)}
-              </p>
+      <Header
+        handleCopy={handleCopy}
+        handleDownload={handleDownload}
+        copied={copied}
+      />
+      <main className="flex-grow container mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+        <div className="bg-card rounded-xl shadow-lg border border-primary/10 overflow-hidden">
+          <div className="bg-primary/5 border-b border-primary/10 p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-primary text-center">
+              File Details
+            </h2>
+          </div>
+          <div className="p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                {
+                  label: "File Name",
+                  value: fileDetails?.name,
+                  isCopyable: true,
+                },
+                {
+                  label: "File Size",
+                  value: formatFileSize(fileDetails?.size || 0),
+                },
+                {
+                  label: "Last Modified",
+                  value: new Date(
+                    fileDetails?.updatedAt || "",
+                  ).toLocaleString(),
+                },
+                {
+                  label: "File Type",
+                  value: fileType.charAt(0).toUpperCase() + fileType.slice(1),
+                },
+              ].map((item, index) => (
+                <div key={index} className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {item.label}
+                  </p>
+                  <div className="flex items-center space-x-2">
+                    <p className="font-semibold text-sm sm:text-base truncate">
+                      {item.value}
+                    </p>
+                    {item.isCopyable && (
+                      <Button
+                        onClick={() => {
+                          navigator.clipboard
+                            .writeText(fileName)
+                            .then(() => {
+                              setCopied(true);
+                              setTimeout(() => setCopied(false), 2000);
+                            })
+                            .catch(() => setError("Failed to copy filename"));
+                        }}
+                        variant="ghost"
+                        size="sm"
+                        className={`${buttonClasses} p-1 hover:bg-primary/10`}
+                        disabled={copied}
+                      >
+                        <CopyIcon
+                          className={`w-4 h-4 ${copied ? "text-green-500" : ""}`}
+                        />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-        <div className="bg-card rounded-lg shadow-lg p-4 sm:p-6">
-          <h2 className="text-lg sm:text-xl font-semibold mb-4 text-center">
-            File Preview
-          </h2>
-          {renderPreview()}
+
+        <div className="bg-card rounded-xl shadow-lg border border-primary/10 overflow-hidden">
+          <div className="bg-primary/5 border-b border-primary/10 p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-primary text-center">
+              File Preview
+            </h2>
+          </div>
+          <div className="p-4 sm:p-6">{renderPreview()}</div>
         </div>
       </main>
     </div>

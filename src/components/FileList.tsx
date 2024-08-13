@@ -102,31 +102,37 @@ export function FileList({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-        <h2 className="text-2xl font-bold">Files</h2>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card rounded-lg p-4 shadow-sm">
+        <h2 className="text-2xl font-bold text-primary">Files</h2>
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <Button
+            onClick={onRefresh}
+            variant="outline"
+            className="transition-all duration-300 ease-in-out hover:bg-primary/10"
+          >
+            <RefreshIcon className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
           {currentRoute !== "/files" && (
             <Button
               onClick={() => router.push("/files")}
-              className={buttonClasses}
+              variant="outline"
+              className="transition-all duration-300 ease-in-out hover:bg-primary/10"
             >
               <AllFilesIcon className="w-4 h-4 mr-2" />
               View All
             </Button>
           )}
-          <Button onClick={onRefresh} className={buttonClasses}>
-            <RefreshIcon className="w-4 h-4 mr-2" />
-            Refresh
-          </Button>
           <Button
             onClick={() => {
               setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
               setSortBy("name");
             }}
-            className={buttonClasses}
+            variant={sortBy === "name" ? "default" : "outline"}
+            className="transition-all duration-300 ease-in-out"
           >
-            <SortIcon className="w-4 h-4 mr-2" order={sortOrder} type="name" />
+            <SortIcon className="w-4 h-4 mr-2" type="name" order={sortOrder} />
             {sortBy === "name" ? (sortOrder === "asc" ? "A-Z" : "Z-A") : "Name"}
           </Button>
           <Button
@@ -134,7 +140,8 @@ export function FileList({
               setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
               setSortBy("date");
             }}
-            className={buttonClasses}
+            variant={sortBy === "date" ? "default" : "outline"}
+            className="transition-all duration-300 ease-in-out"
           >
             <SortIcon className="w-4 h-4 mr-2" type="date" order={sortOrder} />
             {sortBy === "date" ? (sortOrder === "asc" ? "Old" : "New") : "Date"}
@@ -149,24 +156,24 @@ export function FileList({
           return (
             <motion.div
               key={file.name}
-              className="bg-background rounded-lg p-4 flex flex-col gap-4 w-full"
+              className="bg-card rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
               <div className="flex items-start gap-4 w-full">
-                <FileIcon className="w-8 h-8 text-primary flex-shrink-0 mt-1" />
+                <FileIcon className="w-10 h-10 text-primary flex-shrink-0 mt-1" />
                 <div className="flex-grow min-w-0">
                   <Link
                     href={`/files/${encodeURIComponent(file.name)}`}
                     passHref
                   >
-                    <p className="font-medium text-blue-600 hover:underline cursor-pointer truncate">
+                    <p className="font-semibold text-primary hover:text-primary/80 cursor-pointer truncate text-lg">
                       {file.name}
                     </p>
                   </Link>
-                  <div className="flex flex-col text-sm text-muted-foreground gap-1 mt-1">
+                  <div className="flex flex-col text-sm text-muted-foreground gap-1 mt-2">
                     <p className="truncate">
                       Modified: {formatDate(file.updatedAt)}
                     </p>
@@ -174,26 +181,26 @@ export function FileList({
                   </div>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2 w-full justify-start mt-2">
+              <div className="flex flex-wrap gap-2 w-full justify-start mt-4">
                 <Button
-                  className={buttonClasses}
-                  variant="ghost"
+                  variant={isCopied ? "default" : "outline"}
                   size="sm"
                   onClick={() => handleCopy(file.name)}
                   disabled={isCopied}
+                  className="transition-all duration-300 ease-in-out hover:bg-primary/10"
                 >
                   <CopyIcon className="w-4 h-4 mr-2" />
                   {isCopied ? "Copied!" : "Copy"}
                 </Button>
                 <Button
-                  className={buttonClasses}
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={() => handleDownload(file.name)}
                   disabled={isDownloading}
+                  className="transition-all duration-300 ease-in-out hover:bg-primary/10"
                 >
                   <DownloadIcon className="w-4 h-4 mr-2" />
-                  {isDownloading ? "..." : "Download"}
+                  {isDownloading ? "Downloading..." : "Download"}
                 </Button>
               </div>
             </motion.div>

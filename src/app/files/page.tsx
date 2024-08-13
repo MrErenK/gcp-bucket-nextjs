@@ -1,49 +1,52 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { FileList } from "@/components/FileList";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon } from "@/components/Icons";
+import { HomeIcon } from "@/components/Icons";
 import { ThemeSwitch } from "@/components/ThemeSwitch";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const FilesPage = () => {
   const [files, setFiles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const buttonClasses =
-    "transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary hover:text-primary-foreground";
 
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const response = await fetch("/api/files");
-        if (!response.ok) throw new Error("Failed to fetch files");
+  const fetchFiles = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
 
-        const data = await response.json();
-        setFiles(data.files);
-      } catch (err) {
-        console.error("Error fetching files:", err);
-        setError("Failed to load files");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    try {
+      const response = await fetch("/api/files");
+      if (!response.ok) throw new Error("Failed to fetch files");
 
-    fetchFiles();
+      const data = await response.json();
+      setFiles(data.files);
+    } catch (err) {
+      console.error("Error fetching files:", err);
+      setError("Failed to load files");
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const handleCopy = (filename: string) => {
+  useEffect(() => {
+    fetchFiles();
+  }, [fetchFiles]);
+
+  const handleCopy = useCallback((filename: string) => {
     navigator.clipboard
       .writeText(
         `${process.env.NEXT_PUBLIC_WEB_URL}/api/download?filename=${encodeURIComponent(filename)}`,
       )
+      .then(() => alert("URL copied to clipboard"))
       .catch(() => alert("Failed to copy URL"));
-  };
+  }, []);
 
-  const handleDownload = async (filename: string) => {
+  const handleDownload = useCallback(async (filename: string) => {
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_WEB_URL}/api/download?filename=${encodeURIComponent(filename)}`,
@@ -63,52 +66,43 @@ const FilesPage = () => {
       console.error("Download error:", err);
       alert("Failed to download file");
     }
-  };
-
-  const handleRefresh = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/files");
-      if (!response.ok) throw new Error("Failed to refresh files");
-
-      const data = await response.json();
-      setFiles(data.files);
-    } catch (err) {
-      console.error("Error refreshing files:", err);
-      setError("Failed to refresh files");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-background/80">
-      <header className="flex justify-between items-center p-4 bg-card shadow-md">
+      <header className="flex justify-between items-center p-6 bg-card shadow-md">
         <Button
           onClick={() => router.push("/")}
           variant="outline"
-          className={buttonClasses}
+          className="transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary/10 rounded-full"
         >
-          <ArrowLeftIcon className="w-4 h-4 mr-2" />
-          Back
+          <HomeIcon className="w-5 h-5 mr-2" />
+          <span className="hidden sm:inline">Home</span>
         </Button>
         <ThemeSwitch />
       </header>
-      <main className="flex-grow container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        {isLoading ? (
-          <LoadingIndicator loading="files" />
-        ) : error ? (
-          <p className="text-red-500">{error}</p>
-        ) : (
-          <FileList
-            files={files}
-            onCopy={handleCopy}
-            onDownload={handleDownload}
-            onRefresh={handleRefresh}
-          />
-        )}
+      <main className="flex-grow container mx-auto px-4 py-12 sm:px-6 lg:px-8 max-w-4xl">
+        <Card className="shadow-lg border border-primary/10 rounded-xl overflow-hidden">
+          <CardHeader className="bg-primary/5 border-b border-primary/10">
+            <CardTitle className="text-3xl font-bold text-center sm:text-left text-primary flex items-center justify-between">
+              File Manager
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            {isLoading ? (
+              <LoadingIndicator loading="files" />
+            ) : error ? (
+              <p className="text-destructive text-center py-4">{error}</p>
+            ) : (
+              <FileList
+                files={files}
+                onCopy={handleCopy}
+                onDownload={handleDownload}
+                onRefresh={fetchFiles}
+              />
+            )}
+          </CardContent>
+        </Card>
       </main>
     </div>
   );

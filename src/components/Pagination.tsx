@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
+import { ChevronLeftIcon, ChevronRightIcon } from "@/components/Icons";
 
 interface PaginationProps {
   currentPage: number;
@@ -13,32 +13,45 @@ export function Pagination({
   totalPages,
   onPageChange,
 }: PaginationProps) {
-  const buttonClasses =
-    "transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary hover:text-primary-foreground flex items-center justify-center";
+  const buttonClasses = `
+    transition duration-300 ease-in-out
+    hover:bg-primary hover:text-primary-foreground
+    focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50
+    flex items-center justify-center px-4 py-2
+    text-sm font-medium rounded-full
+  `;
 
   return (
-    <div className="mt-8 flex flex-wrap justify-center items-center gap-4">
+    <nav
+      className="mt-8 flex flex-wrap justify-center items-center gap-4"
+      aria-label="Pagination"
+    >
       <Button
         onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
         disabled={currentPage === 1}
-        className={`w-28 sm:w-36 ${buttonClasses}`}
+        className={`${buttonClasses} ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
         variant="outline"
       >
-        <ChevronLeftIcon className="w-4 h-4 mr-2" />
-        Previous
+        <ChevronLeftIcon />
+        <span className="ml-2">Previous</span>
       </Button>
-      <span className="text-sm bg-secondary text-secondary-foreground py-2 px-4 rounded-full">
-        Page {currentPage} of {totalPages}
-      </span>
+
+      <div className="flex items-center bg-secondary text-secondary-foreground rounded-full overflow-hidden">
+        <span className="px-4 py-2 text-sm font-medium border-r border-secondary-foreground/20">
+          Page {currentPage}
+        </span>
+        <span className="px-4 py-2 text-sm font-medium">of {totalPages}</span>
+      </div>
+
       <Button
         onClick={() => onPageChange(Math.min(currentPage + 1, totalPages))}
         disabled={currentPage === totalPages}
-        className={`w-28 sm:w-36 ${buttonClasses}`}
+        className={`${buttonClasses} ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""}`}
         variant="outline"
       >
-        Next
-        <ChevronRightIcon className="w-4 h-4 ml-2" />
+        <span className="mr-2">Next</span>
+        <ChevronRightIcon />
       </Button>
-    </div>
+    </nav>
   );
 }
