@@ -21,7 +21,7 @@ const Footer: React.FC = () => {
           </p>
           <div className="flex space-x-4 order-1 sm:order-2">
             <a
-              href="https://github.com/MrErenK/gcp-bucket-nextjs"
+              href="https://github.com/MrErenK"
               target="_blank"
               rel="noopener noreferrer"
               className="text-foreground hover:text-primary transition-colors"
