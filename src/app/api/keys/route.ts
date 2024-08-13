@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const keys = await prisma.apiKey.findMany({
-      select: { id: true, description: true },
+      select: { id: true, description: true, key: true },
     });
     return NextResponse.json({ keys });
   } catch (error) {
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     const newKey = await prisma.apiKey.create({
       data: {
         description,
-        key: `${uuidv4()}`,
+        key: `key_${uuidv4()}`, // Prefix with 'key_' to ensure it's a string
       },
     });
 

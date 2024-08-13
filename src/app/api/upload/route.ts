@@ -4,22 +4,22 @@ import { PassThrough, Readable } from "stream";
 
 const MAX_FILE_SIZE = 3 * 1024 * 1024 * 1024; // 3 GB in bytes
 const BASE_URL = process.env.WEB_URL || "http://localhost:3000"; // Default to localhost if WEB_URL is not set
-const API_KEYS_ROUTE = "/api/keys";
+const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
+
+if (!ADMIN_API_KEY) {
+  throw new Error("ADMIN_API_KEY environment variable is not set");
+}
 
 async function verifyApiKey(apiKey: string): Promise<boolean> {
   try {
-    const response = await fetch(`${BASE_URL}/${API_KEYS_ROUTE}`, {
-      method: "GET",
+    const response = await fetch(`${BASE_URL}/api/keys/verify?key=${apiKey}`, {
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${ADMIN_API_KEY}`,
       },
     });
-
     if (response.ok) {
       const data = await response.json();
-      // Check if the API key is valid based on the response
-      // For example, you could check if the response contains the key
-      return data.keys.some((key: { key: string }) => key.key === apiKey);
+      return data.valid === true;
     }
     return false;
   } catch (error) {
@@ -32,9 +32,9 @@ export async function POST(request: NextRequest) {
   // Check for the API key in the headers
   const apiKey = request.headers.get("x-api-key");
 
-  if (!apiKey || !(await verifyApiKey(apiKey))) {
+  if (!apiKey || !(await verifyApiKey(apiKey as string))) {
     return NextResponse.json(
-      { error: "Unauthorized: Invalid or missing API key" },
+      { error: "Unauthorized: Invalid or missing API key", key: apiKey },
       { status: 401 },
     );
   }

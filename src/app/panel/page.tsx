@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   ArrowLeftIcon,
   PlusIcon,
-  RefreshCwIcon,
   TrashIcon,
   LockIcon,
   CopyIcon,
@@ -18,9 +17,13 @@ import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { Toaster, toast } from "react-hot-toast";
 
 const PanelPage = () => {
-  const [apiKeys, setApiKeys] = useState<{ id: string; description: string }[]>(
-    [],
-  );
+  const [apiKeys, setApiKeys] = useState<
+    {
+      key: ReactNode;
+      id: string;
+      description: string;
+    }[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -309,7 +312,7 @@ const PanelPage = () => {
                   <CardContent>
                     <p className="text-lg font-semibold">{key.description}</p>
                     <p className="text-sm text-muted-foreground">
-                      Key: {key.id}
+                      Key: {key.key}
                     </p>
                   </CardContent>
                   <div className="flex items-center space-x-2">
@@ -317,13 +320,13 @@ const PanelPage = () => {
                       variant="outline"
                       className="transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary/10"
                       onClick={() => {
-                        navigator.clipboard.writeText(key.id);
-                        setCopiedId(key.id);
-                        toast.success("API key ID copied to clipboard");
+                        navigator.clipboard.writeText(String(key.key ?? ""));
+                        setCopiedId(String(key.key) || null);
+                        toast.success("API key copied to clipboard");
                         setTimeout(() => setCopiedId(null), 2000);
                       }}
                     >
-                      {copiedId === key.id ? (
+                      {copiedId === key.key ? (
                         <span className="text-green-500">Copied</span>
                       ) : (
                         <CopyIcon className="w-4 h-4" />
