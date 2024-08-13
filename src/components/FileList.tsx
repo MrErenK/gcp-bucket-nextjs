@@ -92,6 +92,15 @@ export function FileList({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   }
 
+  function formatDate(dateString: string) {
+    const date = new Date(dateString);
+    return (
+      date.toLocaleDateString() +
+      " at " +
+      date.toLocaleTimeString().slice(0, -3).replace(":", ".")
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
@@ -159,7 +168,7 @@ export function FileList({
                   </Link>
                   <div className="flex flex-col text-sm text-muted-foreground gap-1 mt-1">
                     <p className="truncate">
-                      Modified: {new Date(file.updatedAt).toLocaleDateString()}
+                      Modified: {formatDate(file.updatedAt)}
                     </p>
                     <p>Size: {formatFileSize(file.size)}</p>
                   </div>

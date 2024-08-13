@@ -4,8 +4,41 @@ import { PassThrough, Readable } from "stream";
 
 const MAX_FILE_SIZE = 3 * 1024 * 1024 * 1024; // 3 GB in bytes
 const BASE_URL = process.env.WEB_URL || "http://localhost:3000"; // Default to localhost if WEB_URL is not set
+const API_KEYS_ROUTE = "/api/keys";
+
+async function verifyApiKey(apiKey: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${BASE_URL}/${API_KEYS_ROUTE}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      // Check if the API key is valid based on the response
+      // For example, you could check if the response contains the key
+      return data.keys.some((key: { key: string }) => key.key === apiKey);
+    }
+    return false;
+  } catch (error) {
+    console.error("Error verifying API key:", error);
+    return false;
+  }
+}
 
 export async function POST(request: NextRequest) {
+  // Check for the API key in the headers
+  const apiKey = request.headers.get("x-api-key");
+
+  if (!apiKey || !(await verifyApiKey(apiKey))) {
+    return NextResponse.json(
+      { error: "Unauthorized: Invalid or missing API key" },
+      { status: 401 },
+    );
+  }
+
   const formData = await request.formData();
   const files = formData.getAll("files") as File[];
 
