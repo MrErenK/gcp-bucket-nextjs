@@ -51,7 +51,7 @@ export function FileUploader({
                   "flex flex-col items-center justify-center w-full h-56 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-300 ease-in-out",
                   isDragActive
                     ? "border-primary bg-primary/10"
-                    : "border-input hover:border-primary hover:bg-accent/50"
+                    : "border-input hover:border-primary hover:bg-accent/50",
                 )}
               >
                 <input {...getInputProps()} />
@@ -98,7 +98,7 @@ export function FileUploader({
                       "w-full py-4 font-semibold rounded-lg shadow-md transition-all duration-300 ease-in-out",
                       files.length > 0 && !uploading
                         ? "bg-primary hover:bg-primary/90 text-primary-foreground"
-                        : "bg-muted text-muted-foreground cursor-not-allowed"
+                        : "bg-muted text-muted-foreground cursor-not-allowed",
                     )}
                   >
                     {uploading ? (
