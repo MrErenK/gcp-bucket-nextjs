@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Readable } from "stream";
 import { cloudStorage } from "@/lib/cloudStorage";
+import Busboy from "busboy";
+import { IncomingHttpHeaders } from "http";
 
 const MAX_FILE_SIZE = 3 * 1024 * 1024 * 1024; // 3 GB in bytes
 const BASE_URL = process.env.WEB_URL || "http://localhost:3000"; // Default to localhost if WEB_URL is not set
@@ -28,81 +29,88 @@ async function verifyApiKey(apiKey: string): Promise<boolean> {
   }
 }
 
-// Utility to convert ReadableStream to Node.js Readable
-function convertToNodeStream(
-  readableStream: ReadableStream<Uint8Array>,
-): Readable {
-  const reader = readableStream.getReader();
-
-  return new Readable({
-    async read() {
-      const { done, value } = await reader.read();
-      if (done) {
-        this.push(null); // End the stream
-      } else {
-        this.push(Buffer.from(value)); // Push the chunk to the stream
-      }
-    },
-  });
-}
-
 export async function POST(request: NextRequest) {
   const apiKey = request.headers.get("x-api-key");
 
-  if (!apiKey || !(await verifyApiKey(apiKey as string))) {
+  if (!apiKey || !(await verifyApiKey(apiKey))) {
     return NextResponse.json(
       { error: "Unauthorized: Invalid or missing API key", key: apiKey },
       { status: 401 },
     );
   }
 
-  const formData = await request.formData();
-  const files = formData.getAll("files") as File[];
-
-  if (files.length === 0) {
-    return NextResponse.json({ error: "No files uploaded" }, { status: 400 });
-  }
-
-  try {
-    const uploadedFiles = await Promise.all(
-      files.map(async (file) => {
-        if (file.size > MAX_FILE_SIZE) {
-          throw new Error(
-            `File ${file.name} exceeds the maximum allowed size of 3 GB.`,
-          );
-        }
-
-        const fileStream = file.stream(); // Get a ReadableStream from the file
-        const nodeStream = convertToNodeStream(fileStream); // Convert to Node.js Readable stream
-
-        // Create a write stream directly to cloud storage
-        const blob = cloudStorage.getWriteStream(file.name);
-
-        // Pipe the file stream directly to cloud storage
-        await new Promise((resolve, reject) => {
-          nodeStream.pipe(blob).on("finish", resolve).on("error", reject);
-        });
-
-        // Set metadata after upload
-        await cloudStorage.setFileMetadata(file.name, {
-          contentType: file.type,
-          contentDisposition: `${file.type.startsWith("text/") ? "inline" : "attachment"}; filename="${file.name}"`,
-        });
-
-        const fileUrl = `${BASE_URL}/api/download?filename=${encodeURIComponent(file.name)}`;
-        return { name: file.name, url: fileUrl };
-      }),
-    );
-
-    return NextResponse.json({
-      message: "Files uploaded successfully",
-      files: uploadedFiles,
+  return new Promise<NextResponse>((resolve) => {
+    const headers: IncomingHttpHeaders = {};
+    request.headers.forEach((value, key) => {
+      headers[key] = value;
     });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: `Error uploading files: ${(error as Error).message}` },
-      { status: 500 },
-    );
-  }
+
+    const busboy = Busboy({ headers });
+    const uploadedFiles: { name: string; url: string }[] = [];
+
+    busboy.on("file", (fieldname: string, file: NodeJS.ReadableStream, info: Busboy.FileInfo) => {
+      const { filename, encoding, mimeType } = info;
+      let fileSize = 0;
+      const blobStream = cloudStorage.getWriteStream(filename);
+
+      file.on("data", (data: Buffer) => {
+        fileSize += data.length;
+        if (fileSize > MAX_FILE_SIZE) {
+          file.resume();
+          blobStream.destroy(new Error(`File ${filename} exceeds the maximum allowed size of 3 GB.`));
+        }
+      });
+
+      file.pipe(blobStream);
+
+      blobStream.on("finish", async () => {
+        await cloudStorage.setFileMetadata(filename, {
+          contentType: mimeType,
+          contentDisposition: `${mimeType.startsWith("text/") ? "inline" : "attachment"}; filename="${filename}"`,
+        });
+
+        const fileUrl = `${BASE_URL}/api/download?filename=${encodeURIComponent(filename)}`;
+        uploadedFiles.push({ name: filename, url: fileUrl });
+      });
+    });
+
+    busboy.on("finish", () => {
+      resolve(NextResponse.json({
+        message: "Files uploaded successfully",
+        files: uploadedFiles,
+      }));
+    });
+
+    busboy.on("error", (error: Error) => {
+      console.error(error);
+      resolve(NextResponse.json(
+        { error: `Error uploading files: ${error.message}` },
+        { status: 500 },
+      ));
+    });
+
+    if (request.body) {
+      const readableStream = request.body as ReadableStream;
+      const reader = readableStream.getReader();
+
+      const readChunk = () => {
+        reader.read().then(({ done, value }) => {
+          if (done) {
+            busboy.end();
+          } else {
+            busboy.write(value);
+            readChunk();
+          }
+        });
+      };
+
+      readChunk();
+    } else {
+      busboy.end();
+    }
+  });
 }
+
+// New way to configure the API route
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
