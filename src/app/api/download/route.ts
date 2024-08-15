@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { bucket } from "@/lib/storage";
+import { cloudStorage } from "@/lib/cloudStorage";
 import { Readable } from "stream";
 
 export async function GET(request: NextRequest) {
@@ -14,18 +14,18 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const file = bucket.file(filename);
-    const [exists] = await file.exists();
-
-    if (!exists) {
+    // Check if file exists
+    const fileExists = await cloudStorage.fileExists(filename);
+    if (!fileExists) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
-    const [metadata] = await file.getMetadata();
+    // Get file metadata
+    const metadata = await cloudStorage.getFileMetadata(filename);
     const fileSize = metadata.size;
 
     // Create a readable stream
-    const readStream = file.createReadStream();
+    const readStream = await cloudStorage.createReadStream(filename);
 
     // Create a transform stream to track progress
     let downloadedBytes = 0;
@@ -42,9 +42,9 @@ export async function GET(request: NextRequest) {
     const response = new NextResponse(stream as any, {
       headers: {
         "Content-Disposition": `attachment; filename="${filename}"`,
-        "Content-Type": metadata.contentType,
-        "Content-Length": (fileSize ?? "").toString(),
-        "X-Total-Size": (fileSize ?? 0).toString(),
+        "Content-Type": metadata.contentType || "application/octet-stream",
+        "Content-Length": fileSize ? fileSize.toString() : "",
+        "X-Total-Size": fileSize ? fileSize.toString() : "0",
       } as HeadersInit,
     });
 

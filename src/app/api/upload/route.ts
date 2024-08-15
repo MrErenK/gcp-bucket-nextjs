@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { bucket } from "@/lib/storage";
 import { PassThrough, Readable } from "stream";
+import { cloudStorage } from "@/lib/cloudStorage";
 
 const MAX_FILE_SIZE = 3 * 1024 * 1024 * 1024; // 3 GB in bytes
 const BASE_URL = process.env.WEB_URL || "http://localhost:3000"; // Default to localhost if WEB_URL is not set
@@ -58,36 +58,26 @@ export async function POST(request: NextRequest) {
         const fileStream = file.stream(); // Get a ReadableStream from the file
         const passThroughStream = new PassThrough(); // Create a PassThrough stream
 
-        const gcsFile = bucket.file(file.name);
-        const contentDisposition = file.type.startsWith("text/")
-          ? "inline"
-          : "attachment";
-
-        const writeStream = gcsFile.createWriteStream({
-          metadata: {
-            contentType: file.type,
-            acl: [{ entity: "allUsers", role: "READER" }],
-            contentDisposition: `${contentDisposition}; filename="${file.name}"`,
-          },
-        });
-
         // Convert ReadableStream to Node.js Readable stream
         const nodeReadable = Readable.from(fileStream as any);
 
-        // Pipe the Readable stream to PassThrough and then to Google Cloud Storage
+        // Pipe the Readable stream to PassThrough
         nodeReadable.pipe(passThroughStream);
-        passThroughStream.pipe(writeStream);
 
-        await new Promise<void>((resolve, reject) => {
-          passThroughStream
-            .on("error", (err) => {
-              reject(
-                new Error(`Error uploading file ${file.name}: ${err.message}`),
-              );
-            })
-            .on("finish", () => {
-              resolve();
-            });
+        // Read the entire file into a buffer
+        const chunks: Buffer[] = [];
+        for await (const chunk of passThroughStream) {
+          chunks.push(Buffer.from(chunk));
+        }
+        const fileBuffer = Buffer.concat(chunks);
+
+        // Upload the file using our cloudStorage utility
+        await cloudStorage.uploadFile(fileBuffer, file.name);
+
+        // Set metadata after upload
+        await cloudStorage.setFileMetadata(file.name, {
+          contentType: file.type,
+          contentDisposition: `${file.type.startsWith("text/") ? "inline" : "attachment"}; filename="${file.name}"`,
         });
 
         // Generate the file URL using the environment variable

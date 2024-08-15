@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
-import { bucket } from "@/lib/storage";
+import { cloudStorage } from "@/lib/cloudStorage";
 import { getFileType } from "@/types/filetypes";
 
 export async function GET(request: NextRequest) {
@@ -18,11 +18,10 @@ export async function GET(request: NextRequest) {
     const fileExtension = path.extname(filename).toLowerCase();
     const fileType = getFileType(fileExtension);
 
-    // Fetch file from Google Cloud Storage
-    const [files] = await bucket.getFiles();
-    const file = files.find((f) => f.name === filename);
+    // Check if file exists
+    const fileExists = await cloudStorage.fileExists(filename);
 
-    if (!file) {
+    if (!fileExists) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
@@ -34,8 +33,8 @@ export async function GET(request: NextRequest) {
 
     switch (fileType) {
       case "text":
-        const [fileData] = await file.download();
-        previewData.content = fileData.toString("utf8");
+        const fileContent = await cloudStorage.downloadFile(filename);
+        previewData.content = fileContent.toString("utf8");
         break;
 
       case "image":

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { bucket } from "@/lib/storage";
+import { cloudStorage } from "@/lib/cloudStorage";
 
 const PAGE_SIZE = 10;
 
@@ -12,30 +12,28 @@ export async function GET(request: NextRequest) {
   try {
     // If a filename is provided, return details for that specific file
     if (filename) {
-      const [files] = await bucket.getFiles();
-      const file = files.find((f) => f.name === filename);
-
-      if (!file) {
+      const fileExists = await cloudStorage.fileExists(filename);
+      if (!fileExists) {
         return NextResponse.json({ error: "File not found" }, { status: 404 });
       }
 
-      const [metadata] = await file.getMetadata();
+      const metadata = await cloudStorage.getFileMetadata(filename);
       return NextResponse.json({
-        name: file.name,
+        name: filename,
         updatedAt: metadata.updated,
         size: parseInt(String(metadata.size) || "0", 10),
       });
     }
 
     // Pagination and search functionality
-    const [files] = await bucket.getFiles();
+    const files = await cloudStorage.listFiles();
     const filteredFiles = await Promise.all(
       files
         .filter((file) =>
           file.name.toLowerCase().includes(search.toLowerCase()),
         )
         .map(async (file) => {
-          const [metadata] = await file.getMetadata();
+          const metadata = await cloudStorage.getFileMetadata(file.name);
           return {
             name: file.name,
             updatedAt: metadata.updated,
