@@ -5,6 +5,8 @@ import {
   VolumeUpIcon,
   VolumeDownIcon,
   VolumeOffIcon,
+  FullscreenIcon,
+  FullscreenExitIcon,
 } from "../Icons";
 
 interface VideoPreviewProps {
@@ -14,12 +16,17 @@ interface VideoPreviewProps {
 
 export function VideoPreview({ src, poster }: VideoPreviewProps) {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPendingPlay, setIsPendingPlay] = useState(false);
   const [volume, setVolume] = useState(1);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showControls, setShowControls] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
@@ -32,12 +39,31 @@ export function VideoPreview({ src, poster }: VideoPreviewProps) {
     if (video) {
       if (isPlaying) {
         video.pause();
+        setIsPlaying(false);
       } else {
-        video.play();
+        if (!isPendingPlay) {
+          setIsPendingPlay(true);
+          const playPromise = video.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                // Video playback started successfully
+                setIsPlaying(true);
+                setIsPendingPlay(false);
+              })
+              .catch((error) => {
+                // Playback failed
+                console.error("Error attempting to play video:", error);
+                setIsPlaying(false);
+                setIsPendingPlay(false);
+              });
+          } else {
+            setIsPendingPlay(false);
+          }
+        }
       }
-      setIsPlaying(!isPlaying);
     }
-  }, [isPlaying]);
+  }, [isPlaying, isPendingPlay]);
 
   const handleVolumeChange = useCallback((newVolume: number) => {
     const video = videoRef.current;
@@ -69,6 +95,33 @@ export function VideoPreview({ src, poster }: VideoPreviewProps) {
     [],
   );
 
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  }, []);
+
+  const showControlsTemporarily = useCallback(() => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    controlsTimeoutRef.current = setTimeout(() => {
+      setShowControls(false);
+    }, 3000);
+  }, []);
+
+  const skipTime = useCallback((seconds: number) => {
+    const video = videoRef.current;
+    if (video) {
+      video.currentTime += seconds;
+    }
+  }, []);
+
   useEffect(() => {
     const video = videoRef.current;
     if (video) {
@@ -81,31 +134,55 @@ export function VideoPreview({ src, poster }: VideoPreviewProps) {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Space") {
-        e.preventDefault();
-        togglePlay();
+      e.preventDefault();
+      switch (e.code) {
+        case "Space":
+          togglePlay();
+          break;
+        case "ArrowLeft":
+          skipTime(-5);
+          break;
+        case "ArrowRight":
+          skipTime(5);
+          break;
+        case "ArrowUp":
+          handleVolumeChange(Math.min(volume + 0.1, 1));
+          break;
+        case "ArrowDown":
+          handleVolumeChange(Math.max(volume - 0.1, 0));
+          break;
+        case "KeyF":
+          toggleFullscreen();
+          break;
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [togglePlay]);
+  }, [togglePlay, skipTime, handleVolumeChange, toggleFullscreen, volume]);
 
   return (
-    <div className="bg-card p-4 rounded-lg shadow-md">
-      <div className="relative">
-        <video
-          ref={videoRef}
-          className="w-full max-h-[60vh] object-contain rounded-md"
-          poster={poster}
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onTimeUpdate={handleProgress}
-          onClick={togglePlay}
-        >
-          <source src={src} />
-          Your browser does not support the video element.
-        </video>
-        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 p-2">
+    <div
+      ref={containerRef}
+      className="bg-card p-4 rounded-lg shadow-md relative"
+      onMouseMove={showControlsTemporarily}
+      onMouseLeave={() => setShowControls(false)}
+    >
+      <video
+        ref={videoRef}
+        className="w-full max-h-[60vh] object-contain rounded-md"
+        poster={poster}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onTimeUpdate={handleProgress}
+        onClick={togglePlay}
+        autoPlay={false}
+        playsInline
+      >
+        <source src={src} />
+        Your browser does not support the video element.
+      </video>
+      {showControls && (
+        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 p-2 transition-opacity duration-300">
           <div
             ref={progressRef}
             className="h-1 bg-gray-300 rounded-full cursor-pointer"
@@ -152,10 +229,23 @@ export function VideoPreview({ src, poster }: VideoPreviewProps) {
                 onChange={(e) => handleVolumeChange(Number(e.target.value))}
                 className="w-16 accent-primary"
               />
+              <button
+                onClick={toggleFullscreen}
+                className="p-1 rounded-full bg-white text-black hover:bg-gray-200 transition-colors"
+                aria-label={
+                  isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"
+                }
+              >
+                {isFullscreen ? (
+                  <FullscreenExitIcon size={16} />
+                ) : (
+                  <FullscreenIcon size={16} />
+                )}
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -7,6 +7,10 @@ export const cloudStorage = {
     await blob.save(file);
     return filename;
   },
+  getWriteStream: (filename: string) => {
+    const blob = bucket.file(filename);
+    return blob.createWriteStream();
+  },
   downloadFile: async (filename: string) => {
     const [fileContents] = await bucket.file(filename).download();
     return fileContents;

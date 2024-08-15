@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PassThrough, Readable } from "stream";
+import { Readable } from "stream";
 import { cloudStorage } from "@/lib/cloudStorage";
 
 const MAX_FILE_SIZE = 3 * 1024 * 1024 * 1024; // 3 GB in bytes
@@ -28,8 +28,25 @@ async function verifyApiKey(apiKey: string): Promise<boolean> {
   }
 }
 
+// Utility to convert ReadableStream to Node.js Readable
+function convertToNodeStream(
+  readableStream: ReadableStream<Uint8Array>,
+): Readable {
+  const reader = readableStream.getReader();
+
+  return new Readable({
+    async read() {
+      const { done, value } = await reader.read();
+      if (done) {
+        this.push(null); // End the stream
+      } else {
+        this.push(Buffer.from(value)); // Push the chunk to the stream
+      }
+    },
+  });
+}
+
 export async function POST(request: NextRequest) {
-  // Check for the API key in the headers
   const apiKey = request.headers.get("x-api-key");
 
   if (!apiKey || !(await verifyApiKey(apiKey as string))) {
@@ -56,23 +73,15 @@ export async function POST(request: NextRequest) {
         }
 
         const fileStream = file.stream(); // Get a ReadableStream from the file
-        const passThroughStream = new PassThrough(); // Create a PassThrough stream
+        const nodeStream = convertToNodeStream(fileStream); // Convert to Node.js Readable stream
 
-        // Convert ReadableStream to Node.js Readable stream
-        const nodeReadable = Readable.from(fileStream as any);
+        // Create a write stream directly to cloud storage
+        const blob = cloudStorage.getWriteStream(file.name);
 
-        // Pipe the Readable stream to PassThrough
-        nodeReadable.pipe(passThroughStream);
-
-        // Read the entire file into a buffer
-        const chunks: Buffer[] = [];
-        for await (const chunk of passThroughStream) {
-          chunks.push(Buffer.from(chunk));
-        }
-        const fileBuffer = Buffer.concat(chunks);
-
-        // Upload the file using our cloudStorage utility
-        await cloudStorage.uploadFile(fileBuffer, file.name);
+        // Pipe the file stream directly to cloud storage
+        await new Promise((resolve, reject) => {
+          nodeStream.pipe(blob).on("finish", resolve).on("error", reject);
+        });
 
         // Set metadata after upload
         await cloudStorage.setFileMetadata(file.name, {
@@ -80,7 +89,6 @@ export async function POST(request: NextRequest) {
           contentDisposition: `${file.type.startsWith("text/") ? "inline" : "attachment"}; filename="${file.name}"`,
         });
 
-        // Generate the file URL using the environment variable
         const fileUrl = `${BASE_URL}/api/download?filename=${encodeURIComponent(file.name)}`;
         return { name: file.name, url: fileUrl };
       }),
