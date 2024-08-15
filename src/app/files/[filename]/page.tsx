@@ -10,6 +10,7 @@ import { VideoPreview } from "@/components/previews/VideoPreview";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { getFileType } from "@/types/filetypes";
 import Header from "./Header";
+import { useFileManagement } from "@/hooks/useFileManagement";
 
 interface FileDetails {
   name: string;
@@ -24,12 +25,12 @@ interface PreviewData {
 }
 
 export default function FilePage({ params }: { params: { filename: string } }) {
-  const router = useRouter();
   const [fileDetails, setFileDetails] = useState<FileDetails | null>(null);
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const { handleCopy, handleDownload } = useFileManagement();
+  const [loading, setLoading] = useState(true);
 
   const fileName = decodeURIComponent(params.filename);
   const fileExtension = fileName
@@ -39,53 +40,6 @@ export default function FilePage({ params }: { params: { filename: string } }) {
 
   const buttonClasses =
     "transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary hover:text-primary-foreground";
-
-  const handleDownload = async () => {
-    try {
-      const url = `${process.env.NEXT_PUBLIC_WEB_URL}/api/download?filename=${encodeURIComponent(fileName)}`;
-
-      // Fetch the file content
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      // Get the blob from the response
-      const blob = await response.blob();
-
-      // Create a URL for the blob
-      const blobUrl = window.URL.createObjectURL(blob);
-
-      // Create a temporary anchor element
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = fileName;
-
-      // Append to the document, click, and remove
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Revoke the blob URL to free up resources
-      window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      console.error("Download failed:", error);
-      setError("Failed to download file");
-    }
-  };
-
-  const handleCopy = () => {
-    navigator.clipboard
-      .writeText(
-        `${process.env.NEXT_PUBLIC_WEB_URL}/api/download?filename=${encodeURIComponent(fileName)}`,
-      )
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      })
-      .catch(() => setError("Failed to copy filename"));
-  };
 
   useEffect(() => {
     const fetchFileDetails = async () => {
@@ -112,7 +66,7 @@ export default function FilePage({ params }: { params: { filename: string } }) {
       } catch (err) {
         setError("Failed to load file preview");
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
@@ -161,7 +115,7 @@ export default function FilePage({ params }: { params: { filename: string } }) {
     );
   }
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background/80">
         <LoadingIndicator loading="file details" />
@@ -180,8 +134,8 @@ export default function FilePage({ params }: { params: { filename: string } }) {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-background/80">
       <Header
-        handleCopy={handleCopy}
-        handleDownload={handleDownload}
+        handleCopy={() => handleCopy(fileName)}
+        handleDownload={() => handleDownload(fileName)}
         copied={copied}
       />
       <main className="flex-grow container mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">

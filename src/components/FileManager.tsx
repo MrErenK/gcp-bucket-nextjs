@@ -68,7 +68,7 @@ interface FileContentProps {
   onRefresh: () => Promise<void>;
 }
 
-function FileContent({
+export function FileContent({
   loading,
   initialLoadDone,
   files,
