@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useFileUploader } from "@/hooks/useFileUploader";
 import { APIKeyInput } from "./APIKeyInput";
+import { DirectLinkUploader } from "./DirectLinkUploader";
+import { useState } from "react";
 
 export function FileUploader({
   onUploadComplete,
@@ -24,6 +26,11 @@ export function FileUploader({
     handleUpload,
     handleRemoveFile,
   } = useFileUploader(onUploadComplete);
+  const [directLinkError, setDirectLinkError] = useState<string | null>(null);
+
+  const handleDirectLinkError = (error: string) => {
+    setDirectLinkError(error);
+  };
 
   return (
     <div className="flex flex-col gap-8 mb-8 w-full max-w-3xl mx-auto px-4 py-8">
@@ -118,6 +125,15 @@ export function FileUploader({
           </motion.div>
         )}
       </AnimatePresence>
+
+      <DirectLinkUploader
+        apiKey={apiKey}
+        onUploadSuccess={onUploadComplete}
+        onUploadError={handleDirectLinkError}
+      />
+      {directLinkError && (
+        <p className="text-red-500 text-sm mt-2">{directLinkError}</p>
+      )}
 
       <AnimatePresence>
         {error && (

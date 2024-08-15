@@ -1,15 +1,24 @@
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 
-export function useFileUploader(onUploadComplete: () => void) {
+interface UploadedFile {
+  name: string;
+  url: string;
+}
+
+export function useFileUploader(
+  onUploadComplete: (uploadedFiles: UploadedFile[]) => void,
+) {
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState<string>("");
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
     setError(null);
+    setUploadSuccess(null);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -29,6 +38,7 @@ export function useFileUploader(onUploadComplete: () => void) {
 
     setUploading(true);
     setError(null);
+    setUploadSuccess(null);
 
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
@@ -43,10 +53,19 @@ export function useFileUploader(onUploadComplete: () => void) {
       });
 
       if (response.ok) {
+        const data = await response.json();
+        if (data.files && Array.isArray(data.files)) {
+          setUploadSuccess(
+            `Successfully uploaded ${data.files.length} file(s).`,
+          );
+          onUploadComplete(data.files);
+        } else {
+          setError("Unexpected response format from server.");
+        }
         setFiles([]);
-        await onUploadComplete();
       } else {
-        setError("Upload failed. Please try again.");
+        const errorData = await response.json();
+        setError(errorData.error || "Upload failed. Please try again.");
       }
     } catch (error) {
       setError("An error occurred while uploading the file.");
@@ -64,6 +83,7 @@ export function useFileUploader(onUploadComplete: () => void) {
     files,
     uploading,
     error,
+    uploadSuccess,
     apiKey,
     setApiKey,
     getRootProps,

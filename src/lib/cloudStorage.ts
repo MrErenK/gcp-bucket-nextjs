@@ -5,11 +5,16 @@ export const cloudStorage = {
   uploadFile: async (file: Buffer, filename: string) => {
     const blob = bucket.file(filename);
     await blob.save(file);
+    await blob.makePublic(); // Make the file public
     return filename;
   },
   getWriteStream: (filename: string) => {
     const blob = bucket.file(filename);
     return blob.createWriteStream();
+  },
+  makeFilePublic: async (filename: string) => {
+    const blob = bucket.file(filename);
+    await blob.makePublic();
   },
   downloadFile: async (filename: string) => {
     const [fileContents] = await bucket.file(filename).download();
