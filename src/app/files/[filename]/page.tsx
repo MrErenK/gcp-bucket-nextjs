@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CopyIcon } from "@/components/Icons";
 import { TextPreview } from "@/components/previews/TextPreview";
@@ -11,11 +10,14 @@ import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { getFileType } from "@/types/filetypes";
 import Header from "./Header";
 import { useFileManagement } from "@/hooks/useFileManagement";
+import { ThemeSwitch } from "@/components/ThemeSwitch";
 
 interface FileDetails {
   name: string;
   size: number;
   updatedAt: string;
+  downloads: number;
+  views: number;
 }
 
 interface PreviewData {
@@ -29,7 +31,7 @@ export default function FilePage({ params }: { params: { filename: string } }) {
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const { handleCopy, handleDownload } = useFileManagement();
+  const { handleDownload } = useFileManagement();
   const [loading, setLoading] = useState(true);
 
   const fileName = decodeURIComponent(params.filename);
@@ -115,6 +117,16 @@ export default function FilePage({ params }: { params: { filename: string } }) {
     );
   }
 
+  function handleFilenameCopy(filename: string) {
+    navigator.clipboard
+      .writeText(filename)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => setError("Failed to copy filename"));
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background/80">
@@ -134,10 +146,13 @@ export default function FilePage({ params }: { params: { filename: string } }) {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-background/80">
       <Header
-        handleCopy={() => handleCopy(fileName)}
+        handleCopy={() => handleFilenameCopy(fileName)}
         handleDownload={() => handleDownload(fileName)}
         copied={copied}
       />
+      <div className="flex justify-end p-6">
+        <ThemeSwitch />
+      </div>
       <main className="flex-grow container mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">
         <div className="bg-card rounded-xl shadow-lg border border-primary/10 overflow-hidden">
           <div className="bg-primary/5 border-b border-primary/10 p-4 sm:p-6">
@@ -146,7 +161,7 @@ export default function FilePage({ params }: { params: { filename: string } }) {
             </h2>
           </div>
           <div className="p-4 sm:p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[
                 {
                   label: "File Name",
@@ -167,13 +182,24 @@ export default function FilePage({ params }: { params: { filename: string } }) {
                   label: "File Type",
                   value: fileType.charAt(0).toUpperCase() + fileType.slice(1),
                 },
+                {
+                  label: "Downloads",
+                  value: fileDetails?.downloads || 0,
+                },
+                {
+                  label: "Views",
+                  value: fileDetails?.views || 0,
+                },
               ].map((item, index) => (
-                <div key={index} className="space-y-2">
+                <div
+                  key={index}
+                  className="space-y-2 bg-primary/5 p-4 rounded-lg"
+                >
                   <p className="text-sm font-medium text-muted-foreground">
                     {item.label}
                   </p>
-                  <div className="flex items-center space-x-2">
-                    <p className="font-semibold text-sm sm:text-base truncate">
+                  <div className="flex items-center justify-between">
+                    <p className="font-semibold text-sm sm:text-base truncate flex-grow">
                       {item.value}
                     </p>
                     {item.isCopyable && (
@@ -189,7 +215,7 @@ export default function FilePage({ params }: { params: { filename: string } }) {
                         }}
                         variant="ghost"
                         size="sm"
-                        className={`${buttonClasses} p-1 hover:bg-primary/10`}
+                        className={`${buttonClasses} p-1 hover:bg-primary/10 ml-2`}
                         disabled={copied}
                       >
                         <CopyIcon
@@ -203,14 +229,15 @@ export default function FilePage({ params }: { params: { filename: string } }) {
             </div>
           </div>
         </div>
-
         <div className="bg-card rounded-xl shadow-lg border border-primary/10 overflow-hidden">
           <div className="bg-primary/5 border-b border-primary/10 p-4 sm:p-6">
             <h2 className="text-xl sm:text-2xl font-bold text-primary text-center">
               File Preview
             </h2>
           </div>
-          <div className="p-4 sm:p-6">{renderPreview()}</div>
+          <div className="p-4 sm:p-6">
+            <div className="max-w-4xl mx-auto">{renderPreview()}</div>
+          </div>
         </div>
       </main>
     </div>

@@ -7,6 +7,13 @@ import { SearchBar } from "./SearchBar";
 import { LoadingIndicator } from "./LoadingIndicator";
 import { useFileManagement } from "@/hooks/useFileManagement";
 
+interface FileData {
+  name: string;
+  updatedAt: string;
+  downloads?: number;
+  size?: number;
+}
+
 export function FileManager() {
   const {
     files,
@@ -42,7 +49,13 @@ export function FileManager() {
         <FileContent
           loading={loading}
           initialLoadDone={initialLoadDone}
-          files={files}
+          files={files.map((file) => ({
+            ...file,
+            name: file.name,
+            updatedAt: file.updatedAt,
+            downloads: file.downloads || 0,
+            size: file.size || 0,
+          }))}
           onCopy={handleCopy}
           onDownload={handleDownload}
           onRefresh={handleRefresh}
@@ -62,7 +75,7 @@ export function FileManager() {
 interface FileContentProps {
   loading: boolean;
   initialLoadDone: boolean;
-  files: { name: string; updatedAt: string }[];
+  files: FileData[];
   onCopy: (filename: string) => void;
   onDownload: (filename: string) => void;
   onRefresh: () => Promise<void>;
@@ -83,7 +96,12 @@ export function FileContent({
 
   return (
     <FileList
-      files={files}
+      files={files.map((file) => ({
+        name: file.name,
+        updatedAt: file.updatedAt,
+        downloads: file.downloads || 0,
+        size: file.size || 0,
+      }))}
       onCopy={onCopy}
       onDownload={onDownload}
       onRefresh={onRefresh}

@@ -2,6 +2,8 @@ import { useState, useCallback } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 
 interface File {
+  size: number;
+  downloads: number;
   name: string;
   updatedAt: string;
 }

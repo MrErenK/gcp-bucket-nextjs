@@ -25,6 +25,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
+    // Increment download count
+    await cloudStorage.incrementFileDownloads(filename);
+
     // Construct the CDN URL
     const cdnFileUrl = `${CDN_URL}/${encodeURIComponent(filename)}`;
 

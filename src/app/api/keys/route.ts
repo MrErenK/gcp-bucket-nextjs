@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { v4 as uuidv4 } from "uuid";
 
-const prisma = new PrismaClient();
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 
 if (!ADMIN_API_KEY) {

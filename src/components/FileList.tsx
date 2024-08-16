@@ -17,6 +17,7 @@ interface File {
   name: string;
   updatedAt: string;
   size?: number;
+  downloads: number;
 }
 
 interface FileListProps {
@@ -178,6 +179,7 @@ export function FileList({
                       Modified: {formatDate(file.updatedAt)}
                     </p>
                     <p>Size: {formatFileSize(file.size)}</p>
+                    <p>Downloads: {file.downloads}</p>
                   </div>
                 </div>
               </div>
