@@ -9,11 +9,11 @@ export async function syncDatabases() {
     const { apiKeys, fileStats } = await getRecords();
 
     // Sync the records to the second database
-    await prisma.apiKey.createMany({ 
+    await prisma.apiKey.createMany({
       data: apiKeys,
       skipDuplicates: true,
     });
-    await prisma.fileStats.createMany({ 
+    await prisma.fileStats.createMany({
       data: fileStats,
       skipDuplicates: true,
     });
