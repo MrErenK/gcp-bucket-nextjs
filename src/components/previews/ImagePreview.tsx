@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence, useMotionValue } from "framer-motion";
 import { ZoomInIcon, ZoomOutIcon, XIcon } from "@/components/Icons";
 
 interface ImagePreviewProps {
@@ -9,34 +9,57 @@ interface ImagePreviewProps {
 
 export function ImagePreview({ src, alt }: ImagePreviewProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [scale, setScale] = useState(1);
+  const [zoom, setZoom] = useState(1);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
 
   const openModal = () => setIsModalOpen(true);
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setIsModalOpen(false);
-    setScale(1);
-  };
+    setZoom(1);
+    x.set(0);
+    y.set(0);
+  }, [setIsModalOpen, setZoom, x, y]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") closeModal();
     };
 
-    if (isModalOpen) {
-      document.body.style.overflow = "hidden";
-      document.addEventListener("keydown", handleKeyDown);
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
     return () => {
       document.body.style.overflow = "unset";
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isModalOpen]);
+  }, [isModalOpen, closeModal]);
 
   const handleZoom = (zoomIn: boolean) => {
-    setScale((prevScale) => (zoomIn ? prevScale * 1.2 : prevScale / 1.2));
+    setZoom((prevZoom) => {
+      const newZoom = zoomIn ? prevZoom * 1.2 : prevZoom / 1.2;
+      return Math.max(1, Math.min(newZoom, 5)); // Limit zoom between 1x and 5x
+    });
+  };
+
+  const handleDragEnd = () => {
+    if (imageRef.current && containerRef.current) {
+      const rect = imageRef.current.getBoundingClientRect();
+      const containerRect = containerRef.current.getBoundingClientRect();
+
+      if (rect.width <= containerRect.width) {
+        x.set(0);
+      } else {
+        x.set(Math.max(Math.min(x.get(), 0), containerRect.width - rect.width));
+      }
+
+      if (rect.height <= containerRect.height) {
+        y.set(0);
+      } else {
+        y.set(
+          Math.max(Math.min(y.get(), 0), containerRect.height - rect.height),
+        );
+      }
+    }
   };
 
   return (
@@ -64,17 +87,28 @@ export function ImagePreview({ src, alt }: ImagePreviewProps) {
           >
             <div className="absolute inset-0 bg-black bg-opacity-75 backdrop-blur-sm"></div>
             <motion.div
-              className="relative max-w-[90vw] max-h-[90vh] z-60"
+              ref={containerRef}
+              className="relative max-w-[90vw] max-h-[90vh] z-60 overflow-hidden"
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
+              onClick={(e) => e.stopPropagation()}
             >
               <motion.img
+                ref={imageRef}
                 src={src}
                 alt={alt}
-                className="max-w-full max-h-full object-contain"
-                style={{ scale }}
-                onClick={(e) => e.stopPropagation()}
+                className="max-w-none max-h-none object-contain cursor-move"
+                style={{
+                  width: `${100 * zoom}%`,
+                  height: `${100 * zoom}%`,
+                  x,
+                  y,
+                }}
+                drag
+                dragConstraints={containerRef}
+                dragElastic={0}
+                onDragEnd={handleDragEnd}
               />
               <div className="absolute bottom-4 right-4 flex space-x-2">
                 <button
