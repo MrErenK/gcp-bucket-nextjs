@@ -110,7 +110,7 @@ export function FileList({
           <Button
             onClick={onRefresh}
             variant="outline"
-            className="transition-all duration-300 ease-in-out hover:bg-primary/10"
+            className={buttonClasses}
           >
             <RefreshIcon className="w-4 h-4 mr-2" />
             Refresh
@@ -119,7 +119,7 @@ export function FileList({
             <Button
               onClick={() => router.push("/files")}
               variant="outline"
-              className="transition-all duration-300 ease-in-out hover:bg-primary/10"
+              className={buttonClasses}
             >
               <AllFilesIcon className="w-4 h-4 mr-2" />
               View All
@@ -131,7 +131,7 @@ export function FileList({
               setSortBy("name");
             }}
             variant={sortBy === "name" ? "default" : "outline"}
-            className="transition-all duration-300 ease-in-out"
+            className={buttonClasses}
           >
             <SortIcon className="w-4 h-4 mr-2" type="name" order={sortOrder} />
             {sortBy === "name" ? (sortOrder === "asc" ? "A-Z" : "Z-A") : "Name"}
@@ -142,7 +142,7 @@ export function FileList({
               setSortBy("date");
             }}
             variant={sortBy === "date" ? "default" : "outline"}
-            className="transition-all duration-300 ease-in-out"
+            className={buttonClasses}
           >
             <SortIcon className="w-4 h-4 mr-2" type="date" order={sortOrder} />
             {sortBy === "date" ? (sortOrder === "asc" ? "Old" : "New") : "Date"}
@@ -189,7 +189,7 @@ export function FileList({
                   size="sm"
                   onClick={() => handleCopy(file.name)}
                   disabled={isCopied}
-                  className="transition-all duration-300 ease-in-out hover:bg-primary/10"
+                  className={buttonClasses}
                 >
                   <CopyIcon className="w-4 h-4 mr-2" />
                   {isCopied ? "Copied!" : "Copy"}
@@ -199,7 +199,7 @@ export function FileList({
                   size="sm"
                   onClick={() => handleDownload(file.name)}
                   disabled={isDownloading}
-                  className="transition-all duration-300 ease-in-out hover:bg-primary/10"
+                  className={buttonClasses}
                 >
                   <DownloadIcon className="w-4 h-4 mr-2" />
                   {isDownloading ? "Downloading..." : "Download"}

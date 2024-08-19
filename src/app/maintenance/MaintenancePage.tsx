@@ -3,7 +3,6 @@ import React from "react";
 import { Toaster } from "react-hot-toast";
 import { RefreshIcon } from "@/components/Icons";
 import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 
 interface MaintenancePageProps {
   reasonForMaintenance: string | null;
