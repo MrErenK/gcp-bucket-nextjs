@@ -16,6 +16,7 @@ export function useFileManagement() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const fetchFiles = useCallback(async () => {
     setLoading(true);
@@ -43,9 +44,33 @@ export function useFileManagement() {
   };
 
   const handleCopy = (filename: string) => {
-    navigator.clipboard.writeText(
-      `${window.location.origin}/api/download?filename=${filename}`,
-    );
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(
+          `${window.location.origin}/api/download?filename=${filename}`,
+        )
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+        .catch((err) => {
+          console.error("Failed to copy text: ", err);
+        });
+    } else {
+      // Fallback for browsers that don't support the Clipboard API
+      const textArea = document.createElement("textarea");
+      textArea.value = `${window.location.origin}/api/download?filename=${filename}`;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand("copy");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error("Fallback: Oops, unable to copy", err);
+      }
+      document.body.removeChild(textArea);
+    }
   };
 
   const handleDownload = (filename: string) => {

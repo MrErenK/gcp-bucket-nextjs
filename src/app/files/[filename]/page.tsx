@@ -31,7 +31,7 @@ export default function FilePage({ params }: { params: { filename: string } }) {
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const { handleDownload } = useFileManagement();
+  const { handleDownload, handleCopy } = useFileManagement();
   const [loading, setLoading] = useState(true);
 
   const fileName = decodeURIComponent(params.filename);
@@ -118,13 +118,31 @@ export default function FilePage({ params }: { params: { filename: string } }) {
   }
 
   function handleFilenameCopy(filename: string) {
-    navigator.clipboard
-      .writeText(filename)
-      .then(() => {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(`${filename}`)
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+        .catch((err) => {
+          console.error("Failed to copy text: ", err);
+        });
+    } else {
+      // Fallback for browsers that don't support the Clipboard API
+      const textArea = document.createElement("textarea");
+      textArea.value = `${filename}`;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand("copy");
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
-      })
-      .catch(() => setError("Failed to copy filename"));
+      } catch (err) {
+        console.error("Fallback: Oops, unable to copy", err);
+      }
+      document.body.removeChild(textArea);
+    }
   }
 
   if (loading) {
@@ -146,7 +164,7 @@ export default function FilePage({ params }: { params: { filename: string } }) {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-background/80">
       <Header
-        handleCopy={() => handleFilenameCopy(fileName)}
+        handleCopy={() => handleCopy(fileName)}
         handleDownload={() => handleDownload(fileName)}
         copied={copied}
       />
@@ -205,13 +223,7 @@ export default function FilePage({ params }: { params: { filename: string } }) {
                     {item.isCopyable && (
                       <Button
                         onClick={() => {
-                          navigator.clipboard
-                            .writeText(fileName)
-                            .then(() => {
-                              setCopied(true);
-                              setTimeout(() => setCopied(false), 2000);
-                            })
-                            .catch(() => setError("Failed to copy filename"));
+                          handleFilenameCopy(item.value || "");
                         }}
                         variant="ghost"
                         size="sm"
