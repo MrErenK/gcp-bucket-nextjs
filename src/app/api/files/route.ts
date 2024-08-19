@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
         updatedAt: metadata.updated,
         size: parseInt(String(metadata.size) || "0", 10),
         downloads: stats.downloads,
+        views: stats.views,
       });
     }
 

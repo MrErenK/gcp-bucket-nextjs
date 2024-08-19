@@ -57,12 +57,26 @@ export default function FilePage({ params }: { params: { filename: string } }) {
       }
     };
 
+    const incrementFileViews = async () => {
+      try {
+        const response = await fetch(
+          `/api/views?filename=${encodeURIComponent(fileName)}`,
+          {
+            method: "POST",
+          },
+        );
+        if (!response.ok) throw new Error("Failed to increment file views");
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
     const fetchPreviewData = async () => {
       try {
         const response = await fetch(
           `/api/preview?filename=${encodeURIComponent(fileName)}`,
         );
-        if (!response.ok) throw new Error("Failed to fetch file preview");
+        if (!response.ok) throw new Error("Failed to fetch preview data");
         const data = await response.json();
         setPreviewData(data);
       } catch (err) {
@@ -73,6 +87,7 @@ export default function FilePage({ params }: { params: { filename: string } }) {
     };
 
     fetchFileDetails();
+    incrementFileViews();
     fetchPreviewData();
   }, [fileName]);
 

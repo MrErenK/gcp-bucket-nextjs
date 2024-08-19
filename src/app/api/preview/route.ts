@@ -25,9 +25,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
-    // Increment view count
-    await cloudStorage.incrementFileViews(filename);
-
     const previewData: {
       content?: string;
       previewUrl?: string;
