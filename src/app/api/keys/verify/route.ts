@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 
@@ -26,6 +26,7 @@ async function checkAuth(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   const authResponse = await checkAuth(request);
   if (authResponse) return authResponse;
 

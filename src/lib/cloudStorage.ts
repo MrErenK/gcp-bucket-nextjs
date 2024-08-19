@@ -1,6 +1,6 @@
 import { bucket } from "./storage";
 import { Readable } from "stream";
-import { prisma } from "./prisma";
+import { getPrisma } from "./prisma";
 
 export const cloudStorage = {
   uploadFile: async (file: Buffer, filename: string) => {
@@ -22,6 +22,7 @@ export const cloudStorage = {
     return fileContents;
   },
   deleteFile: async (filename: string) => {
+    const prisma = await getPrisma();
     await bucket.file(filename).delete();
     await prisma.fileStats.delete({ where: { filename } }).catch(() => {}); // Delete stats if they exist
   },
@@ -47,6 +48,7 @@ export const cloudStorage = {
     return bucket.file(filename).createReadStream();
   },
   getFileStats: async (filename: string) => {
+    const prisma = await getPrisma();
     const stats = await prisma.fileStats.findUnique({
       where: { filename },
       select: { views: true, downloads: true },
@@ -54,6 +56,7 @@ export const cloudStorage = {
     return stats || { views: 0, downloads: 0 };
   },
   incrementFileViews: async (filename: string) => {
+    const prisma = await getPrisma();
     await prisma.fileStats.upsert({
       where: { filename },
       update: { views: { increment: 1 } },
@@ -61,6 +64,7 @@ export const cloudStorage = {
     });
   },
   incrementFileDownloads: async (filename: string) => {
+    const prisma = await getPrisma();
     await prisma.fileStats.upsert({
       where: { filename },
       update: { downloads: { increment: 1 } },

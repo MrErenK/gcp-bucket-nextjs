@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { v4 as uuidv4 } from "uuid";
 
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
@@ -27,6 +27,7 @@ async function checkAuth(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  const prisma = await getPrisma();
   const authResponse = await checkAuth(request);
   if (authResponse) return authResponse;
 
@@ -45,6 +46,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const prisma = await getPrisma();
   const authResponse = await checkAuth(request);
   if (authResponse) return authResponse;
 
@@ -85,6 +87,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const prisma = await getPrisma();
   const authResponse = await checkAuth(request);
   if (authResponse) return authResponse;
 

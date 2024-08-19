@@ -7,9 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier 'src/**/*.{js,ts,jsx,tsx}' --write",
+    "format": "prettier '**/**/*.{js,ts,jsx,tsx}' --write",
     "depcheck": "depcheck --oneline",
-    "check": "npm-check"
+    "check": "npm-check",
+    "generate": "prisma generate",
+    "generate:backup": "prisma generate --schema=./db-sync/prisma/schema.prisma",
+    "migrate": "prisma migrate dev",
+    "studio": "prisma studio",
+    "sync-db": "cd db-sync && npm run sync",
+    "sync-db-scheduled": "cd db-sync && npm run sync-scheduled"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.12.1",
@@ -17,6 +23,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@types/busboy": "^1.5.4",
+    "@types/node-cron": "^3.0.11",
     "@types/node-fetch": "^2.6.11",
     "@types/uuid": "^10.0.0",
     "busboy": "^1.6.0",
@@ -26,6 +33,7 @@
     "framer-motion": "^11.3.28",
     "next": "14.2.5",
     "next-themes": "^0.3.0",
+    "node-cron": "^3.0.3",
     "node-fetch": "^3.3.2",
     "npm-check": "^6.0.1",
     "postcss": "^8.4.41",

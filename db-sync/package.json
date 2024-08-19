@@ -1,0 +1,7 @@
+{
+    "type": "module",
+    "scripts": {
+        "sync": "node syncDatabases.js",
+        "sync-scheduled": "node syncDatabasesScheduled.js"
+    }
+  }

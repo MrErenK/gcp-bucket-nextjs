@@ -37,3 +37,4 @@ yarn-error.log*
 next-env.d.ts
 
 google-cloud-key.json
+db-sync/prisma/client
