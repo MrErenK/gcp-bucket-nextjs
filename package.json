@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:port": "next dev -p",
     "build": "next build",
     "start": "next start",
+    "start:port": "next start -p",
     "lint": "next lint",
     "format": "prettier '**/**/*.{js,ts,jsx,tsx,json}' --write",
     "depcheck": "depcheck --oneline",
