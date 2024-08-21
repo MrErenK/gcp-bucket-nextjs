@@ -3,6 +3,7 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
 import { Inter } from "next/font/google";
+import BackupModeWarning from "@/components/BackupModeWarning";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -54,6 +55,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark">
+          <BackupModeWarning />
           {children}
         </ThemeProvider>
       </body>
