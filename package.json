@@ -7,15 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier '**/**/*.{js,ts,jsx,tsx}' --write",
+    "format": "prettier '**/**/*.{js,ts,jsx,tsx,json}' --write",
     "depcheck": "depcheck --oneline",
     "check": "npm-check",
     "generate": "prisma generate",
     "generate:backup": "prisma generate --schema=./db-sync/prisma/schema.prisma",
     "migrate": "prisma migrate dev",
     "studio": "prisma studio",
-    "sync-db": "cd db-sync && npm run sync",
-    "sync-db-scheduled": "cd db-sync && npm run sync-scheduled"
+    "db-sync-main-to-backup": "cd db-sync && npm run sync-main-to-backup",
+    "db-sync-backup-to-main": "cd db-sync && npm run sync-backup-to-main",
+    "db-sync-scheduled": "cd db-sync && npm run sync-scheduled"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.12.1",

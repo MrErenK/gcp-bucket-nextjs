@@ -6,7 +6,7 @@ const globalForPrisma = global as unknown as {
 };
 
 const API_SECRET = process.env.API_SECRET;
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
 async function createPrismaClient() {
   try {
@@ -28,10 +28,10 @@ async function createPrismaClient() {
       console.log("Connected to secondary database");
       // Log the backup mode via API call
       await fetch(`${API_BASE_URL}/api/backup-mode`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': API_SECRET || '',
+          "Content-Type": "application/json",
+          "x-api-key": API_SECRET || "",
         },
         body: JSON.stringify({ isBackupMode: true }),
       });

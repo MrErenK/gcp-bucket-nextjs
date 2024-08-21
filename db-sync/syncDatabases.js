@@ -1,32 +1,36 @@
-import { PrismaClient } from "./prisma/client/index.js";
+import { PrismaClient as PrismaClient1 } from "@prisma/client";
+import { PrismaClient as PrismaClient2 } from "./prisma/client/index.js";
 import { getRecords } from "./getRecords.js";
 
-const prisma = new PrismaClient();
+export async function syncDatabases(fromBackup = false) {
+  const sourcePrisma = fromBackup ? new PrismaClient2() : new PrismaClient1();
+  const targetPrisma = fromBackup ? new PrismaClient1() : new PrismaClient2();
 
-export async function syncDatabases() {
   try {
-    // Get the records from the first Prisma database
-    const { apiKeys, fileStats } = await getRecords();
+    // Get the records from the source database
+    const { apiKeys, fileStats } = await getRecords(fromBackup);
 
-    // Sync the records to the second database
-    await prisma.apiKey.createMany({
+    if (!apiKeys || !fileStats) {
+      throw new Error("Failed to get records from source database");
+    }
+
+    // Sync the records to the target database
+    await targetPrisma.apiKey.createMany({
       data: apiKeys,
       skipDuplicates: true,
     });
-    await prisma.fileStats.createMany({
+    await targetPrisma.fileStats.createMany({
       data: fileStats,
       skipDuplicates: true,
     });
 
-    console.log("Database sync completed successfully");
+    console.log(
+      `Database sync completed successfully (${fromBackup ? "Backup to Primary" : "Primary to Backup"})`,
+    );
   } catch (error) {
     console.error("Error syncing databases:", error);
   } finally {
-    await prisma.$disconnect();
+    await sourcePrisma.$disconnect();
+    await targetPrisma.$disconnect();
   }
-}
-
-// If this script is run directly (not imported), run the sync and exit
-if (import.meta.url === `file://${process.argv[1]}`) {
-  syncDatabases().then(() => process.exit(0));
 }

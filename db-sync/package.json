@@ -1,7 +1,8 @@
 {
-    "type": "module",
-    "scripts": {
-        "sync": "node syncDatabases.js",
-        "sync-scheduled": "node syncDatabasesScheduled.js"
-    }
+  "type": "module",
+  "scripts": {
+    "sync-main-to-backup": "node syncMainToBackup.js",
+    "sync-backup-to-main": "node syncBackupToMain.js",
+    "sync-scheduled": "node syncScheduled.js"
   }
+}
