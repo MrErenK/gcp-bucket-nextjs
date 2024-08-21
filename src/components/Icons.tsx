@@ -260,7 +260,7 @@ export function RefreshIcon(props: React.SVGProps<SVGSVGElement>) {
 interface SortIconProps {
   className?: string;
   order: "asc" | "desc";
-  type: "name" | "date" | "size" | "default";
+  type: "name" | "date" | "size" | "downloads" | "default";
 }
 
 export const SortIcon: React.FC<SortIconProps> = ({
@@ -304,6 +304,13 @@ export const SortIcon: React.FC<SortIconProps> = ({
                 <rect x="14" y="14" width="6" height="6" />
               </>
             )}
+          </>
+        );
+      case "downloads":
+        return (
+          <>
+            <path d="M12 4v16" />
+            <path d={order === "asc" ? "m5 13 7 7 7-7" : "m5 11 7-7 7 7"} />
           </>
         );
       default:

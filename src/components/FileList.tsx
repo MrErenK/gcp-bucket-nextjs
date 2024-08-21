@@ -28,7 +28,7 @@ interface FileListProps {
   onRefresh: () => Promise<void>;
 }
 
-type SortType = "name" | "date" | "size";
+type SortType = "name" | "date" | "size" | "downloads";
 type SortOrder = "asc" | "desc";
 
 interface SortState {
@@ -65,6 +65,7 @@ export function FileList({
         name: "asc",
         date: "asc",
         size: "asc",
+        downloads: "asc",
       },
     };
   });
@@ -111,6 +112,10 @@ export function FileList({
           : new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
       } else if (sortState.by === "size") {
         return order === "asc" ? a.size - b.size : b.size - a.size;
+      } else if (sortState.by === "downloads") {
+        return order === "asc"
+          ? a.downloads - b.downloads
+          : b.downloads - a.downloads;
       }
       return 0;
     });
@@ -228,7 +233,7 @@ export function FileList({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {(["name", "date", "size"] as const).map((type) => (
+          {(["name", "date", "size", "downloads"] as const).map((type) => (
             <SortButton
               key={type}
               onClick={() => {
@@ -255,13 +260,23 @@ export function FileList({
                       ? "A-Z"
                       : type === "date"
                         ? "Old"
-                        : "Small"
+                        : type === "size"
+                          ? "Small"
+                          : "Fewest Downloads"
                     : type === "name"
                       ? "Z-A"
                       : type === "date"
                         ? "New"
-                        : "Large"
-                  : type.charAt(0).toUpperCase() + type.slice(1)
+                        : type === "size"
+                          ? "Large"
+                          : "Most Downloads"
+                  : type === "name"
+                    ? "Sort by Name"
+                    : type === "date"
+                      ? "Sort by Date"
+                      : type === "size"
+                        ? "Sort by Size"
+                        : "Sort by Downloads"
               }
             />
           ))}
