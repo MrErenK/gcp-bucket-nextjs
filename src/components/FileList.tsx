@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   FileIcon,
@@ -8,6 +8,7 @@ import {
   SortIcon,
   RefreshIcon,
   AllFilesIcon,
+  DownloadCountIcon,
 } from "./Icons";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -16,7 +17,7 @@ import { useRouter, usePathname } from "next/navigation";
 interface File {
   name: string;
   updatedAt: string;
-  size?: number;
+  size: number;
   downloads: number;
 }
 
@@ -25,6 +26,14 @@ interface FileListProps {
   onCopy: (filename: string) => void;
   onDownload: (filename: string) => void;
   onRefresh: () => Promise<void>;
+}
+
+type SortType = "name" | "date" | "size";
+type SortOrder = "asc" | "desc";
+
+interface SortState {
+  by: SortType;
+  orders: Record<SortType, SortOrder>;
 }
 
 export function FileList({
@@ -39,11 +48,30 @@ export function FileList({
   const [downloadingStates, setDownloadingStates] = useState<{
     [key: string]: boolean;
   }>({});
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [sortBy, setSortBy] = useState<"name" | "date">("name");
   const router = useRouter();
   const pathname = usePathname();
   const currentRoute = pathname.split("?")[0];
+
+  const [sortState, setSortState] = useState<SortState>(() => {
+    if (typeof window !== "undefined") {
+      const savedState = localStorage.getItem("sortState");
+      if (savedState) {
+        return JSON.parse(savedState);
+      }
+    }
+    return {
+      by: "name",
+      orders: {
+        name: "asc",
+        date: "asc",
+        size: "asc",
+      },
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem("sortState", JSON.stringify(sortState));
+  }, [sortState]);
 
   const buttonClasses =
     "transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary hover:text-primary-foreground";
@@ -70,22 +98,29 @@ export function FileList({
     [onDownload],
   );
 
-  const filteredAndSortedFiles = useMemo(() => {
-    return files.sort((a, b) => {
-      if (sortBy === "name") {
-        const comparison = a.name.localeCompare(b.name);
-        return sortOrder === "asc" ? comparison : -comparison;
-      } else {
-        const dateA = new Date(a.updatedAt);
-        const dateB = new Date(b.updatedAt);
-        const comparison = dateA.getTime() - dateB.getTime();
-        return sortOrder === "asc" ? comparison : -comparison;
+  const sortedFiles = useMemo(() => {
+    return [...files].sort((a, b) => {
+      const order = sortState.orders[sortState.by];
+      if (sortState.by === "name") {
+        return order === "asc"
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name);
+      } else if (sortState.by === "date") {
+        return order === "asc"
+          ? new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+          : new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      } else if (sortState.by === "size") {
+        return order === "asc" ? a.size - b.size : b.size - a.size;
       }
+      return 0;
     });
-  }, [files, sortOrder, sortBy]);
+  }, [files, sortState]);
 
-  function formatFileSize(bytes: number | undefined) {
-    if (bytes === undefined || isNaN(bytes)) return "Unknown size";
+  const totalSize = useMemo(() => {
+    return files.reduce((acc, file) => acc + file.size, 0);
+  }, [files]);
+
+  function formatFileSize(bytes: number) {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
@@ -102,108 +137,192 @@ export function FileList({
     );
   }
 
+  const SortButton = ({
+    onClick,
+    active,
+    icon,
+    label,
+  }: {
+    onClick: () => void;
+    active: boolean;
+    icon: JSX.Element;
+    label: string;
+  }) => (
+    <Button
+      onClick={onClick}
+      variant={active ? "default" : "outline"}
+      size="sm"
+      className={buttonClasses}
+    >
+      <span className="mr-2">{icon}</span>
+      {label}
+    </Button>
+  );
+
+  const FileActionButton = ({
+    variant,
+    onClick,
+    disabled,
+    icon,
+    label,
+  }: {
+    variant:
+      | "active"
+      | "link"
+      | "default"
+      | "destructive"
+      | "outline"
+      | "secondary"
+      | "ghost"
+      | null
+      | undefined;
+    onClick: () => void;
+    disabled: boolean;
+    icon: JSX.Element;
+    label: string;
+  }) => (
+    <Button
+      variant={variant}
+      size="sm"
+      onClick={onClick}
+      disabled={disabled}
+      className={buttonClasses}
+    >
+      <span className="mr-2">{icon}</span>
+      {label}
+    </Button>
+  );
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card rounded-lg p-4 shadow-sm">
-        <h2 className="text-2xl font-bold text-primary">Files</h2>
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          <Button
-            onClick={onRefresh}
-            variant="outline"
-            className={buttonClasses}
-          >
-            <RefreshIcon className="w-4 h-4 mr-2" />
-            Refresh
-          </Button>
-          {currentRoute !== "/files" && (
+      <div className="bg-card rounded-lg p-6 shadow-md">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-primary mb-2">Files</h2>
+            <h3 className="text-sm text-muted-foreground">
+              Total: {files.length} files, {formatFileSize(totalSize)}
+            </h3>
+          </div>
+          <div className="flex items-center gap-2">
             <Button
-              onClick={() => router.push("/files")}
+              onClick={onRefresh}
               variant="outline"
+              size="sm"
               className={buttonClasses}
             >
-              <AllFilesIcon className="w-4 h-4 mr-2" />
-              View All
+              <RefreshIcon className="w-4 h-4 mr-2" />
+              Refresh
             </Button>
-          )}
-          <Button
-            onClick={() => {
-              setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-              setSortBy("name");
-            }}
-            variant={sortBy === "name" ? "default" : "outline"}
-            className={buttonClasses}
-          >
-            <SortIcon className="w-4 h-4 mr-2" type="name" order={sortOrder} />
-            {sortBy === "name" ? (sortOrder === "asc" ? "A-Z" : "Z-A") : "Name"}
-          </Button>
-          <Button
-            onClick={() => {
-              setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-              setSortBy("date");
-            }}
-            variant={sortBy === "date" ? "default" : "outline"}
-            className={buttonClasses}
-          >
-            <SortIcon className="w-4 h-4 mr-2" type="date" order={sortOrder} />
-            {sortBy === "date" ? (sortOrder === "asc" ? "Old" : "New") : "Date"}
-          </Button>
+            {currentRoute !== "/files" && (
+              <Button
+                onClick={() => router.push("/files")}
+                variant="outline"
+                size="sm"
+                className={buttonClasses}
+              >
+                <AllFilesIcon className="w-4 h-4 mr-2" />
+                View All
+              </Button>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {(["name", "date", "size"] as const).map((type) => (
+            <SortButton
+              key={type}
+              onClick={() => {
+                setSortState((prev) => ({
+                  by: type,
+                  orders: {
+                    ...prev.orders,
+                    [type]: prev.orders[type] === "asc" ? "desc" : "asc",
+                  },
+                }));
+              }}
+              active={sortState.by === type}
+              icon={
+                <SortIcon
+                  className="w-4 h-4"
+                  type={type}
+                  order={sortState.orders[type]}
+                />
+              }
+              label={
+                sortState.by === type
+                  ? sortState.orders[type] === "asc"
+                    ? type === "name"
+                      ? "A-Z"
+                      : type === "date"
+                        ? "Old"
+                        : "Small"
+                    : type === "name"
+                      ? "Z-A"
+                      : type === "date"
+                        ? "New"
+                        : "Large"
+                  : type.charAt(0).toUpperCase() + type.slice(1)
+              }
+            />
+          ))}
         </div>
       </div>
       <AnimatePresence>
-        {filteredAndSortedFiles.map((file) => {
+        {sortedFiles.map((file) => {
           const isCopied = copiedStates[file.name];
           const isDownloading = downloadingStates[file.name];
 
           return (
             <motion.div
               key={file.name}
-              className="bg-card rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out"
+              className="bg-card rounded-lg p-4 sm:p-6 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="flex items-start gap-4 w-full">
-                <FileIcon className="w-10 h-10 text-primary flex-shrink-0 mt-1" />
-                <div className="flex-grow min-w-0">
-                  <Link
-                    href={`/files/${encodeURIComponent(file.name)}`}
-                    passHref
-                  >
-                    <p className="font-semibold text-primary hover:text-primary/80 cursor-pointer truncate text-lg">
-                      {file.name}
-                    </p>
-                  </Link>
-                  <div className="flex flex-col text-sm text-muted-foreground gap-1 mt-2">
-                    <p className="truncate">
-                      Modified: {formatDate(file.updatedAt)}
-                    </p>
-                    <p>Size: {formatFileSize(file.size)}</p>
-                    <p>Downloads: {file.downloads}</p>
+              <div className="flex flex-col gap-4 w-full">
+                <div className="flex items-start gap-4">
+                  <FileIcon className="w-10 h-10 sm:w-12 sm:h-12 text-primary flex-shrink-0" />
+                  <div className="flex-grow min-w-0">
+                    <Link
+                      href={`/files/${encodeURIComponent(file.name)}`}
+                      passHref
+                    >
+                      <h3 className="font-semibold text-primary hover:text-primary/80 cursor-pointer text-lg sm:text-xl break-words">
+                        {file.name}
+                      </h3>
+                    </Link>
+                    <div className="flex items-center mt-1 text-sm text-muted-foreground">
+                      <DownloadCountIcon className="w-4 h-4 mr-1" />
+                      <strong>{file.downloads}</strong>
+                      <span className="mx-2">•</span>
+                      <span>{formatFileSize(file.size)}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex flex-wrap gap-2 w-full justify-start mt-4">
-                <Button
-                  variant={isCopied ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => handleCopy(file.name)}
-                  disabled={isCopied}
-                  className={buttonClasses}
-                >
-                  <CopyIcon className="w-4 h-4 mr-2" />
-                  {isCopied ? "Copied!" : "Copy"}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDownload(file.name)}
-                  disabled={isDownloading}
-                  className={buttonClasses}
-                >
-                  <DownloadIcon className="w-4 h-4 mr-2" />
-                  {isDownloading ? "Downloading..." : "Download"}
-                </Button>
+                <div className="text-sm text-muted-foreground">
+                  <p>
+                    <span className="font-medium">Modified:</span>{" "}
+                    {formatDate(file.updatedAt)}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2 w-full justify-start mt-2">
+                  <FileActionButton
+                    variant={isCopied ? "default" : "outline"}
+                    onClick={() => handleCopy(file.name)}
+                    disabled={isCopied}
+                    icon={<CopyIcon className="w-4 h-4" />}
+                    label={isCopied ? "Copied!" : "Copy"}
+                  />
+                  <FileActionButton
+                    variant="outline"
+                    onClick={() => handleDownload(file.name)}
+                    disabled={isDownloading}
+                    icon={<DownloadIcon className="w-4 h-4" />}
+                    label={isDownloading ? "Downloading..." : "Download"}
+                  />
+                </div>
               </div>
             </motion.div>
           );

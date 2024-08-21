@@ -54,9 +54,13 @@ export async function GET(request: NextRequest) {
       page * PAGE_SIZE,
     );
 
+    const totalSize = filteredFiles.reduce((acc, file) => acc + file.size, 0);
+
     return NextResponse.json({
       files: paginatedFiles,
       totalPages,
+      totalFiles: filteredFiles.length,
+      totalSize,
     });
   } catch (error) {
     console.error(error);
