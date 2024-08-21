@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { formatFileSize } from "@/lib/utils";
 
 interface File {
   name: string;
@@ -26,6 +27,8 @@ interface FileListProps {
   onCopy: (filename: string) => void;
   onDownload: (filename: string) => void;
   onRefresh: () => Promise<void>;
+  totalFiles: number;
+  totalSize: number;
 }
 
 type SortType = "name" | "date" | "size" | "downloads";
@@ -41,6 +44,8 @@ export function FileList({
   onCopy,
   onDownload,
   onRefresh,
+  totalFiles,
+  totalSize,
 }: FileListProps) {
   const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>(
     {},
@@ -121,18 +126,6 @@ export function FileList({
     });
   }, [files, sortState]);
 
-  const totalSize = useMemo(() => {
-    return files.reduce((acc, file) => acc + file.size, 0);
-  }, [files]);
-
-  function formatFileSize(bytes: number) {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  }
-
   function formatDate(dateString: string) {
     const date = new Date(dateString);
     return (
@@ -205,7 +198,7 @@ export function FileList({
           <div>
             <h2 className="text-2xl font-bold text-primary mb-2">Files</h2>
             <h3 className="text-sm text-muted-foreground">
-              Total: {files.length} files, {formatFileSize(totalSize)}
+              Total: {totalFiles} files, {formatFileSize(totalSize)}
             </h3>
           </div>
           <div className="flex items-center gap-2">

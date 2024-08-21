@@ -10,6 +10,8 @@ interface File {
 
 export function useFileManagement() {
   const [files, setFiles] = useState<File[]>([]);
+  const [totalFiles, setTotalFiles] = useState(0);
+  const [totalSize, setTotalSize] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [currentPage, setCurrentPage] = useState(1);
@@ -30,6 +32,8 @@ export function useFileManagement() {
       const data = await response.json();
       setFiles(data.files);
       setTotalPages(data.totalPages);
+      setTotalFiles(data.totalFiles);
+      setTotalSize(data.totalSize);
     } catch (error) {
       console.error("Error fetching files:", error);
     } finally {
@@ -89,5 +93,7 @@ export function useFileManagement() {
     handleCopy,
     handleDownload,
     setCurrentPage,
+    totalFiles,
+    totalSize,
   };
 }

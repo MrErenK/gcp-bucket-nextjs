@@ -27,6 +27,8 @@ export function FileManager() {
     handleCopy,
     handleDownload,
     setCurrentPage,
+    totalFiles,
+    totalSize,
   } = useFileManagement();
 
   useEffect(() => {
@@ -59,6 +61,8 @@ export function FileManager() {
           onCopy={handleCopy}
           onDownload={handleDownload}
           onRefresh={handleRefresh}
+          totalFiles={totalFiles}
+          totalSize={totalSize}
         />
         {!loading && initialLoadDone && files.length > 0 && (
           <Pagination
@@ -79,6 +83,8 @@ interface FileContentProps {
   onCopy: (filename: string) => void;
   onDownload: (filename: string) => void;
   onRefresh: () => Promise<void>;
+  totalFiles: number;
+  totalSize: number;
 }
 
 export function FileContent({
@@ -88,6 +94,8 @@ export function FileContent({
   onCopy,
   onDownload,
   onRefresh,
+  totalFiles,
+  totalSize,
 }: FileContentProps) {
   if (loading) return <LoadingIndicator loading="files" />;
   if (!initialLoadDone) return null;
@@ -105,6 +113,8 @@ export function FileContent({
       onCopy={onCopy}
       onDownload={onDownload}
       onRefresh={onRefresh}
+      totalFiles={totalFiles}
+      totalSize={totalSize}
     />
   );
 }

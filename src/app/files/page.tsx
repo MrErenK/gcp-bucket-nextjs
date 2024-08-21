@@ -19,6 +19,8 @@ const FilesPage = () => {
     fetchFiles,
     handleCopy,
     handleDownload,
+    totalFiles,
+    totalSize,
   } = useFileManagement();
   const router = useRouter();
 
@@ -59,10 +61,18 @@ const FilesPage = () => {
               <FileContent
                 loading={loading}
                 initialLoadDone={initialLoadDone}
-                files={files}
+                files={files.map((file) => ({
+                  ...file,
+                  name: file.name,
+                  updatedAt: file.updatedAt,
+                  downloads: file.downloads || 0,
+                  size: file.size || 0,
+                }))}
                 onCopy={handleCopy}
                 onDownload={handleDownload}
                 onRefresh={handleRefresh}
+                totalFiles={totalFiles}
+                totalSize={totalSize}
               />
             )}
           </CardContent>
