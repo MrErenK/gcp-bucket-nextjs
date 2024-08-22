@@ -3,6 +3,6 @@
   "scripts": {
     "sync-main-to-backup": "node syncMainToBackup.js",
     "sync-backup-to-main": "node syncBackupToMain.js",
-    "sync-scheduled": "node syncScheduled.js"
+    "sync-scheduled": "node syncDatabasesScheduled.js"
   }
 }

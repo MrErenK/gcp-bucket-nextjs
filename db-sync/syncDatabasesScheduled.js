@@ -8,7 +8,6 @@ async function runSync() {
   console.log("Running database sync...");
   try {
     await syncDatabases();
-    console.log("Database sync completed successfully");
   } catch (error) {
     console.error("Error during database sync:", error);
   }
