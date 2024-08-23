@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { formatFileSize } from "@/lib/utils";
+import { useFileManagement } from "@/hooks/useFileManagement";
 
 interface File {
   name: string;
@@ -47,8 +48,9 @@ export function FileList({
   totalFiles,
   totalSize,
 }: FileListProps) {
+  const { sortState, updateSort } = useFileManagement();
   const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>(
-    {},
+    {}
   );
   const [downloadingStates, setDownloadingStates] = useState<{
     [key: string]: boolean;
@@ -56,28 +58,6 @@ export function FileList({
   const router = useRouter();
   const pathname = usePathname();
   const currentRoute = pathname.split("?")[0];
-
-  const [sortState, setSortState] = useState<SortState>(() => {
-    if (typeof window !== "undefined") {
-      const savedState = localStorage.getItem("sortState");
-      if (savedState) {
-        return JSON.parse(savedState);
-      }
-    }
-    return {
-      by: "name",
-      orders: {
-        name: "asc",
-        date: "asc",
-        size: "asc",
-        downloads: "asc",
-      },
-    };
-  });
-
-  useEffect(() => {
-    localStorage.setItem("sortState", JSON.stringify(sortState));
-  }, [sortState]);
 
   const buttonClasses =
     "transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary hover:text-primary-foreground";
@@ -90,7 +70,7 @@ export function FileList({
         setCopiedStates((prev) => ({ ...prev, [filename]: false }));
       }, 2000);
     },
-    [onCopy],
+    [onCopy]
   );
 
   const handleDownload = useCallback(
@@ -101,7 +81,7 @@ export function FileList({
         setDownloadingStates((prev) => ({ ...prev, [filename]: false }));
       }, 2000);
     },
-    [onDownload],
+    [onDownload]
   );
 
   const sortedFiles = useMemo(() => {
@@ -229,15 +209,7 @@ export function FileList({
           {(["name", "date", "size", "downloads"] as const).map((type) => (
             <SortButton
               key={type}
-              onClick={() => {
-                setSortState((prev) => ({
-                  by: type,
-                  orders: {
-                    ...prev.orders,
-                    [type]: prev.orders[type] === "asc" ? "desc" : "asc",
-                  },
-                }));
-              }}
+              onClick={() => updateSort(type)}
               active={sortState.by === type}
               icon={
                 <SortIcon

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 
 interface File {
@@ -6,6 +6,14 @@ interface File {
   downloads: number;
   name: string;
   updatedAt: string;
+}
+
+type SortType = "name" | "date" | "size" | "downloads";
+type SortOrder = "asc" | "desc";
+
+interface SortState {
+  by: SortType;
+  orders: Record<SortType, SortOrder>;
 }
 
 export function useFileManagement() {
@@ -20,11 +28,33 @@ export function useFileManagement() {
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const [sortState, setSortState] = useState<SortState>(() => {
+    if (typeof window !== "undefined") {
+      const savedState = localStorage.getItem("sortState");
+      if (savedState) {
+        return JSON.parse(savedState);
+      }
+    }
+    return {
+      by: "name",
+      orders: {
+        name: "asc",
+        date: "asc",
+        size: "asc",
+        downloads: "asc",
+      },
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem("sortState", JSON.stringify(sortState));
+  }, [sortState]);
+
   const fetchFiles = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/files?page=${currentPage}&search=${debouncedSearchTerm}`,
+        `/api/files?page=${currentPage}&search=${debouncedSearchTerm}`
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -42,6 +72,38 @@ export function useFileManagement() {
     }
   }, [currentPage, debouncedSearchTerm]);
 
+  const sortedFiles = useMemo(() => {
+    return [...files].sort((a, b) => {
+      const order = sortState.orders[sortState.by];
+      if (sortState.by === "name") {
+        return order === "asc"
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name);
+      } else if (sortState.by === "date") {
+        return order === "asc"
+          ? new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+          : new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      } else if (sortState.by === "size") {
+        return order === "asc" ? a.size - b.size : b.size - a.size;
+      } else if (sortState.by === "downloads") {
+        return order === "asc"
+          ? a.downloads - b.downloads
+          : b.downloads - a.downloads;
+      }
+      return 0;
+    });
+  }, [files, sortState]);
+
+  const updateSort = (type: SortType) => {
+    setSortState((prev) => ({
+      by: type,
+      orders: {
+        ...prev.orders,
+        [type]: prev.orders[type] === "asc" ? "desc" : "asc",
+      },
+    }));
+  };
+
   const handleSearch = (newSearchTerm: string) => {
     setSearchTerm(newSearchTerm);
     setCurrentPage(1);
@@ -51,7 +113,7 @@ export function useFileManagement() {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard
         .writeText(
-          `${window.location.origin}/api/download?filename=${filename}`,
+          `${window.location.origin}/api/download?filename=${filename}`
         )
         .then(() => {
           setCopied(true);
@@ -82,7 +144,7 @@ export function useFileManagement() {
   };
 
   return {
-    files,
+    files: sortedFiles,
     searchTerm,
     currentPage,
     totalPages,
@@ -95,5 +157,7 @@ export function useFileManagement() {
     setCurrentPage,
     totalFiles,
     totalSize,
+    sortState,
+    updateSort,
   };
 }
