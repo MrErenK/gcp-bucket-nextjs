@@ -76,3 +76,11 @@
 .fade-in.show {
   opacity: 1;
 }
+
+#bmc-wbtn{
+  bottom: 15px;
+}
+
+#bmc-wbtn + div{
+  bottom:15px;
+}

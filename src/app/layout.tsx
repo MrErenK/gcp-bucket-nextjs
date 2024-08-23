@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { Inter } from "next/font/google";
 import BackupModeWarning from "@/components/BackupModeWarning";
+import BuyMeCoffeeWidget from "@/components/BuyMeCoffeeWidget";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -57,6 +58,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="dark">
           <BackupModeWarning />
           {children}
+          <BuyMeCoffeeWidget />
         </ThemeProvider>
       </body>
     </html>
