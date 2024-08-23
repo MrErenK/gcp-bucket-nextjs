@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
   const filename = searchParams.get("filename");
   const sort = searchParams.get("sort") || "name";
   const order = searchParams.get("order") || "asc";
+  const all = searchParams.get("all") === "true";
 
   try {
     // If a filename is provided, return details for that specific file
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
     const filteredFiles = await Promise.all(
       files
         .filter((file) =>
-          file.name.toLowerCase().includes(search.toLowerCase()),
+          file.name.toLowerCase().includes(search.toLowerCase())
         )
         .map(async (file) => {
           const metadata = await cloudStorage.getFileMetadata(file.name);
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
             size: parseInt(String(metadata.size) || "0", 10),
             downloads: stats.downloads,
           };
-        }),
+        })
     );
 
     // Sort the filtered files
@@ -72,11 +73,10 @@ export async function GET(request: NextRequest) {
       return 0;
     });
 
-    const totalPages = Math.ceil(sortedFiles.length / PAGE_SIZE);
-    const paginatedFiles = sortedFiles.slice(
-      (page - 1) * PAGE_SIZE,
-      page * PAGE_SIZE,
-    );
+    const totalPages = all ? 1 : Math.ceil(sortedFiles.length / PAGE_SIZE);
+    const paginatedFiles = all
+      ? sortedFiles
+      : sortedFiles.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
     const totalSize = sortedFiles.reduce((acc, file) => acc + file.size, 0);
 
@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
     console.error(error);
     return NextResponse.json(
       { error: "Error fetching files" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

@@ -29,7 +29,7 @@ export function FileManager() {
     setCurrentPage,
     totalFiles,
     totalSize,
-  } = useFileManagement();
+  } = useFileManagement(false);
 
   useEffect(() => {
     fetchFiles();

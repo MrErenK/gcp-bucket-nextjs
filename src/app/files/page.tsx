@@ -11,7 +11,7 @@ import { useFileManagement } from "@/hooks/useFileManagement";
 import { FileContent } from "@/components/FileManager";
 
 const FilesPage = () => {
-  const [error] = useState<string | null>(null);
+  const [error] = useState(null);
   const {
     files,
     loading,
@@ -21,12 +21,14 @@ const FilesPage = () => {
     handleDownload,
     totalFiles,
     totalSize,
-  } = useFileManagement();
+    setDisabledPagination,
+  } = useFileManagement(true);
   const router = useRouter();
 
   useEffect(() => {
+    setDisabledPagination(true);
     fetchFiles();
-  }, [fetchFiles]);
+  }, [fetchFiles, setDisabledPagination]);
 
   const handleRefresh = useCallback(async () => {
     await fetchFiles();

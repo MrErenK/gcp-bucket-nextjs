@@ -16,7 +16,7 @@ interface SortState {
   orders: Record<SortType, SortOrder>;
 }
 
-export function useFileManagement() {
+export function useFileManagement(disablePagination = false) {
   const [files, setFiles] = useState<File[]>([]);
   const [totalFiles, setTotalFiles] = useState(0);
   const [totalSize, setTotalSize] = useState(0);
@@ -27,6 +27,8 @@ export function useFileManagement() {
   const [loading, setLoading] = useState(true);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [disabledPagination, setDisabledPagination] =
+    useState(disablePagination);
 
   const [sortState, setSortState] = useState<SortState>(() => {
     if (typeof window !== "undefined") {
@@ -54,14 +56,14 @@ export function useFileManagement() {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/files?page=${currentPage}&search=${debouncedSearchTerm}&sort=${sortState.by}&order=${sortState.orders[sortState.by]}`,
+        `/api/files?${disabledPagination ? "all=true" : `page=${currentPage}`}&search=${debouncedSearchTerm}&sort=${sortState.by}&order=${sortState.orders[sortState.by]}`
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
       const data = await response.json();
       setFiles(data.files);
-      setTotalPages(data.totalPages);
+      setTotalPages(disabledPagination ? 1 : data.totalPages);
       setTotalFiles(data.totalFiles);
       setTotalSize(data.totalSize);
     } catch (error) {
@@ -70,7 +72,7 @@ export function useFileManagement() {
       setLoading(false);
       setInitialLoadDone(true);
     }
-  }, [currentPage, debouncedSearchTerm, sortState]);
+  }, [currentPage, debouncedSearchTerm, sortState, disabledPagination]);
 
   const updateSort = (type: SortType) => {
     setSortState((prev) => ({
@@ -92,7 +94,7 @@ export function useFileManagement() {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard
         .writeText(
-          `${window.location.origin}/api/download?filename=${filename}`,
+          `${window.location.origin}/api/download?filename=${filename}`
         )
         .then(() => {
           setCopied(true);
@@ -138,5 +140,7 @@ export function useFileManagement() {
     totalSize,
     sortState,
     updateSort,
+    disabledPagination,
+    setDisabledPagination,
   };
 }
