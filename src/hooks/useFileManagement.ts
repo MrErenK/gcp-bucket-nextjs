@@ -54,7 +54,7 @@ export function useFileManagement() {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/files?page=${currentPage}&search=${debouncedSearchTerm}`
+        `/api/files?page=${currentPage}&search=${debouncedSearchTerm}&sort=${sortState.by}&order=${sortState.orders[sortState.by]}`,
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -70,29 +70,7 @@ export function useFileManagement() {
       setLoading(false);
       setInitialLoadDone(true);
     }
-  }, [currentPage, debouncedSearchTerm]);
-
-  const sortedFiles = useMemo(() => {
-    return [...files].sort((a, b) => {
-      const order = sortState.orders[sortState.by];
-      if (sortState.by === "name") {
-        return order === "asc"
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name);
-      } else if (sortState.by === "date") {
-        return order === "asc"
-          ? new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
-          : new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-      } else if (sortState.by === "size") {
-        return order === "asc" ? a.size - b.size : b.size - a.size;
-      } else if (sortState.by === "downloads") {
-        return order === "asc"
-          ? a.downloads - b.downloads
-          : b.downloads - a.downloads;
-      }
-      return 0;
-    });
-  }, [files, sortState]);
+  }, [currentPage, debouncedSearchTerm, sortState]);
 
   const updateSort = (type: SortType) => {
     setSortState((prev) => ({
@@ -102,6 +80,7 @@ export function useFileManagement() {
         [type]: prev.orders[type] === "asc" ? "desc" : "asc",
       },
     }));
+    setCurrentPage(1);
   };
 
   const handleSearch = (newSearchTerm: string) => {
@@ -113,7 +92,7 @@ export function useFileManagement() {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard
         .writeText(
-          `${window.location.origin}/api/download?filename=${filename}`
+          `${window.location.origin}/api/download?filename=${filename}`,
         )
         .then(() => {
           setCopied(true);
@@ -144,7 +123,7 @@ export function useFileManagement() {
   };
 
   return {
-    files: sortedFiles,
+    files,
     searchTerm,
     currentPage,
     totalPages,

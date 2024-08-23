@@ -50,7 +50,7 @@ export function FileList({
 }: FileListProps) {
   const { sortState, updateSort } = useFileManagement();
   const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>(
-    {}
+    {},
   );
   const [downloadingStates, setDownloadingStates] = useState<{
     [key: string]: boolean;
@@ -70,7 +70,7 @@ export function FileList({
         setCopiedStates((prev) => ({ ...prev, [filename]: false }));
       }, 2000);
     },
-    [onCopy]
+    [onCopy],
   );
 
   const handleDownload = useCallback(
@@ -81,7 +81,7 @@ export function FileList({
         setDownloadingStates((prev) => ({ ...prev, [filename]: false }));
       }, 2000);
     },
-    [onDownload]
+    [onDownload],
   );
 
   const sortedFiles = useMemo(() => {
