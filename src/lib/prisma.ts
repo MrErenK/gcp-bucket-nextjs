@@ -13,7 +13,9 @@ let PrismaClient2: typeof PrismaClient1 | null = null;
 try {
   PrismaClient2 = require("../../db-sync/prisma/client").PrismaClient;
 } catch (error) {
-  console.warn("Secondary database client not available. Continuing with primary only.");
+  console.warn(
+    "Secondary database client not available. Continuing with primary only.",
+  );
 }
 
 async function createPrismaClient() {
