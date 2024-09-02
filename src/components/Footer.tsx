@@ -1,6 +1,10 @@
 import React from "react";
 import Link from "next/link";
-import { GithubIcon, TelegramIcon, HeartIcon } from "@/components/Icons";
+import dynamic from 'next/dynamic';
+
+const GithubIcon = dynamic(() => import('@/components/Icons').then(mod => mod.GithubIcon), { ssr: false });
+const TelegramIcon = dynamic(() => import('@/components/Icons').then(mod => mod.TelegramIcon), { ssr: false });
+const HeartIcon = dynamic(() => import('@/components/Icons').then(mod => mod.HeartIcon), { ssr: false });
 
 const Footer: React.FC = () => {
   return (

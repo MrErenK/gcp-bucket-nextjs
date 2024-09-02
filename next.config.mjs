@@ -5,6 +5,16 @@ const nextConfig = {
         NEXT_PUBLIC_WEB_URL: process.env.WEB_URL,
     },
     reactStrictMode: false,
+    experimental: {
+        optimizePackageImports: [
+            'framer-motion',
+            'react-hot-toast',
+            'clsx',
+            'class-variance-authority',
+            'tailwind-merge',
+        ],
+    },
+    trailingSlash: true,
 };
 
 export default nextConfig;

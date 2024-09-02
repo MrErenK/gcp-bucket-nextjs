@@ -1,7 +1,15 @@
+"use client";
+
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CopyIcon, TrashIcon, EyeIcon, EyeOffIcon } from "@/components/Icons";
+import dynamic from 'next/dynamic';
+
+const Card = dynamic(() => import('@/components/ui/card').then(mod => mod.Card), { ssr: false });
+const CardContent = dynamic(() => import('@/components/ui/card').then(mod => mod.CardContent), { ssr: false });
+const TrashIcon = dynamic(() => import('@/components/Icons').then(mod => mod.TrashIcon), { ssr: false });
+const EyeIcon = dynamic(() => import('@/components/Icons').then(mod => mod.EyeIcon), { ssr: false });
+const EyeOffIcon = dynamic(() => import('@/components/Icons').then(mod => mod.EyeOffIcon), { ssr: false });
+const CopyIcon = dynamic(() => import('@/components/Icons').then(mod => mod.CopyIcon), { ssr: false });
 
 interface APIKeyCardProps {
   apiKey: any;

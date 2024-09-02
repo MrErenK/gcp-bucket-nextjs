@@ -1,6 +1,11 @@
+"use client"
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useMotionValue } from "framer-motion";
-import { ZoomInIcon, ZoomOutIcon, XIcon } from "@/components/Icons";
+import dynamic from 'next/dynamic';
+
+const ZoomInIcon = dynamic(() => import('@/components/Icons').then(mod => mod.ZoomInIcon), { ssr: false });
+const ZoomOutIcon = dynamic(() => import('@/components/Icons').then(mod => mod.ZoomOutIcon), { ssr: false });
+const XIcon = dynamic(() => import('@/components/Icons').then(mod => mod.XIcon), { ssr: false });
 
 interface ImagePreviewProps {
   src: string;

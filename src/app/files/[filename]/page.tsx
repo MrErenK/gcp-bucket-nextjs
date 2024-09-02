@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { CopyIcon } from "@/components/Icons";
 import { TextPreview } from "@/components/previews/TextPreview";
 import { ImagePreview } from "@/components/previews/ImagePreview";
 import { AudioPreview } from "@/components/previews/AudioPreview";
@@ -10,7 +9,10 @@ import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { getFileType } from "@/types/filetypes";
 import Header from "./Header";
 import { useFileManagement } from "@/hooks/useFileManagement";
-import { ThemeSwitch } from "@/components/ThemeSwitch";
+import dynamic from 'next/dynamic';
+
+const ThemeSwitch = dynamic(() => import('@/components/ThemeSwitch').then(mod => mod.default), { ssr: false });
+const CopyIcon = dynamic(() => import('@/components/Icons').then(mod => mod.CopyIcon), { ssr: false });
 
 interface FileDetails {
   name: string;

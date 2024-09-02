@@ -1,9 +1,14 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { LockIcon } from "@/components/Icons";
-import { LoadingIndicator } from "@/components/LoadingIndicator";
+import dynamic from 'next/dynamic';
+
+const Card = dynamic(() => import('@/components/ui/card').then(mod => mod.Card), { ssr: false });
+const CardHeader = dynamic(() => import('@/components/ui/card').then(mod => mod.CardHeader), { ssr: false });
+const CardTitle = dynamic(() => import('@/components/ui/card').then(mod => mod.CardTitle), { ssr: false });
+const CardContent = dynamic(() => import('@/components/ui/card').then(mod => mod.CardContent), { ssr: false });
+const LockIcon = dynamic(() => import('@/components/Icons').then(mod => mod.LockIcon), { ssr: false });
+const LoadingIndicator = dynamic(() => import('@/components/LoadingIndicator').then(mod => mod.LoadingIndicator), { ssr: false });
 
 interface LoginFormProps {
   adminApiKey: string;

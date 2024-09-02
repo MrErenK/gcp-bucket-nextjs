@@ -1,6 +1,9 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon } from "@/components/Icons";
+import dynamic from 'next/dynamic';
+
+const ChevronLeftIcon = dynamic(() => import('@/components/Icons').then(mod => mod.ChevronLeftIcon), { ssr: false });
+const ChevronRightIcon = dynamic(() => import('@/components/Icons').then(mod => mod.ChevronRightIcon), { ssr: false });
 
 interface PaginationProps {
   currentPage: number;

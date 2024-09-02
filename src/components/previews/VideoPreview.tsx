@@ -1,13 +1,14 @@
+"use client"
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import {
-  PlayIcon,
-  PauseIcon,
-  VolumeUpIcon,
-  VolumeDownIcon,
-  VolumeOffIcon,
-  FullscreenIcon,
-  FullscreenExitIcon,
-} from "../Icons";
+import dynamic from "next/dynamic";
+
+const PlayIcon = dynamic(() => import('@/components/Icons').then(mod => mod.PlayIcon), { ssr: false });
+const PauseIcon = dynamic(() => import('@/components/Icons').then(mod => mod.PauseIcon), { ssr: false });
+const VolumeUpIcon = dynamic(() => import('@/components/Icons').then(mod => mod.VolumeUpIcon), { ssr: false });
+const VolumeDownIcon = dynamic(() => import('@/components/Icons').then(mod => mod.VolumeDownIcon), { ssr: false });
+const VolumeOffIcon = dynamic(() => import('@/components/Icons').then(mod => mod.VolumeOffIcon), { ssr: false });
+const FullscreenIcon = dynamic(() => import('@/components/Icons').then(mod => mod.FullscreenIcon), { ssr: false });
+const FullscreenExitIcon = dynamic(() => import('@/components/Icons').then(mod => mod.FullscreenExitIcon), { ssr: false });
 
 interface VideoPreviewProps {
   src: string;

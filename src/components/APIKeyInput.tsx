@@ -1,5 +1,9 @@
+"use client";
 import React, { useState } from "react";
-import { EyeIcon, EyeOffIcon } from "@/components/Icons";
+import dynamic from "next/dynamic";
+
+const EyeIcon = dynamic(() => import('@/components/Icons').then(mod => mod.EyeIcon), { ssr: false });
+const EyeOffIcon = dynamic(() => import('@/components/Icons').then(mod => mod.EyeOffIcon), { ssr: false });
 
 interface APIKeyInputProps {
   apiKey: string;

@@ -4,14 +4,19 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { Button } from "@/components/ui/button";
-import { HomeIcon } from "@/components/Icons";
-import { ThemeSwitch } from "@/components/ThemeSwitch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import dynamic from 'next/dynamic';
 import { useFileManagement } from "@/hooks/useFileManagement";
 import { FileContent } from "@/components/FileManager";
 
+const ThemeSwitch = dynamic(() => import('@/components/ThemeSwitch').then(mod => mod.default), { ssr: false });
+const HomeIcon = dynamic(() => import('@/components/Icons').then(mod => mod.HomeIcon), { ssr: false });
+const Card = dynamic(() => import('@/components/ui/card').then(mod => mod.Card), { ssr: false });
+const CardContent = dynamic(() => import('@/components/ui/card').then(mod => mod.CardContent), { ssr: false });
+const CardHeader = dynamic(() => import('@/components/ui/card').then(mod => mod.CardHeader), { ssr: false });
+const CardTitle = dynamic(() => import('@/components/ui/card').then(mod => mod.CardTitle), { ssr: false });
+
 const FilesPage = () => {
-  const [error] = useState(null);
+  const [error, setError] = useState(null);
   const {
     files,
     loading,

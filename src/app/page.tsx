@@ -1,12 +1,15 @@
 import React from "react";
 import { FileManager } from "@/components/FileManager";
-import { ThemeSwitch } from "@/components/ThemeSwitch";
+import dynamic from 'next/dynamic';
 import { Button } from "@/components/ui/button";
-import { GithubIcon, FileIcon } from "@/components/Icons";
 import { Header } from "@/components/Header";
 import Footer from "@/components/Footer";
 import { MaintenanceContent } from "@/components/MaintenanceContent";
 import useMaintenance from "@/hooks/useMaintenance";
+
+const ThemeSwitch = dynamic(() => import('@/components/ThemeSwitch').then(mod => mod.default), { ssr: false });
+const FileIcon = dynamic(() => import('@/components/Icons').then(mod => mod.FileIcon), { ssr: false });
+const GithubIcon = dynamic(() => import('@/components/Icons').then(mod => mod.GithubIcon), { ssr: false });
 
 export default function Home() {
   const { isMaintenance } = useMaintenance();

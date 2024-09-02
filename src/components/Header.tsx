@@ -1,7 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { CloudIcon } from "./Icons";
+import dynamic from 'next/dynamic';
 import Link from "next/link";
+
+const CloudIcon = dynamic(() => import('@/components/Icons').then(mod => mod.CloudIcon), { ssr: false });
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);

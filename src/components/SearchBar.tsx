@@ -1,6 +1,8 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
-import { SearchIcon } from "./Icons";
+import dynamic from "next/dynamic";
+
+const SearchIcon = dynamic(() => import('@/components/Icons').then(mod => mod.SearchIcon), { ssr: false });
 
 interface SearchBarProps {
   searchTerm: string;
