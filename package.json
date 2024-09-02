@@ -6,6 +6,7 @@
     "dev": "next dev",
     "dev:port": "next dev -p",
     "build": "next build",
+    "postinstall": "prisma generate",
     "start": "next start",
     "start:port": "next start -p",
     "lint": "next lint",
