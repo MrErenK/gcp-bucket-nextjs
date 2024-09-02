@@ -14,7 +14,6 @@ const nextConfig = {
             'tailwind-merge',
         ],
     },
-    trailingSlash: true,
 };
 
 export default nextConfig;
