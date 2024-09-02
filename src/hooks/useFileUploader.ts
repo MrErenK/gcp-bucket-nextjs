@@ -24,9 +24,9 @@ export function useFileUploader(
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     multiple: true,
-    maxSize: 3 * 1024 * 1024 * 1024, // 3 GB
+    maxSize: 6 * 1024 * 1024 * 1024, // 6 GB
     onDropRejected: () =>
-      setError("File is too large. Please upload a file smaller than 3 GB."),
+      setError("File is too large. Please upload a file smaller than 6 GB."),
   });
 
   const handleUpload = async () => {

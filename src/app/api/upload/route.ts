@@ -9,7 +9,7 @@ import { URL } from "url";
 
 const pipeline = promisify(stream.pipeline);
 
-const MAX_FILE_SIZE = 3 * 1024 * 1024 * 1024; // 3 GB in bytes
+const MAX_FILE_SIZE = 6 * 1024 * 1024 * 1024; // 6 GB in bytes
 const BASE_URL = process.env.WEB_URL || "http://localhost:3000"; // Default to localhost if WEB_URL is not set
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 
@@ -144,12 +144,12 @@ export async function POST(request: NextRequest) {
                 file.resume();
                 blobStream.destroy(
                   new Error(
-                    `File ${filename} exceeds the maximum allowed size of 3 GB.,`,
+                    `File ${filename} exceeds the maximum allowed size of 6 GB.,`,
                   ),
                 );
                 rejectUpload(
                   new Error(
-                    `File ${filename} exceeds the maximum allowed size of 3 GB.`,
+                    `File ${filename} exceeds the maximum allowed size of 6 GB.`,
                   ),
                 );
               }

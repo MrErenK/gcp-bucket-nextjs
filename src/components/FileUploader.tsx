@@ -75,7 +75,7 @@ export function FileUploader({
                   or drag and drop
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Max file size: 3 GB
+                  Max file size: 6 GB
                 </p>
               </div>
             ) : (
