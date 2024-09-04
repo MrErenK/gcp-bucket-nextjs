@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 import { Toaster } from "react-hot-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useApiKeys } from "@/hooks/useApiKeys";
@@ -11,8 +11,14 @@ import { LoginForm } from "@/components/LoginForm";
 import { MainPanel } from "@/components/MainPanel";
 import { DeleteConfirmationModal } from "@/components/DeleteConfirmationModal";
 
-const HomeIcon = dynamic(() => import('@/components/Icons').then(mod => mod.HomeIcon), { ssr: false });
-const ThemeSwitch = dynamic(() => import('@/components/ThemeSwitch').then(mod => mod.default), { ssr: false });
+const HomeIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.HomeIcon),
+  { ssr: false },
+);
+const ThemeSwitch = dynamic(
+  () => import("@/components/ThemeSwitch").then((mod) => mod.default),
+  { ssr: false },
+);
 
 const PanelPage = () => {
   const router = useRouter();

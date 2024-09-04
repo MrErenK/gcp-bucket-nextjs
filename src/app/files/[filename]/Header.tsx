@@ -1,16 +1,34 @@
 import { Button } from "@/components/ui/button";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 import { Tooltip } from "@/components/ui/tooltip";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
-const HomeIcon = dynamic(() => import('@/components/Icons').then(mod => mod.HomeIcon), { ssr: false });
-const ArrowLeftIcon = dynamic(() => import('@/components/Icons').then(mod => mod.ArrowLeftIcon), { ssr: false });
-const CopyIcon = dynamic(() => import('@/components/Icons').then(mod => mod.CopyIcon), { ssr: false });
-const DownloadIcon = dynamic(() => import('@/components/Icons').then(mod => mod.DownloadIcon), { ssr: false });
-const XIcon = dynamic(() => import('@/components/Icons').then(mod => mod.XIcon), { ssr: false });
-const MenuIcon = dynamic(() => import('@/components/Icons').then(mod => mod.MenuIcon), { ssr: false });
+const HomeIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.HomeIcon),
+  { ssr: false },
+);
+const ArrowLeftIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.ArrowLeftIcon),
+  { ssr: false },
+);
+const CopyIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.CopyIcon),
+  { ssr: false },
+);
+const DownloadIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.DownloadIcon),
+  { ssr: false },
+);
+const XIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.XIcon),
+  { ssr: false },
+);
+const MenuIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.MenuIcon),
+  { ssr: false },
+);
 
 const Header = ({
   handleCopy,

@@ -2,13 +2,25 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
 
-const Button = dynamic(() => import('@/components/ui/button').then(mod => mod.Button), { ssr: false });
-const Input = dynamic(() => import('@/components/ui/input').then(mod => mod.Input), { ssr: false });
-const UploadIcon = dynamic(() => import('@/components/Icons').then(mod => mod.UploadIcon), { ssr: false });
-const LoadingIcon = dynamic(() => import('@/components/Icons').then(mod => mod.LoadingIcon), { ssr: false });
+const Button = dynamic(
+  () => import("@/components/ui/button").then((mod) => mod.Button),
+  { ssr: false },
+);
+const Input = dynamic(
+  () => import("@/components/ui/input").then((mod) => mod.Input),
+  { ssr: false },
+);
+const UploadIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.UploadIcon),
+  { ssr: false },
+);
+const LoadingIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.LoadingIcon),
+  { ssr: false },
+);
 
 interface DirectLinkUploaderProps {
   apiKey: string;

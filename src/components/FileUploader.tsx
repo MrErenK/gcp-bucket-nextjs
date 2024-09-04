@@ -7,12 +7,24 @@ import { useFileUploader } from "@/hooks/useFileUploader";
 import { APIKeyInput } from "./APIKeyInput";
 import { DirectLinkUploader } from "./DirectLinkUploader";
 import { useState } from "react";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
-const UploadIcon = dynamic(() => import('@/components/Icons').then(mod => mod.UploadIcon), { ssr: false });
-const XIcon = dynamic(() => import('@/components/Icons').then(mod => mod.XIcon), { ssr: false });
-const FileIcon = dynamic(() => import('@/components/Icons').then(mod => mod.FileIcon), { ssr: false });
-const LoadingIcon = dynamic(() => import('@/components/Icons').then(mod => mod.LoadingIcon), { ssr: false });
+const UploadIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.UploadIcon),
+  { ssr: false },
+);
+const XIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.XIcon),
+  { ssr: false },
+);
+const FileIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.FileIcon),
+  { ssr: false },
+);
+const LoadingIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.LoadingIcon),
+  { ssr: false },
+);
 
 export function FileUploader({
   onUploadComplete,

@@ -9,10 +9,16 @@ import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { getFileType } from "@/types/filetypes";
 import Header from "./Header";
 import { useFileManagement } from "@/hooks/useFileManagement";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
-const ThemeSwitch = dynamic(() => import('@/components/ThemeSwitch').then(mod => mod.default), { ssr: false });
-const CopyIcon = dynamic(() => import('@/components/Icons').then(mod => mod.CopyIcon), { ssr: false });
+const ThemeSwitch = dynamic(
+  () => import("@/components/ThemeSwitch").then((mod) => mod.default),
+  { ssr: false },
+);
+const CopyIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.CopyIcon),
+  { ssr: false },
+);
 
 interface FileDetails {
   name: string;

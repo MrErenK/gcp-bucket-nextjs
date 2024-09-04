@@ -21,7 +21,10 @@ export default function BuyMeCoffeeWidget() {
     script.src = "https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js";
     script.setAttribute("data-id", "MrErenK");
     script.setAttribute("data-description", "Support me on Buy me a coffee!");
-    script.setAttribute("data-message", "Thank you for visiting and using my service. Buy me a coffee if you wish to.");
+    script.setAttribute(
+      "data-message",
+      "Thank you for visiting and using my service. Buy me a coffee if you wish to.",
+    );
     script.setAttribute("data-color", widgetColor);
     script.setAttribute("data-position", "Right");
     script.setAttribute("data-x_margin", "18");

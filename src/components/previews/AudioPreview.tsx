@@ -1,9 +1,15 @@
-"use client"
+"use client";
 import React, { useState, useRef, useEffect } from "react";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
-const PlayIcon = dynamic(() => import('@/components/Icons').then(mod => mod.PlayIcon), { ssr: false });
-const PauseIcon = dynamic(() => import('@/components/Icons').then(mod => mod.PauseIcon), { ssr: false });
+const PlayIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.PlayIcon),
+  { ssr: false },
+);
+const PauseIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.PauseIcon),
+  { ssr: false },
+);
 
 interface AudioPreviewProps {
   src: string;

@@ -3,10 +3,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import dynamic from "next/dynamic";
 
-const Card = dynamic(() => import('@/components/ui/card').then(mod => mod.Card), { ssr: false });
-const CardContent = dynamic(() => import('@/components/ui/card').then(mod => mod.CardContent), { ssr: false });
-const CardHeader = dynamic(() => import('@/components/ui/card').then(mod => mod.CardHeader), { ssr: false });
-const CardTitle = dynamic(() => import('@/components/ui/card').then(mod => mod.CardTitle), { ssr: false });
+const Card = dynamic(
+  () => import("@/components/ui/card").then((mod) => mod.Card),
+  { ssr: false },
+);
+const CardContent = dynamic(
+  () => import("@/components/ui/card").then((mod) => mod.CardContent),
+  { ssr: false },
+);
+const CardHeader = dynamic(
+  () => import("@/components/ui/card").then((mod) => mod.CardHeader),
+  { ssr: false },
+);
+const CardTitle = dynamic(
+  () => import("@/components/ui/card").then((mod) => mod.CardTitle),
+  { ssr: false },
+);
 
 interface DeleteConfirmationModalProps {
   deletingKey: { id: string; description: string } | null;

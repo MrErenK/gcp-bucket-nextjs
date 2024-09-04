@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 
-const SunIcon = dynamic(() => import('./Icons').then(mod => mod.SunIcon));
-const MoonIcon = dynamic(() => import('./Icons').then(mod => mod.MoonIcon));
+const SunIcon = dynamic(() => import("./Icons").then((mod) => mod.SunIcon));
+const MoonIcon = dynamic(() => import("./Icons").then((mod) => mod.MoonIcon));
 
 export default function ThemeSwitch() {
   const [mounted, setMounted] = useState(false);

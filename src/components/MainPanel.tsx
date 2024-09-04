@@ -2,15 +2,37 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import APIKeyCard from "@/components/APIKeyCard";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
-const toast = dynamic(() => import('react-hot-toast').then(mod => mod.toast), { ssr: false });
-const Card = dynamic(() => import('@/components/ui/card').then(mod => mod.Card), { ssr: false });
-const CardHeader = dynamic(() => import('@/components/ui/card').then(mod => mod.CardHeader), { ssr: false });
-const CardTitle = dynamic(() => import('@/components/ui/card').then(mod => mod.CardTitle), { ssr: false });
-const CardContent = dynamic(() => import('@/components/ui/card').then(mod => mod.CardContent), { ssr: false });
-const PlusIcon = dynamic(() => import('@/components/Icons').then(mod => mod.PlusIcon), { ssr: false });
-const LoadingIndicator = dynamic(() => import('@/components/LoadingIndicator').then(mod => mod.LoadingIndicator), { ssr: false });
+const toast = dynamic(
+  () => import("react-hot-toast").then((mod) => mod.toast),
+  { ssr: false },
+);
+const Card = dynamic(
+  () => import("@/components/ui/card").then((mod) => mod.Card),
+  { ssr: false },
+);
+const CardHeader = dynamic(
+  () => import("@/components/ui/card").then((mod) => mod.CardHeader),
+  { ssr: false },
+);
+const CardTitle = dynamic(
+  () => import("@/components/ui/card").then((mod) => mod.CardTitle),
+  { ssr: false },
+);
+const CardContent = dynamic(
+  () => import("@/components/ui/card").then((mod) => mod.CardContent),
+  { ssr: false },
+);
+const PlusIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.PlusIcon),
+  { ssr: false },
+);
+const LoadingIndicator = dynamic(
+  () =>
+    import("@/components/LoadingIndicator").then((mod) => mod.LoadingIndicator),
+  { ssr: false },
+);
 
 interface MainPanelProps {
   newKeyDescription: string;

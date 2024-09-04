@@ -1,20 +1,41 @@
 "use client";
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { formatFileSize } from "@/lib/utils";
 import { useFileManagement } from "@/hooks/useFileManagement";
 
-const FileIcon = dynamic(() => import('@/components/Icons').then(mod => mod.FileIcon), { ssr: false });
-const CopyIcon = dynamic(() => import('@/components/Icons').then(mod => mod.CopyIcon), { ssr: false });
-const DownloadIcon = dynamic(() => import('@/components/Icons').then(mod => mod.DownloadIcon), { ssr: false });
-const SortIcon = dynamic(() => import('@/components/Icons').then(mod => mod.SortIcon), { ssr: false });
-const RefreshIcon = dynamic(() => import('@/components/Icons').then(mod => mod.RefreshIcon), { ssr: false });
-const AllFilesIcon = dynamic(() => import('@/components/Icons').then(mod => mod.AllFilesIcon), { ssr: false });
-const DownloadCountIcon = dynamic(() => import('@/components/Icons').then(mod => mod.DownloadCountIcon), { ssr: false });
+const FileIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.FileIcon),
+  { ssr: false },
+);
+const CopyIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.CopyIcon),
+  { ssr: false },
+);
+const DownloadIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.DownloadIcon),
+  { ssr: false },
+);
+const SortIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.SortIcon),
+  { ssr: false },
+);
+const RefreshIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.RefreshIcon),
+  { ssr: false },
+);
+const AllFilesIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.AllFilesIcon),
+  { ssr: false },
+);
+const DownloadCountIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.DownloadCountIcon),
+  { ssr: false },
+);
 
 interface File {
   name: string;

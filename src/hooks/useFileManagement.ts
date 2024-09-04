@@ -56,7 +56,7 @@ export function useFileManagement(disablePagination = false) {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/files?${disabledPagination ? "all=true" : `page=${currentPage}`}&search=${debouncedSearchTerm}&sort=${sortState.by}&order=${sortState.orders[sortState.by]}`
+        `/api/files?${disabledPagination ? "all=true" : `page=${currentPage}`}&search=${debouncedSearchTerm}&sort=${sortState.by}&order=${sortState.orders[sortState.by]}`,
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -94,7 +94,7 @@ export function useFileManagement(disablePagination = false) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard
         .writeText(
-          `${window.location.origin}/api/download?filename=${filename}`
+          `${window.location.origin}/api/download?filename=${filename}`,
         )
         .then(() => {
           setCopied(true);

@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     const filteredFiles = await Promise.all(
       files
         .filter((file) =>
-          file.name.toLowerCase().includes(search.toLowerCase())
+          file.name.toLowerCase().includes(search.toLowerCase()),
         )
         .map(async (file) => {
           const metadata = await cloudStorage.getFileMetadata(file.name);
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
             size: parseInt(String(metadata.size) || "0", 10),
             downloads: stats.downloads,
           };
-        })
+        }),
     );
 
     // Sort the filtered files
@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
     console.error(error);
     return NextResponse.json(
       { error: "Error fetching files" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -5,9 +5,13 @@ import { Pagination } from "./Pagination";
 import { FileList } from "./FileList";
 import { SearchBar } from "./SearchBar";
 import { useFileManagement } from "@/hooks/useFileManagement";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
-const LoadingIndicator = dynamic(() => import('@/components/LoadingIndicator').then(mod => mod.LoadingIndicator), { ssr: false });
+const LoadingIndicator = dynamic(
+  () =>
+    import("@/components/LoadingIndicator").then((mod) => mod.LoadingIndicator),
+  { ssr: false },
+);
 
 interface FileData {
   name: string;

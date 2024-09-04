@@ -3,14 +3,32 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
-const HomeIcon = dynamic(() => import('@/components/Icons').then(mod => mod.HomeIcon), { ssr: false });
-const RefreshIcon = dynamic(() => import('@/components/Icons').then(mod => mod.RefreshIcon), { ssr: false });
-const Card = dynamic(() => import('@/components/ui/card').then(mod => mod.Card), { ssr: false });
-const CardContent = dynamic(() => import('@/components/ui/card').then(mod => mod.CardContent), { ssr: false });
-const CardHeader = dynamic(() => import('@/components/ui/card').then(mod => mod.CardHeader), { ssr: false });
-const CardTitle = dynamic(() => import('@/components/ui/card').then(mod => mod.CardTitle), { ssr: false });
+const HomeIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.HomeIcon),
+  { ssr: false },
+);
+const RefreshIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.RefreshIcon),
+  { ssr: false },
+);
+const Card = dynamic(
+  () => import("@/components/ui/card").then((mod) => mod.Card),
+  { ssr: false },
+);
+const CardContent = dynamic(
+  () => import("@/components/ui/card").then((mod) => mod.CardContent),
+  { ssr: false },
+);
+const CardHeader = dynamic(
+  () => import("@/components/ui/card").then((mod) => mod.CardHeader),
+  { ssr: false },
+);
+const CardTitle = dynamic(
+  () => import("@/components/ui/card").then((mod) => mod.CardTitle),
+  { ssr: false },
+);
 
 export default function GlobalError({
   error,
