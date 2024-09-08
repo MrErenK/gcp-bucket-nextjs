@@ -216,10 +216,27 @@ nextApp.prepare().then(() => {
     return handle(req, res);
   });
 
-  app.listen(port, () => {
-    console.log(`> Ready on http://localhost:${port}`);
-    console.log("> Mode:", process.env.NODE_ENV);
-    console.log("> Custom server is running");
+  const findAvailablePort = async (port) => {
+    return new Promise((resolve, reject) => {
+      const server = app.listen(port, () => {
+        console.log(`> Ready on http://localhost:${port}`);
+        resolve(port);
+      });
+
+      server.on('error', (error) => {
+        if (error.code === 'EADDRINUSE') {
+          console.log(`Port ${port} is in use, trying another port...`);
+          server.close();
+          resolve(findAvailablePort(parseInt(port) + 1));
+        } else {
+          reject(error);
+        }
+      });
+    });
+  };
+
+  findAvailablePort(port).catch((error) => {
+    console.error("Failed to start server:", error);
   });
 });
 
