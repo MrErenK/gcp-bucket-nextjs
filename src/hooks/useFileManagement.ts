@@ -6,6 +6,7 @@ interface File {
   downloads: number;
   name: string;
   updatedAt: string;
+  uploadedKey: string | null;
 }
 
 type SortType = "name" | "date" | "size" | "downloads";

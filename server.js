@@ -1,6 +1,7 @@
 const express = require("express");
 const next = require("next");
 const { bucket } = require("./src/lib/expressStorage");
+const { prisma } = require("./src/lib/expressPrisma");
 const cors = require("cors");
 const busboy = require("busboy");
 const stream = require("stream");
@@ -44,6 +45,14 @@ async function verifyApiKey(apiKey) {
     console.error("Error verifying API key:", error);
     return false;
   }
+}
+
+async function getApiKeyDescription(apiKey) {
+  const apiKeyData = await prisma.apiKey.findUnique({
+    where: { key: apiKey },
+    select: { description: true },
+  });
+  return apiKeyData ? apiKeyData.description : null;
 }
 
 async function uploadFromDirectLink(directLink) {
@@ -190,8 +199,24 @@ nextApp.prepare().then(() => {
             message: "Files uploaded successfully",
             files: uploadedFiles,
           });
+          const apiKeyDescription = await getApiKeyDescription(apiKey);
+          await prisma.fileStats.deleteMany({
+            where: {
+              filename: {
+                in: uploadedFiles.map((file) => file.name)
+              }
+            }
+          });
+          await prisma.fileStats.createMany({
+            data: uploadedFiles.map((file) => ({
+              filename: file.name,
+              views: 0,
+              downloads: 0,
+              uploadedKey: apiKeyDescription,
+            })),
+          });
           console.log(
-            `Files uploaded to ${bucket.name} with the following names: ${uploadedFiles.map((file) => file.name).join(", ")}`,
+            `Files uploaded to ${bucket.name} with the following names: ${uploadedFiles.map((file) => file.name).join(", ")} using the api key: ${apiKeyDescription}`,
           );
         } catch (error) {
           res

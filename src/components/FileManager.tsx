@@ -18,6 +18,7 @@ interface FileData {
   updatedAt: string;
   downloads?: number;
   size?: number;
+  uploadedKey?: string;
 }
 
 export function FileManager() {
@@ -63,6 +64,7 @@ export function FileManager() {
             updatedAt: file.updatedAt,
             downloads: file.downloads || 0,
             size: file.size || 0,
+            uploadedKey: file.uploadedKey || undefined,
           }))}
           onCopy={handleCopy}
           onDownload={handleDownload}
@@ -115,6 +117,7 @@ export function FileContent({
         updatedAt: file.updatedAt,
         downloads: file.downloads || 0,
         size: file.size || 0,
+        uploadedKey: file.uploadedKey || null,
       }))}
       onCopy={onCopy}
       onDownload={onDownload}

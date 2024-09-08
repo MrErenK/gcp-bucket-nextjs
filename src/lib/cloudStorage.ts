@@ -51,9 +51,9 @@ export const cloudStorage = {
     const prisma = await getPrisma();
     const stats = await prisma.fileStats.findUnique({
       where: { filename },
-      select: { views: true, downloads: true },
+      select: { views: true, downloads: true, uploadedKey: true },
     });
-    return stats || { views: 0, downloads: 0 };
+    return stats || { views: 0, downloads: 0, uploadedKey: null };
   },
   incrementFileViews: async (filename: string) => {
     const prisma = await getPrisma();
