@@ -234,7 +234,7 @@ export default function FilePage({ params }: { params: { filename: string } }) {
                 },
                 {
                   label: "Uploaded with API Key:",
-                  value: fileDetails?.uploadedKey || null,
+                  value: fileDetails?.uploadedKey || "Unknown",
                 },
               ].map((item, index) => (
                 <div

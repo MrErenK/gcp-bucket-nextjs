@@ -1,5 +1,4 @@
 import { useState, useEffect, ReactNode, useCallback } from "react";
-import { toast } from "react-hot-toast";
 
 export const useApiKeys = (adminApiKey: string, isAuthenticated: boolean) => {
   const [apiKeys, setApiKeys] = useState<
@@ -30,7 +29,6 @@ export const useApiKeys = (adminApiKey: string, isAuthenticated: boolean) => {
     } catch (err) {
       console.error("Error fetching API keys:", err);
       setError("Failed to load API keys");
-      toast.error("Failed to load API keys");
     } finally {
       setIsLoading(false);
     }
@@ -38,7 +36,7 @@ export const useApiKeys = (adminApiKey: string, isAuthenticated: boolean) => {
 
   const generateNewKey = async () => {
     if (!newKeyDescription.trim()) {
-      toast.error("Please enter a description for the new key");
+      setError("Please enter a description for the new key");
       return;
     }
     setIsLoading(true);
@@ -54,10 +52,9 @@ export const useApiKeys = (adminApiKey: string, isAuthenticated: boolean) => {
       if (!response.ok) throw new Error("Failed to generate new key");
       await fetchApiKeys();
       setNewKeyDescription("");
-      toast.success("New key generated successfully");
     } catch (err) {
       console.error("Error generating new key:", err);
-      toast.error("Failed to generate new key");
+      setError("Failed to generate new key");
     } finally {
       setIsLoading(false);
     }
@@ -74,10 +71,9 @@ export const useApiKeys = (adminApiKey: string, isAuthenticated: boolean) => {
       });
       if (!response.ok) throw new Error("Failed to delete key");
       await fetchApiKeys();
-      toast.success("API key deleted successfully");
     } catch (err) {
       console.error("Error deleting key:", err);
-      toast.error("Failed to delete key");
+      setError("Failed to delete key");
     } finally {
       setIsLoading(false);
     }
@@ -99,10 +95,10 @@ export const useApiKeys = (adminApiKey: string, isAuthenticated: boolean) => {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (adminApiKey) {
       fetchApiKeys();
     }
-  }, [adminApiKey, isAuthenticated, fetchApiKeys]);
+  }, [adminApiKey, fetchApiKeys]);
 
   useEffect(() => {
     if (deletingKey) {
@@ -135,5 +131,6 @@ export const useApiKeys = (adminApiKey: string, isAuthenticated: boolean) => {
     generateNewKey,
     handleDeleteConfirmation,
     handleFinalDeleteConfirmation,
+    deleteKey,
   };
 };

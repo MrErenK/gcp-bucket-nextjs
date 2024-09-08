@@ -75,7 +75,7 @@ export function useFileManagement(disablePagination = false) {
     }
   }, [currentPage, debouncedSearchTerm, sortState, disabledPagination]);
 
-  const updateSort = (type: SortType) => {
+  const updateSort = useCallback((type: SortType) => {
     setSortState((prev) => ({
       by: type,
       orders: {
@@ -84,14 +84,14 @@ export function useFileManagement(disablePagination = false) {
       },
     }));
     setCurrentPage(1);
-  };
+  }, []);
 
-  const handleSearch = (newSearchTerm: string) => {
+  const handleSearch = useCallback((newSearchTerm: string) => {
     setSearchTerm(newSearchTerm);
     setCurrentPage(1);
-  };
+  }, []);
 
-  const handleCopy = (filename: string) => {
+  const handleCopy = useCallback((filename: string) => {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard
         .writeText(
@@ -119,29 +119,47 @@ export function useFileManagement(disablePagination = false) {
       }
       document.body.removeChild(textArea);
     }
-  };
+  }, []);
 
-  const handleDownload = (filename: string) => {
+  const handleDownload = useCallback((filename: string) => {
     window.location.href = `/api/download?filename=${filename}`;
-  };
+  }, []);
+
+  const memoizedValues = useMemo(
+    () => ({
+      files,
+      searchTerm,
+      currentPage,
+      totalPages,
+      loading,
+      initialLoadDone,
+      totalFiles,
+      totalSize,
+      sortState,
+      disabledPagination,
+    }),
+    [
+      files,
+      searchTerm,
+      currentPage,
+      totalPages,
+      loading,
+      initialLoadDone,
+      totalFiles,
+      totalSize,
+      sortState,
+      disabledPagination,
+    ],
+  );
 
   return {
-    files,
-    searchTerm,
-    currentPage,
-    totalPages,
-    loading,
-    initialLoadDone,
+    ...memoizedValues,
     fetchFiles,
     handleSearch,
     handleCopy,
     handleDownload,
     setCurrentPage,
-    totalFiles,
-    totalSize,
-    sortState,
     updateSort,
-    disabledPagination,
     setDisabledPagination,
   };
 }

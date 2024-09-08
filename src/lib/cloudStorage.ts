@@ -23,8 +23,19 @@ export const cloudStorage = {
   },
   deleteFile: async (filename: string) => {
     const prisma = await getPrisma();
-    await bucket.file(filename).delete();
-    await prisma.fileStats.delete({ where: { filename } }).catch(() => {}); // Delete stats if they exist
+    await bucket
+      .file(filename)
+      .delete()
+      .catch(() => {});
+    await prisma.fileStats.delete({ where: { filename } }).catch(() => {});
+  },
+  renameFile: async (oldFilename: string, newFilename: string) => {
+    const prisma = await getPrisma();
+    await bucket.file(oldFilename).rename(newFilename);
+    await prisma.fileStats.update({
+      where: { filename: oldFilename },
+      data: { filename: newFilename },
+    });
   },
   fileExists: async (filename: string): Promise<boolean> => {
     const [exists] = await bucket.file(filename).exists();

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
@@ -9,7 +9,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useApiKeys } from "@/hooks/useApiKeys";
 import { LoginForm } from "@/components/LoginForm";
 import { MainPanel } from "@/components/MainPanel";
-import { DeleteConfirmationModal } from "@/components/DeleteConfirmationModal";
 
 const HomeIcon = dynamic(
   () => import("@/components/Icons").then((mod) => mod.HomeIcon),
@@ -39,13 +38,16 @@ const PanelPage = () => {
     setNewKeyDescription,
     deletingKey,
     setDeletingKey,
-    confirmDescription,
-    setConfirmDescription,
-    showFinalConfirmation,
+    fetchApiKeys,
     generateNewKey,
-    handleDeleteConfirmation,
-    handleFinalDeleteConfirmation,
+    deleteKey,
   } = useApiKeys(adminApiKey, isAuthenticated);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchApiKeys();
+    }
+  }, [isAuthenticated, fetchApiKeys]);
 
   if (!isAuthenticated) {
     return (
@@ -90,22 +92,14 @@ const PanelPage = () => {
         generateNewKey={generateNewKey}
         isLoading={isLoading}
         error={apiKeysError}
-        apiKeys={apiKeys}
-        handleDelete={(id) =>
-          setDeletingKey(apiKeys.find((key) => key.id === id) || null)
-        }
+        apiKeys={apiKeys.map((key) => ({
+          ...key,
+          key: key.key as string,
+        }))}
+        deletingKey={deletingKey}
+        setDeletingKey={setDeletingKey}
+        deleteKey={deleteKey}
       />
-      {deletingKey && (
-        <DeleteConfirmationModal
-          deletingKey={deletingKey}
-          confirmDescription={confirmDescription}
-          setConfirmDescription={setConfirmDescription}
-          showFinalConfirmation={showFinalConfirmation}
-          handleDeleteConfirmation={handleDeleteConfirmation}
-          handleFinalDeleteConfirmation={handleFinalDeleteConfirmation}
-          setDeletingKey={setDeletingKey}
-        />
-      )}
     </div>
   );
 };

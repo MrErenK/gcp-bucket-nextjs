@@ -203,9 +203,9 @@ nextApp.prepare().then(() => {
           await prisma.fileStats.deleteMany({
             where: {
               filename: {
-                in: uploadedFiles.map((file) => file.name)
-              }
-            }
+                in: uploadedFiles.map((file) => file.name),
+              },
+            },
           });
           await prisma.fileStats.createMany({
             data: uploadedFiles.map((file) => ({
@@ -248,8 +248,8 @@ nextApp.prepare().then(() => {
         resolve(port);
       });
 
-      server.on('error', (error) => {
-        if (error.code === 'EADDRINUSE') {
+      server.on("error", (error) => {
+        if (error.code === "EADDRINUSE") {
           console.log(`Port ${port} is in use, trying another port...`);
           server.close();
           resolve(findAvailablePort(parseInt(port) + 1));

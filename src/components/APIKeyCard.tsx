@@ -41,7 +41,10 @@ const APIKeyCard = ({ apiKey, onCopy, onDelete, toast }: APIKeyCardProps) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(apiKey.key);
+    if (!window) return;
+    const { clipboard } = window.navigator;
+    if (!clipboard) return;
+    clipboard.writeText(apiKey.key);
     setCopied(true);
     toast.success("API key copied to clipboard");
     setTimeout(() => setCopied(false), 2000);
