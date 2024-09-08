@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { FileManager } from "@/components/FileManager";
 import dynamic from "next/dynamic";
