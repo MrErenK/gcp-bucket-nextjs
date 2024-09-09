@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { formatFileSize } from "@/lib/utils";
 import { useFileManagement } from "@/hooks/useFileManagement";
+import { getFileIcon } from "@/components/Icons";
 
 const FileIcon = dynamic(
   () => import("@/components/Icons").then((mod) => mod.FileIcon),
@@ -275,6 +276,7 @@ export function FileList({
         {sortedFiles.map((file) => {
           const isCopied = copiedStates[file.name];
           const isDownloading = downloadingStates[file.name];
+          const FileTypeIcon = getFileIcon(file.name);
 
           return (
             <motion.div
@@ -287,7 +289,7 @@ export function FileList({
             >
               <div className="flex flex-col gap-2 sm:gap-3 md:gap-4 w-full">
                 <div className="flex items-start gap-2 sm:gap-3 md:gap-4">
-                  <FileIcon className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-primary flex-shrink-0" />
+                  <FileTypeIcon className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-primary flex-shrink-0" />
                   <div className="flex-grow min-w-0">
                     <Link
                       href={`/files/${encodeURIComponent(file.name)}`}

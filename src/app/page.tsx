@@ -13,8 +13,8 @@ const ThemeSwitch = dynamic(
   () => import("@/components/ThemeSwitch").then((mod) => mod.default),
   { ssr: false },
 );
-const FileIcon = dynamic(
-  () => import("@/components/Icons").then((mod) => mod.FileIcon),
+const FileManagerIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.FileManagerIcon),
   { ssr: false },
 );
 const GithubIcon = dynamic(
@@ -41,7 +41,7 @@ export default function Home() {
       <main className="flex-grow container mx-auto px-4 py-8 sm:py-12 md:py-16 lg:py-20">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 sm:mb-12 md:mb-16 space-y-6 sm:space-y-0 sm:space-x-6">
           <div className="flex items-center">
-            <FileIcon
+            <FileManagerIcon
               className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 text-primary mr-3 sm:mr-4 pt-1"
               aria-hidden="true"
             />

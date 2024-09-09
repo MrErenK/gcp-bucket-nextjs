@@ -1,4 +1,5 @@
 import React from "react";
+import { getFileType, FileType } from "@/types/filetypes";
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   size?: number;
@@ -28,6 +29,9 @@ const createIcon = (path: React.ReactNode) => {
       viewBox="0 0 24 24"
       fill="none"
       stroke={color}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       {...defaultIconProps}
       {...props}
     >
@@ -347,6 +351,134 @@ const ApiKeyIcon = createIcon(
 
 const FileStatsIcon = createIcon(
   <>
+    <path
+      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+    />
+    <polyline
+      points="14 2 14 8 20 8"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+    />
+    <line
+      x1="16"
+      y1="13"
+      x2="8"
+      y2="13"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <line
+      x1="16"
+      y1="17"
+      x2="8"
+      y2="17"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M9 9h2"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </>,
+);
+
+const RenameIcon = createIcon(
+  <>
+    <path
+      d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+    />
+    <path
+      d="M15 5l4 4"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </>,
+);
+
+const FileManagerIcon = createIcon(
+  <>
+    <path
+      d="M3 5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+    />
+    <path
+      d="M3 7h18"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M9 12h6"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M9 15h6"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </>,
+);
+
+const ArchiveIcon = createIcon(
+  <>
+    <path
+      d="M3 7v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+    />
+    <path
+      d="M1 3h22v4H1z"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill="none"
+    />
+    <path
+      d="M10 13h4"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M9 16h6"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M10 10h4"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </>,
+);
+
+const TextIcon = createIcon(
+  <>
     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
     <polyline points="14 2 14 8 20 8" />
     <line x1="16" y1="13" x2="8" y2="13" />
@@ -355,9 +487,74 @@ const FileStatsIcon = createIcon(
   </>,
 );
 
-const RenameIcon = createIcon(
-  <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />,
+const ImageIcon = createIcon(
+  <>
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+    <circle cx="8.5" cy="8.5" r="1.5" />
+    <polyline points="21 15 16 10 5 21" />
+  </>,
 );
+
+const VideoIcon = createIcon(
+  <>
+    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
+    <line x1="7" y1="2" x2="7" y2="22" />
+    <line x1="17" y1="2" x2="17" y2="22" />
+    <line x1="2" y1="12" x2="22" y2="12" />
+    <line x1="2" y1="7" x2="7" y2="7" />
+    <line x1="2" y1="17" x2="7" y2="17" />
+    <line x1="17" y1="17" x2="22" y2="17" />
+    <line x1="17" y1="7" x2="22" y2="7" />
+  </>,
+);
+
+const AudioIcon = createIcon(
+  <>
+    <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+  </>,
+);
+
+const PdfIcon = createIcon(
+  <>
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <path d="M9 15v-4h6v4H9z" />
+    <path d="M9 15h6" />
+    <path d="M9 13h6" />
+  </>,
+);
+
+const CodeIcon = createIcon(
+  <>
+    <polyline points="16 18 22 12 16 6" />
+    <polyline points="8 6 2 12 8 18" />
+  </>,
+);
+
+function getFileIcon(fileName: string) {
+  const extension = fileName.split(".").pop() || "";
+  const fileType = getFileType(`.${extension}`);
+
+  switch (fileType) {
+    case "text":
+      return TextIcon;
+    case "image":
+      return ImageIcon;
+    case "audio":
+      return AudioIcon;
+    case "video":
+      return VideoIcon;
+    default:
+      // You can add more specific checks here if needed
+      if (extension === "pdf") return PdfIcon;
+      if (["zip", "rar", "7z", "tar", "gz"].includes(extension))
+        return ArchiveIcon;
+      if (["js", "ts", "py", "java", "cpp", "html", "css"].includes(extension))
+        return CodeIcon;
+      return FileIcon;
+  }
+}
 
 export {
   CloudIcon,
@@ -401,4 +598,13 @@ export {
   ApiKeyIcon,
   FileStatsIcon,
   RenameIcon,
+  FileManagerIcon,
+  ArchiveIcon,
+  TextIcon,
+  ImageIcon,
+  VideoIcon,
+  AudioIcon,
+  PdfIcon,
+  CodeIcon,
+  getFileIcon,
 };
