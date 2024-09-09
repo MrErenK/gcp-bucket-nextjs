@@ -88,6 +88,10 @@ async function uploadFromDirectLink(directLink) {
   await blob.setMetadata({
     contentType,
     contentDisposition: `${contentType.startsWith("text/") ? "inline" : "attachment"}; filename="${filename}"`,
+    metadata: {
+      uploadedFromDirectLink: 'true',
+      originalHost: sourceUrl.hostname
+    }
   });
 
   const downloadUrl = `${BASE_URL}/api/download?filename=${encodeURIComponent(filename)}`;
@@ -105,19 +109,44 @@ nextApp.prepare().then(() => {
       });
     }
 
+    console.log("Upload started");
+
     const contentType = req.headers["content-type"] || "";
 
     if (contentType.includes("application/json")) {
-      const body = req.body;
-      if (body.directLink) {
+      let body;
+      try {
+        body = await new Promise((resolve, reject) => {
+          let data = '';
+          req.on('data', chunk => {
+            data += chunk;
+          });
+          req.on('end', () => {
+            try {
+              resolve(JSON.parse(data));
+            } catch (e) {
+              reject(e);
+            }
+          });
+        });
+      } catch (error) {
+        console.log("Upload canceled: Invalid JSON body"); // Log upload canceled
+        return res.status(400).json({ error: "Invalid JSON body" });
+      }
+
+      if (body && body.directLink) {
         try {
           const uploadedFile = await uploadFromDirectLink(body.directLink);
+          const apikey = await getApiKeyDescription(apiKey);
+          console.log("Upload completed successfully");
+          console.log(`Uploaded file details: Name: ${uploadedFile.name}, URL: ${uploadedFile.url}, apiKey: ${apikey}`);
           return res.json({
             message: "File uploaded successfully from direct link",
             file: uploadedFile,
           });
         } catch (error) {
           console.error(error);
+          console.log("Upload canceled: Error uploading from direct link"); // Log upload canceled
           return res.status(500).json({
             error: `Error uploading file from direct link: ${error.message}`,
           });
@@ -156,6 +185,7 @@ nextApp.prepare().then(() => {
                 `File ${filename} exceeds the maximum allowed size of 6 GB.`,
               ),
             );
+            console.log(`Upload canceled: File ${filename} exceeds size limit`); // Log upload canceled
             rejectUpload(
               new Error(
                 `File ${filename} exceeds the maximum allowed size of 6 GB.`,
@@ -175,13 +205,16 @@ nextApp.prepare().then(() => {
             });
 
             const fileUrl = `${BASE_URL}/api/download?filename=${encodeURIComponent(filename)}`;
+            console.log(`Uploaded file details: Name: ${filename}, URL: ${fileUrl}`); // Log file details
             resolveUpload({ name: filename, url: fileUrl });
           } catch (error) {
+            console.log(`Upload canceled: Error processing ${filename}`); // Log upload canceled
             rejectUpload(error);
           }
         });
 
         blobStream.on("error", (error) => {
+          console.log(`Upload canceled: Error uploading ${filename}`); // Log upload canceled
           rejectUpload(error);
         });
       });
@@ -191,6 +224,7 @@ nextApp.prepare().then(() => {
 
     bb.on("finish", async () => {
       if (!filesUploaded) {
+        console.log("Upload canceled: No valid file was uploaded"); // Log upload canceled
         res.status(400).json({ error: "No valid file was uploaded" });
       } else {
         try {
@@ -216,9 +250,10 @@ nextApp.prepare().then(() => {
             })),
           });
           console.log(
-            `Files uploaded to ${bucket.name} with the following names: ${uploadedFiles.map((file) => file.name).join(", ")} using the api key: ${apiKeyDescription}`,
+            `Upload completed: Files uploaded to ${bucket.name} with the following names: ${uploadedFiles.map((file) => file.name).join(", ")} using the api key: ${apiKeyDescription}`,
           );
         } catch (error) {
+          console.log("Upload canceled: Error uploading files"); // Log upload canceled
           res
             .status(500)
             .json({ error: `Error uploading files: ${error.message}` });
@@ -228,6 +263,7 @@ nextApp.prepare().then(() => {
 
     bb.on("error", (error) => {
       console.error(error);
+      console.log("Upload canceled: Error in busboy"); // Log upload canceled
       res
         .status(500)
         .json({ error: `Error uploading files: ${error.message}` });

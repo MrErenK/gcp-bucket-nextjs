@@ -56,8 +56,13 @@ export function DirectLinkUploader({
       }
 
       const data = await response.json();
-      onUploadSuccess(data.file);
-      setDirectLink("");
+      // Check if the response contains the expected file data
+      if (data.file && data.file.name && data.file.url) {
+        onUploadSuccess(data.file);
+        setDirectLink("");
+      } else {
+        throw new Error("Unexpected response format from server");
+      }
     } catch (error) {
       onUploadError((error as Error).message);
     } finally {
