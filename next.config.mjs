@@ -3,6 +3,7 @@ const nextConfig = {
     env: {
         NEXT_PUBLIC_CDN_URL: process.env.CDN_URL,
         NEXT_PUBLIC_WEB_URL: process.env.WEB_URL,
+        NEXT_PUBLIC_API_BASE_URL: process.env.API_BASE_URL,
     },
     reactStrictMode: false,
     experimental: {
