@@ -4,6 +4,7 @@ import { Pagination } from "./Pagination";
 import { SearchBar } from "./SearchBar";
 import { useFileManagement } from "@/hooks/useFileManagement";
 import dynamic from "next/dynamic";
+import { UserFileManager } from "@/components/UserFileManager";
 
 const LoadingIndicator = dynamic(
   () =>
@@ -55,37 +56,40 @@ export function FileManager() {
   return (
     <section className="mb-8">
       <FileUploader onUploadComplete={handleRefresh} />
-      <h2 className="text-2xl font-bold mb-4">Download Files</h2>
-      <div className="bg-muted rounded-lg p-6">
-        <SearchBar
-          searchTerm={searchTerm}
-          onChange={(e) => handleSearch(e.target.value)}
-        />
-        <FileContent
-          loading={loading}
-          initialLoadDone={initialLoadDone}
-          files={files.map((file) => ({
-            ...file,
-            name: file.name,
-            updatedAt: file.updatedAt,
-            downloads: file.downloads || 0,
-            size: file.size || 0,
-            uploadedKey: file.uploadedKey || undefined,
-          }))}
-          onCopy={handleCopy}
-          onDownload={handleDownload}
-          onRefresh={handleRefresh}
-          totalFiles={totalFiles}
-          totalSize={totalSize}
-        />
-        {!loading && initialLoadDone && files.length > 0 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
+      <UserFileManager />
+      <>
+        <h2 className="text-2xl font-bold mb-4">Download Files</h2>
+        <div className="bg-muted rounded-lg p-6">
+          <SearchBar
+            searchTerm={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
           />
-        )}
-      </div>
+          <FileContent
+            loading={loading}
+            initialLoadDone={initialLoadDone}
+            files={files.map((file) => ({
+              ...file,
+              name: file.name,
+              updatedAt: file.updatedAt,
+              downloads: file.downloads || 0,
+              size: file.size || 0,
+              uploadedKey: file.uploadedKey || undefined,
+            }))}
+            onCopy={handleCopy}
+            onDownload={handleDownload}
+            onRefresh={handleRefresh}
+            totalFiles={totalFiles}
+            totalSize={totalSize}
+          />
+          {!loading && initialLoadDone && files.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          )}
+        </div>
+      </>
     </section>
   );
 }

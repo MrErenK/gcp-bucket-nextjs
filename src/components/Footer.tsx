@@ -43,6 +43,14 @@ const Footer: React.FC = () => {
                   All Files
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/files/manage"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Manage Your Files
+                </Link>
+              </li>
             </ul>
           </nav>
           <div className="flex flex-col space-y-4 items-center sm:items-start">
@@ -76,7 +84,14 @@ const Footer: React.FC = () => {
           </p>
           <p className="text-sm text-muted-foreground flex items-center justify-center">
             Made with <HeartIcon size={16} className="text-red-500 mx-1" /> by
-            MrErenK
+            <Link
+              href="https://github.com/MrErenK"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              MrErenK
+            </Link>
           </p>
         </div>
       </div>

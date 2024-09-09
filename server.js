@@ -113,11 +113,11 @@ nextApp.prepare().then(() => {
       let body;
       try {
         body = await new Promise((resolve, reject) => {
-          let data = '';
-          req.on('data', chunk => {
+          let data = "";
+          req.on("data", (chunk) => {
             data += chunk;
           });
-          req.on('end', () => {
+          req.on("end", () => {
             try {
               resolve(JSON.parse(data));
             } catch (e) {
@@ -135,7 +135,9 @@ nextApp.prepare().then(() => {
           const uploadedFile = await uploadFromDirectLink(body.directLink);
           const apikey = await getApiKeyDescription(apiKey);
           console.log("Upload completed successfully");
-          console.log(`Uploaded file details: Name: ${uploadedFile.name}, URL: ${uploadedFile.url}, apiKey: ${apikey}`);
+          console.log(
+            `Uploaded file details: Name: ${uploadedFile.name}, URL: ${uploadedFile.url}, apiKey: ${apikey}`,
+          );
           return res.json({
             message: "File uploaded successfully from direct link",
             file: uploadedFile,
@@ -201,7 +203,9 @@ nextApp.prepare().then(() => {
             });
 
             const fileUrl = `${BASE_URL}/api/download?filename=${encodeURIComponent(filename)}`;
-            console.log(`Uploaded file details: Name: ${filename}, URL: ${fileUrl}`); // Log file details
+            console.log(
+              `Uploaded file details: Name: ${filename}, URL: ${fileUrl}`,
+            ); // Log file details
             resolveUpload({ name: filename, url: fileUrl });
           } catch (error) {
             console.log(`Upload canceled: Error processing ${filename}`); // Log upload canceled

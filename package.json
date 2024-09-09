@@ -38,7 +38,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "framer-motion": "^11.5.4",
-    "next": "^14.2.8",
+    "next": "^14.2.9",
     "next-themes": "^0.3.0",
     "npm-check": "^6.0.1",
     "postcss": "^8.4.45",
@@ -59,8 +59,8 @@
     "@types/node": "^22.5.4",
     "@types/react": "^18.3.5",
     "eslint": "^8.57.0",
-    "eslint-config-next": "^14.2.8",
+    "eslint-config-next": "^14.2.9",
     "tailwindcss": "^3.4.10",
-    "typescript": "^5"
+    "typescript": "^5.6.2"
   }
 }

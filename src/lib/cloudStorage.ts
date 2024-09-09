@@ -52,7 +52,7 @@ export const cloudStorage = {
     return metadata;
   },
   listFiles: async (prefix?: string) => {
-    const [files] = await bucket.getFiles({ prefix });
+    const [files] = await bucket.getFiles({ prefix, autoPaginate: false });
     return files;
   },
   createReadStream: (filename: string): Readable => {
@@ -81,5 +81,30 @@ export const cloudStorage = {
       update: { downloads: { increment: 1 } },
       create: { filename, downloads: 1, views: 0 },
     });
+  },
+  listUserFiles: async (apiKeyDescription: string) => {
+    const [files] = await bucket.getFiles({ autoPaginate: false });
+    const userFiles = await Promise.all(
+      files.map(async (file) => {
+        const stats = await cloudStorage.getFileStats(file.name);
+        if (stats.uploadedKey === apiKeyDescription) {
+          return {
+            name: file.name,
+            size: parseInt(String(file.metadata.size) || "0", 10),
+            updatedAt: file.metadata.updated,
+            downloads: stats.downloads,
+            views: stats.views,
+          };
+        }
+        return null;
+      }),
+    );
+    return userFiles.filter(
+      (file): file is NonNullable<typeof file> => file !== null,
+    );
+  },
+  listUserStats: async (apiKeyDescription: string) => {
+    const stats = await cloudStorage.getFileStats(apiKeyDescription);
+    return stats;
   },
 };

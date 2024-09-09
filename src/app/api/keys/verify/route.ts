@@ -1,50 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
 
-const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
-
-if (!ADMIN_API_KEY) {
-  throw new Error("ADMIN_API_KEY environment variable is not set");
-}
-
-async function checkAuth(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-    });
-  }
-
-  const token = authHeader.split(" ")[1];
-  if (token !== ADMIN_API_KEY) {
-    return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-    });
-  }
-
-  return null;
-}
-
 export async function GET(request: NextRequest) {
   const prisma = await getPrisma();
-  const authResponse = await checkAuth(request);
-  if (authResponse) return authResponse;
 
   const { searchParams } = new URL(request.url);
-  const key = searchParams.get("key");
+  const userKey = searchParams.get("user_key");
 
-  if (!key) {
-    return NextResponse.json({ error: "API key is required" }, { status: 400 });
+  if (!userKey) {
+    return NextResponse.json(
+      { error: "User API key is required" },
+      { status: 400 },
+    );
   }
 
   try {
     const apiKey = await prisma.apiKey.findUnique({
-      where: { key: key },
-      select: { id: true },
+      where: { key: userKey },
+      select: { id: true, description: true },
     });
 
     if (apiKey) {
-      return NextResponse.json({ valid: true });
+      return NextResponse.json({
+        valid: true,
+        description: apiKey.description,
+      });
     } else {
       return NextResponse.json({ valid: false });
     }
