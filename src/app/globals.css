@@ -29,8 +29,8 @@
     --chart-3: 0 0% 40%;
     --chart-4: 0 0% 60%;
     --chart-5: 0 0% 80%;
-    --bmc-light: #FF813F;
-    --bmc-dark: #FF813F;
+    --bmc-light: #3b3636;
+    --bmc-dark: #b0acac;
   }
 
   .dark {
@@ -58,8 +58,8 @@
     --chart-3: 0 0% 60%;
     --chart-4: 0 0% 40%;
     --chart-5: 0 0% 20%;
-    --bmc-light: #FF813F;
-    --bmc-dark: #FF813F;
+    --bmc-light: #3b3636;
+    --bmc-dark: #b0acac;
   }
 }
 
