@@ -1,10 +1,6 @@
 import React from "react";
 import dynamic from "next/dynamic";
-
-const LoadingIcon = dynamic(
-  () => import("@/components/Icons").then((mod) => mod.LoadingIcon),
-  { ssr: false },
-);
+import { LoadingIcon } from "@/components/Icons";
 
 interface LoadingIndicatorProps {
   loading: string;

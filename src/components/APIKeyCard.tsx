@@ -51,6 +51,9 @@ const APIKeyCard = ({ apiKey, onCopy, onDelete, toast }: APIKeyCardProps) => {
     if (onCopy) onCopy(apiKey.key);
   };
 
+  const buttonClasses =
+    "transition duration-300 ease-in-out transform hover:scale-105 hover:text-primary-foreground";
+
   return (
     <Card className="w-full border border-primary/10 shadow-sm hover:shadow-md transition-shadow duration-300">
       <CardContent className="p-4 sm:p-6">
@@ -61,11 +64,11 @@ const APIKeyCard = ({ apiKey, onCopy, onDelete, toast }: APIKeyCardProps) => {
           <Button
             variant="destructive"
             size="sm"
-            className="transition duration-300 ease-in-out transform hover:scale-105 hover:bg-destructive/90 w-full sm:w-auto mt-2 sm:mt-0"
+            className={`${buttonClasses} hover:bg-destructive`}
             onClick={() => onDelete(apiKey.id)}
           >
             <TrashIcon className="w-4 h-4 mr-2" />
-            <span className="sm:hidden">Delete</span>
+            <span className="hidden sm:inline">Delete</span>
           </Button>
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 mt-3">
@@ -88,7 +91,7 @@ const APIKeyCard = ({ apiKey, onCopy, onDelete, toast }: APIKeyCardProps) => {
             <Button
               variant="outline"
               size="sm"
-              className="transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary/10"
+              className={`${buttonClasses} hover:bg-primary`}
               onClick={handleCopy}
             >
               {copied ? (
