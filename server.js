@@ -88,9 +88,6 @@ async function uploadFromDirectLink(directLink) {
   await blob.setMetadata({
     contentType,
     contentDisposition: `${contentType.startsWith("text/") ? "inline" : "attachment"}; filename="${filename}"`,
-    metadata: {
-      uploadedFromDirectLink: 'true',
-    }
   });
 
   const downloadUrl = `${BASE_URL}/api/download?filename=${encodeURIComponent(filename)}`;
