@@ -53,7 +53,10 @@ export const APIKeyInput: React.FC<APIKeyInputProps> = ({
           )}
         </button>
       </div>
-      <p id="apiKeyHelp" className="mt-2 text-xs sm:text-sm text-muted-foreground">
+      <p
+        id="apiKeyHelp"
+        className="mt-2 text-xs sm:text-sm text-muted-foreground"
+      >
         Your API key is securely stored and never shared.
       </p>
     </div>

@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useTheme } from "next-themes";
 
 export default function BuyMeCoffeeWidget() {
   const { theme, systemTheme } = useTheme();
-  const [widgetColor, setWidgetColor] = useState("#FF813F"); // Default color
+  const [widgetColor, setWidgetColor] = useState("#FF5733");
 
-  useEffect(() => {
+  const updateWidgetColor = useCallback(() => {
     const currentTheme = theme === "system" ? systemTheme : theme;
     const color = getComputedStyle(document.documentElement)
       .getPropertyValue(currentTheme === "dark" ? "--bmc-dark" : "--bmc-light")
@@ -16,6 +16,14 @@ export default function BuyMeCoffeeWidget() {
   }, [theme, systemTheme]);
 
   useEffect(() => {
+    updateWidgetColor();
+  }, [theme, systemTheme, updateWidgetColor]);
+
+  useEffect(() => {
+    if (document.getElementById("bmc-wbtn")) {
+      return; // Widget already exists, don't add it again
+    }
+
     const script = document.createElement("script");
     script.setAttribute("data-name", "BMC-Widget");
     script.src = "https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js";
@@ -37,10 +45,10 @@ export default function BuyMeCoffeeWidget() {
       window.dispatchEvent(evt);
     };
 
-    document.head.appendChild(script);
+    document.body.appendChild(script);
 
     return () => {
-      document.head.removeChild(script);
+      document.body.removeChild(script);
       const widgetButton = document.getElementById("bmc-wbtn");
       if (widgetButton) {
         widgetButton.remove();
@@ -51,13 +59,16 @@ export default function BuyMeCoffeeWidget() {
   useEffect(() => {
     const style = document.createElement("style");
     style.textContent = `
-#bmc-wbtn {
-bottom: 15px !important;
-}
-#bmc-wbtn + div {
-bottom: 15px !important;
-}
-`;
+      #bmc-wbtn {
+        bottom: 15px !important;
+        box-shadow: none !important;
+        transition: all 0.3s ease !important;
+      }
+      #bmc-wbtn + div {
+        bottom: 15px !important;
+        transition: all 0.3s ease !important;
+      }
+    `;
     document.head.appendChild(style);
 
     return () => {

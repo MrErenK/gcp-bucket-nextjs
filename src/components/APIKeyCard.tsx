@@ -55,7 +55,9 @@ const APIKeyCard = ({ apiKey, onCopy, onDelete, toast }: APIKeyCardProps) => {
     <Card className="w-full border border-primary/10 shadow-sm hover:shadow-md transition-shadow duration-300">
       <CardContent className="p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-2">
-          <p className="text-lg font-semibold mb-2 sm:mb-0">{apiKey.description}</p>
+          <p className="text-lg font-semibold mb-2 sm:mb-0">
+            {apiKey.description}
+          </p>
           <Button
             variant="destructive"
             size="sm"
@@ -77,7 +79,11 @@ const APIKeyCard = ({ apiKey, onCopy, onDelete, toast }: APIKeyCardProps) => {
               className="p-1 hover:bg-primary/10"
               onClick={() => setShowKey(!showKey)}
             >
-              {showKey ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+              {showKey ? (
+                <EyeOffIcon className="w-4 h-4" />
+              ) : (
+                <EyeIcon className="w-4 h-4" />
+              )}
             </Button>
             <Button
               variant="outline"
