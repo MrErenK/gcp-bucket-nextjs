@@ -27,11 +27,10 @@ export async function GET(request: NextRequest) {
 
     // Get file metadata
     const metadata = await cloudStorage.getFileMetadata(filename);
-    const isDirectLinkUpload = metadata.uploadedFromDirectLink === 'true';
-    const originalHost = metadata.originalHost;
+    const isDirectLinkUpload = metadata.metadata?.uploadedFromDirectLink === 'true';
 
-    // Increment download count only if not a direct link upload from the same host
-    if (!isDirectLinkUpload || originalHost !== request.headers.get('host')) {
+    // Increment download count only if not a direct link upload
+    if (!isDirectLinkUpload) {
       await cloudStorage.incrementFileDownloads(filename);
     }
 

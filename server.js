@@ -90,7 +90,6 @@ async function uploadFromDirectLink(directLink) {
     contentDisposition: `${contentType.startsWith("text/") ? "inline" : "attachment"}; filename="${filename}"`,
     metadata: {
       uploadedFromDirectLink: 'true',
-      originalHost: sourceUrl.hostname
     }
   });
 
