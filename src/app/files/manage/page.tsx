@@ -16,7 +16,7 @@ const Header = dynamic(
 const UserFileManager = dynamic(
   () =>
     import("@/components/UserFileManager").then((mod) => mod.UserFileManager),
-  { ssr: false, loading: () => <LoadingIndicator loading="file manager" /> },
+  { ssr: false },
 );
 
 const ManageFilesPage = () => {

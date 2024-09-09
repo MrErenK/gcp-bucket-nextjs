@@ -16,7 +16,7 @@ export function useUserFileManagement() {
   const [files, setFiles] = useState<File[]>([]);
   const [totalFiles, setTotalFiles] = useState(0);
   const [totalSize, setTotalSize] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -25,7 +25,7 @@ export function useUserFileManagement() {
   const fetchFiles = useCallback(
     async (forceRefresh = false) => {
       if (!apiKey || !isLoggedIn) {
-        setError("No valid API key available");
+        setLoading(false);
         return;
       }
 

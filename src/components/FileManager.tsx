@@ -115,7 +115,6 @@ export function FileContent({
   totalFiles,
   totalSize,
 }: FileContentProps) {
-  if (loading) return <LoadingIndicator loading="files" />;
   if (!initialLoadDone) return null;
   if (files.length === 0)
     return <p className="text-gray-500">No files found.</p>;

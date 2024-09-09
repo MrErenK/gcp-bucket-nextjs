@@ -75,6 +75,7 @@ export function UserFileManager() {
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [initialLoading, setInitialLoading] = useState(true);
   const {
     files,
     totalFiles,
@@ -92,6 +93,23 @@ export function UserFileManager() {
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [fileToRename, setFileToRename] = useState("");
   const [newFileName, setNewFileName] = useState("");
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      // Check if there's a stored API key or some other way to determine if the user is logged in
+      const storedApiKey = localStorage.getItem("apiKey");
+      if (storedApiKey) {
+        const success = await login(storedApiKey);
+        if (success) {
+          setIsLoggedIn(true);
+          await fetchFiles();
+        }
+      }
+      setInitialLoading(false);
+    };
+
+    checkLoginStatus();
+  }, [login, setIsLoggedIn, fetchFiles]);
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -125,18 +143,33 @@ export function UserFileManager() {
       const success = await login(apiKeyInput);
       if (success) {
         setLoginError(null);
+        localStorage.setItem("apiKey", apiKeyInput);
       } else {
         setLoginError("Invalid API key, please check your key and try again.");
-        setIsLoggedIn(false); // Ensure the user is not logged in
-        setTimeout(() => setLoginError(null), 5000); // Hide error after 5 seconds
+        setIsLoggedIn(false);
+        localStorage.removeItem("apiKey");
+        setTimeout(() => setLoginError(null), 5000);
       }
     } catch (error) {
       setLoginError("An unexpected error occurred, please try again.");
-      setIsLoggedIn(false); // Ensure the user is not logged in
-      setTimeout(() => setLoginError(null), 5000); // Hide error after 5 seconds
+      setIsLoggedIn(false);
+      localStorage.removeItem("apiKey");
+      setTimeout(() => setLoginError(null), 5000);
       console.error(error);
     }
   };
+
+  if (initialLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <Card className="border border-primary/10 shadow-xl rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
+          <CardContent className="p-6">
+            <LoadingIndicator loading="components" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!isLoggedIn) {
     return (
@@ -174,18 +207,6 @@ export function UserFileManager() {
                 Login
               </Button>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Card className="border border-primary/10 shadow-xl rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
-          <CardContent className="p-6">
-            <LoadingIndicator loading="files" />
           </CardContent>
         </Card>
       </div>
