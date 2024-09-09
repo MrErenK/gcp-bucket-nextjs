@@ -1,13 +1,12 @@
 "use client";
 
 import React from "react";
-import { FileManager } from "@/components/FileManager";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
-import { Header } from "@/components/Header";
-import Footer from "@/components/Footer";
 import { MaintenanceContent } from "@/components/MaintenanceContent";
 import useMaintenance from "@/hooks/useMaintenance";
+import Loading from "./loading";
+import { LoadingIndicator } from "@/components/LoadingIndicator";
 
 const ThemeSwitch = dynamic(
   () => import("@/components/ThemeSwitch").then((mod) => mod.default),
@@ -20,6 +19,18 @@ const FileManagerIcon = dynamic(
 const GithubIcon = dynamic(
   () => import("@/components/Icons").then((mod) => mod.GithubIcon),
   { ssr: false },
+);
+const Header = dynamic(
+  () => import("@/components/Header").then((mod) => mod.default),
+  { ssr: false, loading: () => <Loading isLoading={true} /> },
+);
+const FileManager = dynamic(
+  () => import("@/components/FileManager").then((mod) => mod.FileManager),
+  { ssr: false, loading: () => <LoadingIndicator loading="file manager" /> },
+);
+const Footer = dynamic(
+  () => import("@/components/Footer").then((mod) => mod.default),
+  { ssr: false, loading: () => <LoadingIndicator loading="footer" /> },
 );
 
 export default function Home() {

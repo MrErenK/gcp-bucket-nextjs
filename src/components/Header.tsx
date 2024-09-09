@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { Suspense } from "react";
 
 const CloudIcon = dynamic(
   () => import("@/components/Icons").then((mod) => mod.CloudIcon),
@@ -17,14 +18,17 @@ export function Header() {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   return (
     <header
       className={`sticky top-0 z-40 transition-all duration-300 ease-in-out
-    ${isScrolled ? "bg-background/95 shadow-lg backdrop-blur-sm" : "bg-background/70 backdrop-blur-sm"}
-  `}
+          ${isScrolled ? "bg-background/95 shadow-lg backdrop-blur-sm" : "bg-background/70 backdrop-blur-sm"}
+        `}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">

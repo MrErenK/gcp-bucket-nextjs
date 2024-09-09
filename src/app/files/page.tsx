@@ -2,11 +2,9 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
 import { useFileManagement } from "@/hooks/useFileManagement";
-import { FileContent } from "@/components/FileManager";
 
 const ThemeSwitch = dynamic(
   () => import("@/components/ThemeSwitch").then((mod) => mod.default),
@@ -31,6 +29,15 @@ const CardHeader = dynamic(
 const CardTitle = dynamic(
   () => import("@/components/ui/card").then((mod) => mod.CardTitle),
   { ssr: false },
+);
+const LoadingIndicator = dynamic(
+  () =>
+    import("@/components/LoadingIndicator").then((mod) => mod.LoadingIndicator),
+  { ssr: false },
+);
+const FileContent = dynamic(
+  () => import("@/components/FileManager").then((mod) => mod.FileContent),
+  { ssr: false, loading: () => <LoadingIndicator loading="files" /> },
 );
 
 const FilesPage = () => {

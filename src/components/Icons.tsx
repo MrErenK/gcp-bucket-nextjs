@@ -21,7 +21,7 @@ interface SortIconProps {
 }
 
 const createIcon = (path: React.ReactNode) => {
-  return ({ size = 24, color = "currentColor", ...props }: IconProps) => (
+  const IconComponent = ({ size = 24, color = "currentColor", ...props }: IconProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width={size}
@@ -38,6 +38,9 @@ const createIcon = (path: React.ReactNode) => {
       {path}
     </svg>
   );
+
+  IconComponent.displayName = 'IconComponent';
+  return IconComponent;
 };
 
 const CloudIcon = createIcon(

@@ -1,8 +1,6 @@
 "use client";
 import React, { useEffect, useCallback } from "react";
-import { FileUploader } from "./FileUploader";
 import { Pagination } from "./Pagination";
-import { FileList } from "./FileList";
 import { SearchBar } from "./SearchBar";
 import { useFileManagement } from "@/hooks/useFileManagement";
 import dynamic from "next/dynamic";
@@ -11,6 +9,14 @@ const LoadingIndicator = dynamic(
   () =>
     import("@/components/LoadingIndicator").then((mod) => mod.LoadingIndicator),
   { ssr: false },
+);
+const FileList = dynamic(
+  () => import("@/components/FileList").then((mod) => mod.FileList),
+  { ssr: false, loading: () => <LoadingIndicator loading="files" /> },
+);
+const FileUploader = dynamic(
+  () => import("@/components/FileUploader").then((mod) => mod.FileUploader),
+  { ssr: false, loading: () => <LoadingIndicator loading="uploader" /> },
 );
 
 interface FileData {

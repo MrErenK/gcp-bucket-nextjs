@@ -7,9 +7,9 @@ import { AudioPreview } from "@/components/previews/AudioPreview";
 import { VideoPreview } from "@/components/previews/VideoPreview";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { getFileType } from "@/types/filetypes";
-import Header from "./Header";
 import { useFileManagement } from "@/hooks/useFileManagement";
 import dynamic from "next/dynamic";
+import Loading from "@/app/loading";
 
 const ThemeSwitch = dynamic(
   () => import("@/components/ThemeSwitch").then((mod) => mod.default),
@@ -19,6 +19,10 @@ const CopyIcon = dynamic(
   () => import("@/components/Icons").then((mod) => mod.CopyIcon),
   { ssr: false },
 );
+const Header = dynamic(() => import("./Header").then((mod) => mod.default), {
+  ssr: false,
+  loading: () => <Loading isLoading={true} />,
+});
 
 interface FileDetails {
   name: string;
