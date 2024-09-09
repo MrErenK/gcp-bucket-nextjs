@@ -203,20 +203,20 @@ export function FileList({
 
   return (
     <div className="space-y-6">
-      <div className="bg-card rounded-lg p-6 shadow-md">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+      <div className="bg-card rounded-lg p-4 sm:p-6 shadow-md">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h2 className="text-2xl font-bold text-primary mb-2">Files</h2>
             <h3 className="text-sm text-muted-foreground">
               Total: {totalFiles} files, {formatFileSize(totalSize)}
             </h3>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               onClick={onRefresh}
               variant="outline"
               size="sm"
-              className={buttonClasses}
+              className={`${buttonClasses} whitespace-nowrap`}
             >
               <RefreshIcon className="w-4 h-4 mr-2" />
               Refresh
@@ -226,7 +226,7 @@ export function FileList({
                 onClick={() => router.push("/files")}
                 variant="outline"
                 size="sm"
-                className={buttonClasses}
+                className={`${buttonClasses} whitespace-nowrap`}
               >
                 <AllFilesIcon className="w-4 h-4 mr-2" />
                 View All
@@ -254,24 +254,18 @@ export function FileList({
                     ? type === "name"
                       ? "A-Z"
                       : type === "date"
-                        ? "Old"
+                        ? "Older"
                         : type === "size"
-                          ? "Small"
-                          : "Fewest Downloads"
+                          ? "Smaller"
+                          : "Fewer"
                     : type === "name"
                       ? "Z-A"
                       : type === "date"
-                        ? "New"
+                        ? "Newer"
                         : type === "size"
-                          ? "Large"
-                          : "Most Downloads"
-                  : type === "name"
-                    ? "Sort by Name"
-                    : type === "date"
-                      ? "Sort by Date"
-                      : type === "size"
-                        ? "Sort by Size"
-                        : "Sort by Downloads"
+                          ? "Larger"
+                          : "More"
+                  : type.charAt(0).toUpperCase() + type.slice(1)
               }
             />
           ))}
@@ -285,57 +279,63 @@ export function FileList({
           return (
             <motion.div
               key={file.name}
-              className="bg-card rounded-lg p-4 sm:p-6 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out"
+              className="bg-card rounded-lg p-3 sm:p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="flex flex-col gap-4 w-full">
-                <div className="flex items-start gap-4">
-                  <FileIcon className="w-10 h-10 sm:w-12 sm:h-12 text-primary flex-shrink-0" />
+              <div className="flex flex-col gap-2 sm:gap-3 md:gap-4 w-full">
+                <div className="flex items-start gap-2 sm:gap-3 md:gap-4">
+                  <FileIcon className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-primary flex-shrink-0" />
                   <div className="flex-grow min-w-0">
                     <Link
                       href={`/files/${encodeURIComponent(file.name)}`}
                       passHref
                     >
-                      <h3 className="font-semibold text-primary hover:text-primary/80 cursor-pointer text-lg sm:text-xl break-words">
+                      <h3 className="font-semibold text-primary hover:text-primary/80 cursor-pointer text-base sm:text-lg md:text-xl break-words">
                         {file.name}
                       </h3>
                     </Link>
-                    <div className="flex items-center mt-1 text-sm text-muted-foreground">
-                      <DownloadCountIcon className="w-4 h-4 mr-1" />
-                      <strong>{file.downloads}</strong>
-                      <span className="mx-2">•</span>
-                      <FileStatsIcon className="w-4 h-4 mr-1" />
-                      <span>{formatFileSize(file.size)}</span>
-                      <span className="mx-2">•</span>
-                      <ApiKeyIcon className="w-4 h-4 mr-1" />
-                      <span>
-                        Uploaded with API key: {file.uploadedKey || "Unknown"}
-                      </span>
+                    <div className="flex flex-wrap items-center mt-1 text-xs sm:text-sm text-muted-foreground">
+                      <div className="flex items-center mr-2">
+                        <DownloadCountIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                        <strong>{file.downloads}</strong>
+                      </div>
+                      <span className="mx-1 sm:mx-2 hidden xs:inline">•</span>
+                      <div className="flex items-center mr-2">
+                        <FileStatsIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                        <span>{formatFileSize(file.size)}</span>
+                      </div>
+                      <span className="mx-1 sm:mx-2 hidden xs:inline">•</span>
+                      <div className="flex items-center">
+                        <ApiKeyIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                        <span className="truncate max-w-[100px] sm:max-w-[150px] text-xs sm:text-sm font-mono">
+                          {file.uploadedKey || "Unknown"}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   <p>
-                    <span className="font-medium">Modified:</span>{" "}
+                    <span className="font-bold">Modified:</span>{" "}
                     {formatDate(file.updatedAt)}
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2 w-full justify-start mt-2">
+                <div className="flex flex-wrap gap-2 w-full justify-start mt-1 sm:mt-2">
                   <FileActionButton
                     variant={isCopied ? "default" : "outline"}
                     onClick={() => handleCopy(file.name)}
                     disabled={isCopied}
-                    icon={<CopyIcon className="w-4 h-4" />}
+                    icon={<CopyIcon className="w-3 h-3 sm:w-4 sm:h-4" />}
                     label={isCopied ? "Copied!" : "Copy"}
                   />
                   <FileActionButton
                     variant="outline"
                     onClick={() => handleDownload(file.name)}
                     disabled={isDownloading}
-                    icon={<DownloadIcon className="w-4 h-4" />}
+                    icon={<DownloadIcon className="w-3 h-3 sm:w-4 sm:h-4" />}
                     label={isDownloading ? "Downloading..." : "Download"}
                   />
                 </div>

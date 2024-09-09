@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import dynamic from "next/dynamic";
@@ -51,16 +51,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   };
 
   return (
-    <Card className="w-full max-w-md shadow-xl border border-primary/10 rounded-xl overflow-hidden">
-      <CardHeader className="space-y-1 bg-primary/5 border-b border-primary/10 p-6">
-        <CardTitle className="text-3xl font-bold text-center text-primary">
+    <Card className="w-full max-w-md mx-auto shadow-2xl border border-primary/10 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-3xl">
+      <CardHeader className="space-y-2 bg-gradient-to-r from-primary/5 to-primary/10 border-b border-primary/10 p-6 sm:p-8">
+        <CardTitle className="text-2xl sm:text-3xl font-bold text-center text-primary">
           Admin Login
         </CardTitle>
-        <p className="text-muted-foreground text-sm text-center">
+        <p className="text-muted-foreground text-sm sm:text-base text-center">
           Enter your admin API key to access the panel
         </p>
       </CardHeader>
-      <CardContent className="p-6 space-y-6">
+      <CardContent className="p-6 sm:p-8 space-y-6">
         <div className="relative">
           <Input
             type="password"
@@ -68,14 +68,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             value={adminApiKey}
             onChange={(e) => setAdminApiKey(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="pr-10 py-3 rounded-lg border-2 border-primary/20 focus:border-primary focus:ring focus:ring-primary/30 transition-all duration-300"
+            className="pr-10 py-3 rounded-lg border-2 border-primary/20 focus:border-primary focus:ring focus:ring-primary/30 transition-all duration-300 text-base"
           />
           <LockIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
         </div>
         <Button
           onClick={authenticate}
           disabled={isAuthenticating}
-          className="w-full py-3 transition duration-300 ease-in-out bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 transition duration-300 ease-in-out bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-base"
         >
           {isAuthenticating ? (
             <LoadingIndicator loading="login" />
@@ -88,7 +88,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         </Button>
         {error && (
           <div
-            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative text-sm sm:text-base"
             role="alert"
           >
             <span className="block sm:inline">{error}</span>

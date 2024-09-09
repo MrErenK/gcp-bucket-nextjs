@@ -74,24 +74,24 @@ export function DirectLinkUploader({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.3 }}
-          className="mt-6"
+          className="mt-6 w-full max-w-md mx-auto"
         >
-          <h3 className="text-lg font-semibold mb-2">
+          <h3 className="text-xl font-semibold mb-4 text-center">
             Upload from Direct Link
           </h3>
-          <div className="flex flex-col space-y-2">
+          <div className="flex flex-col space-y-4">
             <Input
               type="text"
               placeholder="Enter direct download link"
               value={directLink}
               onChange={(e) => setDirectLink(e.target.value)}
-              className="w-full p-2 border rounded"
+              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary"
             />
             <Button
               onClick={handleUpload}
               disabled={isUploading || !directLink}
               className={cn(
-                "w-full py-4 font-semibold rounded-lg shadow-md transition-all duration-300 ease-in-out",
+                "w-full py-3 px-4 font-semibold rounded-lg shadow-lg transition-all duration-300 ease-in-out text-lg",
                 directLink && !isUploading
                   ? "bg-primary hover:bg-primary/90 text-primary-foreground"
                   : "bg-muted text-muted-foreground cursor-not-allowed",
@@ -104,7 +104,7 @@ export function DirectLinkUploader({
                 </span>
               ) : (
                 <span className="flex items-center justify-center">
-                  <UploadIcon className="w-6 h-6 mr-2" /> Upload from Link
+                  <UploadIcon className="w-6 h-6 mr-3" /> Upload from Link
                 </span>
               )}
             </Button>

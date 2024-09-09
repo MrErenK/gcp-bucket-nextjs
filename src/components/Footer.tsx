@@ -19,10 +19,10 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-background/90 backdrop-blur-sm border-t border-border mt-auto">
       <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
+          <div className="text-center sm:text-left">
             <Link href="/">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent hover:opacity-80 transition-opacity">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent hover:opacity-80 transition-opacity inline-block">
                 File Manager
               </h2>
             </Link>
@@ -30,7 +30,7 @@ const Footer: React.FC = () => {
               A cloud storage solution for developers.
             </p>
           </div>
-          <nav className="space-y-4 md:space-y-2">
+          <nav className="space-y-4 text-center sm:text-left">
             <h3 className="text-lg font-semibold text-foreground">
               Quick Links
             </h3>
@@ -45,7 +45,7 @@ const Footer: React.FC = () => {
               </li>
             </ul>
           </nav>
-          <div className="flex flex-col space-y-4">
+          <div className="flex flex-col space-y-4 items-center sm:items-start">
             <h3 className="text-lg font-semibold text-foreground">Connect</h3>
             <div className="flex space-x-4">
               <a
@@ -70,11 +70,11 @@ const Footer: React.FC = () => {
           </div>
         </div>
         <div className="mt-8 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground text-center sm:text-left">
             © {new Date().getFullYear()} MrErenK Cloud Storage. All rights
             reserved.
           </p>
-          <p className="text-sm text-muted-foreground flex items-center">
+          <p className="text-sm text-muted-foreground flex items-center justify-center">
             Made with <HeartIcon size={16} className="text-red-500 mx-1" /> by
             MrErenK
           </p>

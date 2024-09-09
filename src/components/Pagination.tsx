@@ -26,8 +26,8 @@ export function Pagination({
     transition duration-300 ease-in-out
     hover:bg-primary hover:text-primary-foreground
     focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50
-    flex items-center justify-center px-4 py-2
-    text-sm font-medium rounded-full
+    flex items-center justify-center px-3 py-2
+    text-sm sm:text-base font-medium rounded-md
   `;
 
   return (
@@ -41,15 +41,17 @@ export function Pagination({
         className={`${buttonClasses} ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
         variant="outline"
       >
-        <ChevronLeftIcon />
-        <span className="ml-2">Previous</span>
+        <ChevronLeftIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+        <span className="ml-2 hidden sm:inline">Previous</span>
       </Button>
 
-      <div className="flex items-center bg-secondary text-secondary-foreground rounded-full overflow-hidden">
-        <span className="px-4 py-2 text-sm font-medium border-r border-secondary-foreground/20">
+      <div className="flex items-center bg-secondary text-secondary-foreground rounded-md overflow-hidden">
+        <span className="px-3 py-2 text-sm sm:text-base font-medium border-r border-secondary-foreground/20">
           Page {currentPage}
         </span>
-        <span className="px-4 py-2 text-sm font-medium">of {totalPages}</span>
+        <span className="px-3 py-2 text-sm sm:text-base font-medium">
+          of {totalPages}
+        </span>
       </div>
 
       <Button
@@ -58,8 +60,8 @@ export function Pagination({
         className={`${buttonClasses} ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""}`}
         variant="outline"
       >
-        <span className="mr-2">Next</span>
-        <ChevronRightIcon />
+        <span className="mr-2 hidden sm:inline">Next</span>
+        <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5" />
       </Button>
     </nav>
   );

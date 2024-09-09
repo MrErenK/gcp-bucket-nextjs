@@ -192,18 +192,18 @@ export default function FilePage({ params }: { params: { filename: string } }) {
         handleDownload={() => handleDownload(fileName)}
         copied={copied}
       />
-      <div className="flex justify-end p-6">
+      <div className="flex justify-end p-4 sm:p-6">
         <ThemeSwitch />
       </div>
-      <main className="flex-grow container mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+      <main className="flex-grow container mx-auto px-4 py-6 sm:py-8 lg:py-10 space-y-6 sm:space-y-8">
         <div className="bg-card rounded-xl shadow-lg border border-primary/10 overflow-hidden">
           <div className="bg-primary/5 border-b border-primary/10 p-4 sm:p-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-primary text-center">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-primary text-center">
               File Details
             </h2>
           </div>
           <div className="p-4 sm:p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {[
                 {
                   label: "File Name",
@@ -239,13 +239,13 @@ export default function FilePage({ params }: { params: { filename: string } }) {
               ].map((item, index) => (
                 <div
                   key={index}
-                  className="space-y-2 bg-primary/5 p-4 rounded-lg"
+                  className="space-y-2 bg-primary/5 p-3 sm:p-4 rounded-lg"
                 >
-                  <p className="text-sm font-medium text-muted-foreground">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                     {item.label}
                   </p>
                   <div className="flex items-center justify-between">
-                    <p className="font-semibold text-sm sm:text-base truncate flex-grow">
+                    <p className="font-semibold text-xs sm:text-sm lg:text-base truncate flex-grow">
                       {item.value}
                     </p>
                     {item.isCopyable && (
@@ -259,7 +259,7 @@ export default function FilePage({ params }: { params: { filename: string } }) {
                         disabled={copied}
                       >
                         <CopyIcon
-                          className={`w-4 h-4 ${copied ? "text-green-500" : ""}`}
+                          className={`w-3 h-3 sm:w-4 sm:h-4 ${copied ? "text-green-500" : ""}`}
                         />
                       </Button>
                     )}
@@ -271,12 +271,14 @@ export default function FilePage({ params }: { params: { filename: string } }) {
         </div>
         <div className="bg-card rounded-xl shadow-lg border border-primary/10 overflow-hidden">
           <div className="bg-primary/5 border-b border-primary/10 p-4 sm:p-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-primary text-center">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-primary text-center">
               File Preview
             </h2>
           </div>
           <div className="p-4 sm:p-6">
-            <div className="max-w-4xl mx-auto">{renderPreview()}</div>
+            <div className="max-w-full sm:max-w-4xl mx-auto">
+              {renderPreview()}
+            </div>
           </div>
         </div>
       </main>

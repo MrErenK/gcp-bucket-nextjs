@@ -590,7 +590,7 @@ export function InfoIcon({ size = 24, ...props }: InfoIconProps) {
   );
 }
 
-export const ChevronLeftIcon = () => (
+export const ChevronLeftIcon = ({ className = "w-4 h-4", ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="20"
@@ -601,12 +601,14 @@ export const ChevronLeftIcon = () => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    className={className}
+    {...props}
   >
     <polyline points="15 18 9 12 15 6"></polyline>
   </svg>
 );
 
-export const ChevronRightIcon = () => (
+export const ChevronRightIcon = ({ className = "w-4 h-4", ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="20"
@@ -617,6 +619,8 @@ export const ChevronRightIcon = () => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
+    className={className}
+    {...props}
   >
     <polyline points="9 18 15 12 9 6"></polyline>
   </svg>

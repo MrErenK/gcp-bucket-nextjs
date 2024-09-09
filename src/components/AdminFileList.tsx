@@ -374,9 +374,7 @@ export function AdminFileList({ files, onRefresh }: FileListProps) {
                         <span>{formatFileSize(file.size)}</span>
                         <span className="mx-2">•</span>
                         <ApiKeyIcon className="w-4 h-4 mr-1" />
-                        <span>
-                          Uploaded with API key: {file.uploadedKey || "Unknown"}
-                        </span>
+                        <span>{file.uploadedKey || "Unknown"}</span>
                       </div>
                     </div>
                   </div>

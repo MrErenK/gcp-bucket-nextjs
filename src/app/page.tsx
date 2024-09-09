@@ -38,18 +38,18 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-background/80">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 sm:py-12 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row justify-between items-center mb-8 lg:mb-12 space-y-6 lg:space-y-0 lg:space-x-6">
+      <main className="flex-grow container mx-auto px-4 py-6 sm:py-8 md:py-12 lg:py-16 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 md:mb-10 lg:mb-12 space-y-4 sm:space-y-0 sm:space-x-4 md:space-x-6">
           <div className="flex items-center">
             <FileIcon
-              className="w-10 h-10 sm:w-12 sm:h-12 text-primary mr-3 sm:mr-4"
+              className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-primary mr-2 sm:mr-3 md:mr-4"
               aria-hidden="true"
             />
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary leading-tight">
               File Manager
             </h1>
           </div>
-          <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
             <ThemeSwitch />
             <Button
               variant="outline"
@@ -62,13 +62,16 @@ export default function Home() {
                 className="flex items-center justify-center w-full"
                 aria-label="View project on GitHub"
               >
-                <GithubIcon className="w-5 h-5 mr-2" aria-hidden="true" />
-                <span>GitHub</span>
+                <GithubIcon
+                  className="w-4 h-4 sm:w-5 sm:h-5 mr-2"
+                  aria-hidden="true"
+                />
+                <span className="text-sm sm:text-base">GitHub</span>
               </a>
             </Button>
           </div>
         </div>
-        <section className="bg-card rounded-xl shadow-lg p-4 sm:p-6 md:p-8 border border-primary/10">
+        <section className="bg-card rounded-xl shadow-lg p-3 sm:p-4 md:p-6 lg:p-8 border border-primary/10">
           <h2 className="sr-only">File Management Interface</h2>
           <FileManager />
         </section>

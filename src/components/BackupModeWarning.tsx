@@ -26,8 +26,8 @@ const BackupModeWarning = () => {
   if (!isBackupMode) return null;
 
   return (
-    <div className="bg-yellow-500 text-yellow-900 px-4 py-2 text-center">
-      <p className="text-sm font-medium">
+    <div className="bg-yellow-500 text-yellow-900 px-2 sm:px-4 py-2 sm:py-3 text-center">
+      <p className="text-xs sm:text-sm md:text-base font-medium">
         Backup mode enabled. Some actions may be unavailable.
       </p>
     </div>

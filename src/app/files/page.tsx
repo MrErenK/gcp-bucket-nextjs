@@ -59,25 +59,27 @@ const FilesPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-background/80">
-      <header className="flex justify-between items-center p-6 bg-card shadow-md">
+      <header className="flex flex-col sm:flex-row justify-between items-center p-4 sm:p-6 bg-card shadow-md">
         <Button
           onClick={() => router.push("/")}
           variant="outline"
-          className="transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary/10 rounded-full"
+          className="transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary/10 rounded-full w-full sm:w-auto mb-2 sm:mb-0"
         >
-          <HomeIcon className="w-5 h-5 mr-2" />
-          <span className="hidden sm:inline">Home</span>
+          <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
+          <span className="text-sm sm:text-base">Home</span>
         </Button>
-        <ThemeSwitch />
+        <div className="flex-shrink-0 mt-2 sm:mt-0">
+          <ThemeSwitch />
+        </div>
       </header>
-      <main className="flex-grow container mx-auto px-4 py-12 sm:px-6 lg:px-8 max-w-4xl">
+      <main className="flex-grow container mx-auto px-4 py-6 sm:py-12 sm:px-6 lg:px-8 max-w-4xl">
         <Card className="shadow-lg border border-primary/10 rounded-xl overflow-hidden">
-          <CardHeader className="bg-primary/5 border-b border-primary/10">
-            <CardTitle className="text-3xl font-bold text-center sm:text-left text-primary flex items-center justify-between">
+          <CardHeader className="bg-primary/5 border-b border-primary/10 p-4 sm:p-6">
+            <CardTitle className="text-2xl sm:text-3xl font-bold text-center sm:text-left text-primary flex items-center justify-between">
               File Manager
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             {loading ? (
               <LoadingIndicator loading="files" />
             ) : error ? (
