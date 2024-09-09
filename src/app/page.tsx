@@ -64,7 +64,7 @@ export default function Home() {
             <ThemeSwitch />
             <Button
               variant="outline"
-              className="transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary hover:text-primary-foreground w-full sm:w-auto text-lg py-3 px-6"
+              className="transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary hover:text-primary-foreground w-full sm:w-auto text-lg py-3 px-4"
             >
               <a
                 href="https://github.com/MrErenK/gcp-bucket-nextjs"
@@ -74,7 +74,7 @@ export default function Home() {
                 aria-label="View project on GitHub"
               >
                 <GithubIcon
-                  className="w-6 h-6 sm:w-6 sm:h-6 mr-3"
+                  className="w-5 h-6 sm:w-5 sm:h-6 mr-3"
                   aria-hidden="true"
                 />
                 <span className="text-lg sm:text-lg font-semibold">GitHub</span>
