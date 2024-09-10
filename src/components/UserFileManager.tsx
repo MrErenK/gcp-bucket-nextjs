@@ -101,11 +101,15 @@ export function UserFileManager() {
     handleRename,
     isLoggedIn,
     setIsLoggedIn,
+    handleRefresh,
   } = useUserFileManagement();
 
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [fileToRename, setFileToRename] = useState("");
   const [newFileName, setNewFileName] = useState("");
+
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState("");
 
   const handleLogout = useCallback(() => {
     signOut();
@@ -140,6 +144,7 @@ export function UserFileManager() {
     try {
       await handleRename(fileToRename, newFileName);
       toast.success("File renamed successfully");
+      await handleRefresh();
     } catch (error) {
       toast.error("Failed to rename file");
     } finally {
@@ -147,9 +152,21 @@ export function UserFileManager() {
     }
   };
 
-  const handleRefresh = useCallback(async () => {
-    await fetchFiles();
-  }, [fetchFiles]);
+  const handleDeleteClick = (filename: string) => {
+    setFileToDelete(filename);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await handleDelete(fileToDelete);
+      await handleRefresh();
+    } catch (error) {
+      toast.error("Failed to delete file");
+    } finally {
+      setShowDeleteDialog(false);
+    }
+  };
 
   const handleLogin = async () => {
     const result = await signIn("credentials", {
@@ -321,10 +338,7 @@ export function UserFileManager() {
                       <Button
                         size="sm"
                         variant="destructive"
-                        onClick={() => {
-                          handleDelete(file.name);
-                          toast.success("File deleted successfully");
-                        }}
+                        onClick={() => handleDeleteClick(file.name)}
                       >
                         <TrashIcon className="w-4 h-4 mr-2" />
                         Delete
@@ -378,6 +392,34 @@ export function UserFileManager() {
               Cancel
             </Button>
             <Button onClick={handleRenameSubmit}>Rename</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Delete</DialogTitle>
+          </DialogHeader>
+          <p className="text-muted-foreground mb-6">
+            Are you sure you want to delete{" "}
+            <span className="font-semibold text-primary">{fileToDelete}</span>?
+          </p>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+            >
+              Delete
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

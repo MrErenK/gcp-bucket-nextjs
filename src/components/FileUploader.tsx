@@ -11,7 +11,7 @@ import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 const UploadIcon = dynamic(
   () => import("@/components/Icons").then((mod) => mod.UploadIcon),
@@ -61,13 +61,17 @@ export function FileUploader({
   const [directLinkError, setDirectLinkError] = useState<string | null>(null);
   const [showApiKey, setShowApiKey] = useState(false);
 
+  const handleCopyApiKey = () => {
+    navigator.clipboard.writeText(session?.user?.apiKey || "");
+    toast.success("Copied to clipboard");
+  };
+
   const handleDirectLinkError = (error: string) => {
     setDirectLinkError(error);
   };
 
   return (
     <>
-      <Toaster position="top-right" />
       <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 mb-4 sm:mb-8 lg:mb-12 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-primary items-center justify-center">
           Upload Files
@@ -82,13 +86,10 @@ export function FileUploader({
               <div className="flex items-center space-x-2">
                 <span
                   className="font-mono text-xs sm:text-sm lg:text-base text-center text-muted-foreground items-center justify-center cursor-pointer"
-                  onClick={() => {
-                    navigator.clipboard.writeText(session?.user?.apiKey || "");
-                    toast.success("Copied to clipboard");
-                  }}
+                  onClick={handleCopyApiKey}
                   title="Click to copy"
                 >
-                  {showApiKey ? session?.user?.apiKey : '•'.repeat(32)}
+                  {showApiKey ? session?.user?.apiKey : '•'.repeat(40)}
                 </span>
                 <Button
                   variant="ghost"

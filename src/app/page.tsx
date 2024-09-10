@@ -7,6 +7,7 @@ import { MaintenanceContent } from "@/components/MaintenanceContent";
 import useMaintenance from "@/hooks/useMaintenance";
 import Loading from "./loading";
 import { LoadingIndicator } from "@/components/LoadingIndicator";
+import { Toaster } from "react-hot-toast";
 
 const ThemeSwitch = dynamic(
   () => import("@/components/ThemeSwitch").then((mod) => mod.default),
@@ -48,6 +49,17 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-background/80">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          className: '',
+          style: {
+            zIndex: 9999,
+            top: '1rem',
+            right: '1rem',
+          },
+        }}
+      />
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8 sm:py-12 md:py-16 lg:py-20">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 sm:mb-12 md:mb-16 space-y-6 sm:space-y-0 sm:space-x-6">

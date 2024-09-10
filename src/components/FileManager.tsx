@@ -5,6 +5,7 @@ import { SearchBar } from "./SearchBar";
 import { useFileManagement } from "@/hooks/useFileManagement";
 import dynamic from "next/dynamic";
 import { UserFileManager } from "@/components/UserFileManager";
+import { toast } from "react-hot-toast";
 
 const LoadingIndicator = dynamic(
   () =>
@@ -53,9 +54,17 @@ export function FileManager() {
     await fetchFiles();
   }, [fetchFiles]);
 
+  const handleUploadComplete = useCallback(() => {
+    handleRefresh();
+    toast.success("Upload completed successfully!", {
+      duration: 3000,
+      position: "top-right",
+    });
+  }, [handleRefresh]);
+
   return (
     <section className="mb-8">
-      <FileUploader onUploadComplete={handleRefresh} />
+      <FileUploader onUploadComplete={handleUploadComplete} />
       <>
         <div className="flex flex-col gap-4 justify-center items-center">
           <h2 className="text-2xl font-bold mb-4">Uploaded Files</h2>

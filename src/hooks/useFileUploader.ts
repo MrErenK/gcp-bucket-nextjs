@@ -8,7 +8,7 @@ interface UploadedFile {
 }
 
 export function useFileUploader(
-  onUploadComplete: (uploadedFiles: UploadedFile[]) => void,
+  onUploadComplete: () => void,
 ) {
   const { data: session } = useSession();
   const [files, setFiles] = useState<File[]>([]);
@@ -32,7 +32,7 @@ export function useFileUploader(
       setError("File is too large. Please upload a file smaller than 6 GB."),
   });
 
-  const handleUpload = async () => {
+  const handleUpload = useCallback(async () => {
     if (files.length === 0) return;
     const currentApiKey = useCustomApiKey ? apiKey : session?.user?.apiKey;
     if (!currentApiKey) {
@@ -57,16 +57,10 @@ export function useFileUploader(
       });
 
       if (response.ok) {
-        const data = await response.json();
-        if (data.files && Array.isArray(data.files)) {
-          setUploadSuccess(
-            `Successfully uploaded ${data.files.length} file(s).`,
-          );
-          onUploadComplete(data.files);
-        } else {
-          setError("Unexpected response format from server.");
-        }
         setFiles([]);
+        setUploading(false);
+        setError(null);
+        onUploadComplete(); // Call the onUploadComplete callback
       } else {
         const errorData = await response.json();
         setError(errorData.error || "Upload failed. Please try again.");
@@ -77,7 +71,7 @@ export function useFileUploader(
     } finally {
       setUploading(false);
     }
-  };
+  }, [files, apiKey, useCustomApiKey, onUploadComplete, session?.user?.apiKey]);
 
   const handleRemoveFile = (fileName: string) => {
     setFiles((prevFiles) => prevFiles.filter((file) => file.name !== fileName));

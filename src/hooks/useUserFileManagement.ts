@@ -22,7 +22,7 @@ export function useUserFileManagement() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const fetchFiles = useCallback(async () => {
-    if (!session?.user?.apiKey || files.length > 0) {
+    if (!session?.user?.apiKey) {
       setLoading(false);
       return;
     }
@@ -32,7 +32,7 @@ export function useUserFileManagement() {
     try {
       const response = await fetch(`/api/user-files`, {
         headers: {
-          "x-api-key": session?.user.apiKey || "",
+          "x-api-key": session.user.apiKey,
         },
       });
       if (!response.ok) {
@@ -51,7 +51,7 @@ export function useUserFileManagement() {
     } finally {
       setLoading(false);
     }
-  }, [session, files.length]);
+  }, [session]);
 
   useEffect(() => {
     if (session?.user?.apiKey && files.length === 0) {
@@ -143,6 +143,10 @@ export function useUserFileManagement() {
     );
   }, [files]);
 
+  const handleRefresh = useCallback(async () => {
+    await fetchFiles();
+  }, [fetchFiles]);
+
   return {
     files,
     totalFiles,
@@ -158,5 +162,6 @@ export function useUserFileManagement() {
     handleRename,
     isLoggedIn,
     setIsLoggedIn,
+    handleRefresh,
   };
 }
