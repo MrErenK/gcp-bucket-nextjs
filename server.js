@@ -31,9 +31,7 @@ if (!ADMIN_API_KEY) {
 
 async function verifyApiKey(apiKey) {
   try {
-    const response = await fetch(
-      `${BASE_URL}/api/keys/verify?key=${apiKey}`,
-    );
+    const response = await fetch(`${BASE_URL}/api/keys/verify?key=${apiKey}`);
     if (response.ok) {
       const data = await response.json();
       return data.valid === true;

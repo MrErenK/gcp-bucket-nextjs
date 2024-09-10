@@ -1,7 +1,7 @@
 "use client";
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
-import { verifyApiKey } from "@/lib/apiKeyAuth";
 
 interface File {
   name: string;
@@ -13,92 +13,51 @@ interface File {
 }
 
 export function useUserFileManagement() {
+  const { data: session } = useSession();
   const [files, setFiles] = useState<File[]>([]);
   const [totalFiles, setTotalFiles] = useState(0);
   const [totalSize, setTotalSize] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const cachedFiles = useRef<File[]>([]);
 
-  const fetchFiles = useCallback(
-    async (forceRefresh = false) => {
-      if (!apiKey || !isLoggedIn) {
-        setLoading(false);
-        return;
-      }
+  const fetchFiles = useCallback(async () => {
+    if (!session?.user?.apiKey) {
+      setLoading(false);
+      return;
+    }
 
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(`/api/user-files`, {
-          headers: {
-            "x-api-key": apiKey,
-          },
-        });
-        if (!response.ok) {
-          if (response.status === 401) {
-            throw new Error("Unauthorized: Invalid API key");
-          }
-          throw new Error("Failed to fetch files");
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/user-files`, {
+        headers: {
+          "x-api-key": session.user.apiKey,
+        },
+      });
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Unauthorized: Invalid API key");
         }
-        const data = await response.json();
-        setFiles(data.files);
-        cachedFiles.current = data.files;
-        setTotalFiles(data.totalFiles);
-        setTotalSize(data.totalSize);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error fetching files");
-        console.error(err);
-      } finally {
-        setLoading(false);
+        throw new Error("Failed to fetch files");
       }
-    },
-    [apiKey, isLoggedIn],
-  );
+      const data = await response.json();
+      setFiles(data.files);
+      setTotalFiles(data.totalFiles);
+      setTotalSize(data.totalSize);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error fetching files");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [session]);
 
   useEffect(() => {
-    if (apiKey && isLoggedIn) {
+    if (session?.user?.apiKey) {
       fetchFiles();
     }
-  }, [apiKey, isLoggedIn, fetchFiles]);
-
-  const login = useCallback(
-    async (key: string) => {
-      try {
-        const isValid = await verifyApiKey(key);
-        if (isValid) {
-          setApiKey(key);
-          setIsLoggedIn(true);
-          localStorage.setItem("apiKey", key);
-          fetchFiles(true);
-          return true;
-        } else {
-          setApiKey(null);
-          setIsLoggedIn(false);
-          localStorage.removeItem("apiKey");
-          toast.error("Invalid API key, please check your key and try again.");
-          return false;
-        }
-      } catch (error) {
-        console.error("Error verifying API key:", error);
-        setApiKey(null);
-        setIsLoggedIn(false);
-        localStorage.removeItem("apiKey");
-        toast.error("Error verifying API key, please try again.");
-        return false;
-      }
-    },
-    [fetchFiles],
-  );
-
-  useEffect(() => {
-    const storedApiKey = localStorage.getItem("apiKey");
-    if (storedApiKey) {
-      login(storedApiKey);
-    }
-  }, [login]);
+  }, [session, fetchFiles]);
 
   const handleDelete = useCallback(
     async (filename: string) => {
@@ -108,7 +67,7 @@ export function useUserFileManagement() {
           {
             method: "POST",
             headers: {
-              "x-api-key": apiKey || "",
+              "x-api-key": session?.user.apiKey || "",
             },
           },
         );
@@ -124,7 +83,7 @@ export function useUserFileManagement() {
         toast.error("Failed to delete file. Please try again.");
       }
     },
-    [apiKey, fetchFiles],
+    [session?.user.apiKey, fetchFiles],
   );
 
   const handleRename = useCallback(
@@ -134,7 +93,7 @@ export function useUserFileManagement() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "x-api-key": apiKey || "",
+            "x-api-key": session?.user.apiKey || "",
           },
           body: JSON.stringify({
             oldFilename,
@@ -153,7 +112,7 @@ export function useUserFileManagement() {
         toast.error("Failed to rename file. Please try again.");
       }
     },
-    [apiKey, fetchFiles],
+    [session?.user.apiKey, fetchFiles],
   );
 
   return {
@@ -165,7 +124,6 @@ export function useUserFileManagement() {
     fetchFiles,
     handleDelete,
     handleRename,
-    login,
     isLoggedIn,
     setIsLoggedIn,
   };

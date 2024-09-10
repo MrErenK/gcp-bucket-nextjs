@@ -5,6 +5,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import BackupModeWarning from "@/components/BackupModeWarning";
 import BuyMeCoffeeWidget from "@/components/BuyMeCoffeeWidget";
+import { AuthProvider } from "@/components/AuthProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -55,11 +56,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="dark">
-          <BackupModeWarning />
-          {children}
-          <BuyMeCoffeeWidget />
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider attribute="class" defaultTheme="dark">
+            <BackupModeWarning />
+            {children}
+            <BuyMeCoffeeWidget />
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

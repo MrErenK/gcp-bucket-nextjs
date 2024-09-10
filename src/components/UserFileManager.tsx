@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { toast, Toaster } from "react-hot-toast";
+import { useSession, signIn, signOut } from "next-auth/react";
 import { getApiKeyDescription } from "@/lib/apiKeyAuth";
+import { useRouter } from "next/navigation";
 
 const Card = dynamic(
   () => import("@/components/ui/card").then((mod) => mod.Card),
@@ -73,10 +75,11 @@ const LoadingIndicator = dynamic(
 );
 
 export function UserFileManager() {
+  const { data: session, status } = useSession();
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
-  const [initialLoading, setInitialLoading] = useState(true);
+  const router = useRouter();
   const {
     files,
     totalFiles,
@@ -85,7 +88,6 @@ export function UserFileManager() {
     fetchFiles,
     handleDelete,
     handleRename,
-    login,
     isLoggedIn,
     setIsLoggedIn,
   } = useUserFileManagement();
@@ -93,38 +95,36 @@ export function UserFileManager() {
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [fileToRename, setFileToRename] = useState("");
   const [newFileName, setNewFileName] = useState("");
-  const [apiKeyDescription, setApiKeyDescription] = useState<string | null>(null);
+  const [apiKeyDescription, setApiKeyDescription] = useState<string | null>(
+    null,
+  );
 
   const handleLogout = useCallback(() => {
-    setIsLoggedIn(false);
-    setApiKeyDescription(null);
-    localStorage.removeItem("apiKey");
-    toast.success("Logged out successfully");
+    signOut();
+    toast.success(
+      "Logged out successfully, redirecting to the sign in page...",
+    );
+    setTimeout(() => {
+      router.push("/auth/signin");
+    }, 1000);
   }, []);
 
   useEffect(() => {
-    const checkLoginStatus = async () => {
-      const storedApiKey = localStorage.getItem("apiKey");
-      if (storedApiKey) {
-        const success = await login(storedApiKey);
-        if (success) {
-          setIsLoggedIn(true);
-          const description = await getApiKeyDescription(storedApiKey);
+    const updateSessionState = async () => {
+      if (session) {
+        setIsLoggedIn(true);
+        if (session.user.apiKey) {
+          const description = await getApiKeyDescription(session.user.apiKey);
           setApiKeyDescription(description);
-          await fetchFiles();
         }
+        fetchFiles();
+      } else {
+        setIsLoggedIn(false);
       }
-      setInitialLoading(false);
     };
 
-    checkLoginStatus();
-  }, [login, setIsLoggedIn, fetchFiles]);
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchFiles();
-    }
-  }, [isLoggedIn, fetchFiles]);
+    updateSessionState();
+  }, [session, fetchFiles, setIsLoggedIn]);
 
   const handleRenameClick = (filename: string) => {
     setFileToRename(filename);
@@ -148,42 +148,26 @@ export function UserFileManager() {
   }, [fetchFiles]);
 
   const handleLogin = async () => {
-    try {
-      const success = await login(apiKeyInput);
-      if (success) {
-        setLoginError(null);
-        localStorage.setItem("apiKey", apiKeyInput);
-        const description = await getApiKeyDescription(apiKeyInput);
-        setApiKeyDescription(description);
-        toast.success(`Successfully logged in as ${description}`);
-      } else {
-        setLoginError("Invalid API key, please check your key and try again.");
-        setIsLoggedIn(false);
-        localStorage.removeItem("apiKey");
-        toast.error("Invalid API key, please check your key and try again.");
-      }
-    } catch (error) {
-      setLoginError("An unexpected error occurred, please try again.");
-      setIsLoggedIn(false);
-      localStorage.removeItem("apiKey");
-      toast.error("An unexpected error occurred, please try again.");
-      console.error(error);
+    const result = await signIn("credentials", {
+      apiKey: apiKeyInput,
+      redirect: false,
+    });
+    if (result?.error) {
+      setLoginError("Invalid API key, please check your key and try again.");
+      toast.error("Invalid API key, please check your key and try again.");
+    } else {
+      setLoginError(null);
+      toast.success("Successfully logged in as " + apiKeyDescription);
+      // Refresh the session to trigger the useEffect
+      router.refresh();
     }
   };
 
-  if (initialLoading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Card className="border border-primary/10 shadow-xl rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
-          <CardContent className="p-6">
-            <LoadingIndicator loading="components" />
-          </CardContent>
-        </Card>
-      </div>
-    );
+  if (status === "loading") {
+    return <LoadingIndicator loading="components" />;
   }
 
-  if (!isLoggedIn) {
+  if (!session) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <Toaster position="top-right" />

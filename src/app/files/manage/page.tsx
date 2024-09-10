@@ -3,6 +3,8 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import Loading from "@/app/loading";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 const LoadingIndicator = dynamic(
   () =>
@@ -20,6 +22,17 @@ const UserFileManager = dynamic(
 );
 
 const ManageFilesPage = () => {
+  const { data: session, status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      redirect("/auth/signin");
+    },
+  });
+
+  if (status === "loading") {
+    return <LoadingIndicator loading="file manager" />;
+  }
+
   return (
     <>
       <Header />
