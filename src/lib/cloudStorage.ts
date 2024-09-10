@@ -37,6 +37,9 @@ export const cloudStorage = {
       data: { filename: newFilename },
     });
     await cloudStorage.makeFilePublic(newFilename);
+    await cloudStorage.setFileMetadata(newFilename, {
+      contentDisposition: `attachment; filename="${newFilename}"`,
+    });
   },
   fileExists: async (filename: string): Promise<boolean> => {
     const [exists] = await bucket.file(filename).exists();
