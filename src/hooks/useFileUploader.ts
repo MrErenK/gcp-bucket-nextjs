@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
+import { useSession } from "next-auth/react";
 
 interface UploadedFile {
   name: string;
@@ -9,10 +10,12 @@ interface UploadedFile {
 export function useFileUploader(
   onUploadComplete: (uploadedFiles: UploadedFile[]) => void,
 ) {
+  const { data: session } = useSession();
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState<string>("");
+  const [useCustomApiKey, setUseCustomApiKey] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -31,7 +34,8 @@ export function useFileUploader(
 
   const handleUpload = async () => {
     if (files.length === 0) return;
-    if (!apiKey) {
+    const currentApiKey = useCustomApiKey ? apiKey : session?.user?.apiKey;
+    if (!currentApiKey) {
       setError("API key is required.");
       return;
     }
@@ -47,7 +51,7 @@ export function useFileUploader(
       const response = await fetch("/api/upload", {
         method: "POST",
         headers: {
-          "x-api-key": apiKey,
+          "x-api-key": currentApiKey,
         },
         body: formData,
       });
@@ -86,6 +90,8 @@ export function useFileUploader(
     uploadSuccess,
     apiKey,
     setApiKey,
+    useCustomApiKey,
+    setUseCustomApiKey,
     getRootProps,
     getInputProps,
     isDragActive,

@@ -30,7 +30,13 @@ const ManageFilesPage = () => {
   });
 
   if (status === "loading") {
-    return <LoadingIndicator loading="file manager" />;
+    return (
+      <>
+        <div className="flex justify-center items-center h-screen">
+          <LoadingIndicator loading="file manager" />
+        </div>
+      </>
+    );
   }
 
   return (

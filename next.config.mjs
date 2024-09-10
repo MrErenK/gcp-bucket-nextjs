@@ -13,6 +13,10 @@ const nextConfig = {
             'clsx',
             'class-variance-authority',
             'tailwind-merge',
+            '@radix-ui/react-switch',
+            '@radix-ui/react-label',
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-slot',
         ],
     },
 };

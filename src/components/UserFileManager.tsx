@@ -9,7 +9,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { toast, Toaster } from "react-hot-toast";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { getApiKeyDescription } from "@/lib/apiKeyAuth";
 import { useRouter } from "next/navigation";
 
 const Card = dynamic(
@@ -68,6 +67,18 @@ const EyeOffIcon = dynamic(
   () => import("@/components/Icons").then((mod) => mod.EyeOffIcon),
   { ssr: false },
 );
+const UserIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.UserIcon),
+  { ssr: false },
+);
+const CopyIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.CopyIcon),
+  { ssr: false },
+);
+const DownloadIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.DownloadIcon),
+  { ssr: false },
+);
 const LoadingIndicator = dynamic(
   () =>
     import("@/components/LoadingIndicator").then((mod) => mod.LoadingIndicator),
@@ -95,9 +106,6 @@ export function UserFileManager() {
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [fileToRename, setFileToRename] = useState("");
   const [newFileName, setNewFileName] = useState("");
-  const [apiKeyDescription, setApiKeyDescription] = useState<string | null>(
-    null,
-  );
 
   const handleLogout = useCallback(() => {
     signOut();
@@ -107,16 +115,12 @@ export function UserFileManager() {
     setTimeout(() => {
       router.push("/auth/signin");
     }, 1000);
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     const updateSessionState = async () => {
       if (session) {
         setIsLoggedIn(true);
-        if (session.user.apiKey) {
-          const description = await getApiKeyDescription(session.user.apiKey);
-          setApiKeyDescription(description);
-        }
         fetchFiles();
       } else {
         setIsLoggedIn(false);
@@ -157,10 +161,19 @@ export function UserFileManager() {
       toast.error("Invalid API key, please check your key and try again.");
     } else {
       setLoginError(null);
-      toast.success("Successfully logged in as " + apiKeyDescription);
-      // Refresh the session to trigger the useEffect
+      toast.success("Successfully logged in as " + session?.user.name);
       router.refresh();
     }
+  };
+
+  const handleCopyLink = (fileName: string) => {
+    const fileLink = `${window.location.origin}/api/download?filename=${encodeURIComponent(fileName)}`;
+    navigator.clipboard.writeText(fileLink);
+    toast.success("File link copied to clipboard");
+  };
+
+  const handleDownload = (fileName: string) => {
+    window.location.href = `/api/download?filename=${fileName}`;
   };
 
   if (status === "loading") {
@@ -229,13 +242,28 @@ export function UserFileManager() {
       <Card className="border border-primary/10 shadow-xl rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
         <CardContent className="p-6">
           <div className="space-y-6">
-            {isLoggedIn && apiKeyDescription && (
-              <>
+            {isLoggedIn && session?.user.name && (
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="text-primary text-lg font-semibold">
-                  Welcome back, {apiKeyDescription}!
+                  Welcome back, {session?.user.name}!
                 </div>
-                <Button onClick={handleLogout}>Logout</Button>
-              </>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleLogout}
+                    variant="destructive"
+                    className="text-sm md:text-base px-4 py-2 md:px-6 md:py-3 transition-all duration-300"
+                  >
+                    Logout
+                  </Button>
+                  <Button
+                    onClick={() => router.push("/profile")}
+                    variant="outline"
+                  >
+                    <UserIcon className="w-4 h-4 mr-2" />
+                    Profile
+                  </Button>
+                </div>
+              </div>
             )}
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Your Files</h2>
@@ -267,13 +295,15 @@ export function UserFileManager() {
                             {file.name}
                           </h3>
                         </Link>
-                        <div className="flex items-center mt-1 text-sm text-muted-foreground">
-                          <DownloadCountIcon className="w-4 h-4 mr-1" />
-                          <strong>{file.downloads}</strong>
-                          <span className="mx-2">•</span>
-                          <FileStatsIcon className="w-4 h-4 mr-1" />
-                          <span>{formatFileSize(file.size)}</span>
-                          <span className="mx-2">•</span>
+                        <div className="flex flex-wrap items-center mt-1 text-sm text-muted-foreground gap-2">
+                          <span className="flex items-center">
+                            <DownloadCountIcon className="w-4 h-4 mr-1" />
+                            <strong>{file.downloads}</strong>
+                          </span>
+                          <span className="flex items-center">
+                            <FileStatsIcon className="w-4 h-4 mr-1" />
+                            <span>{formatFileSize(file.size)}</span>
+                          </span>
                           <span>
                             {new Date(file.updatedAt).toLocaleString()}
                           </span>
@@ -298,6 +328,22 @@ export function UserFileManager() {
                       >
                         <TrashIcon className="w-4 h-4 mr-2" />
                         Delete
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleCopyLink(file.name)}
+                      >
+                        <CopyIcon className="w-4 h-4 mr-2" />
+                        Copy
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDownload(file.name)}
+                      >
+                        <DownloadIcon className="w-4 h-4 mr-2" />
+                        Download
                       </Button>
                     </div>
                   </div>

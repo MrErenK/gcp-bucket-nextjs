@@ -36,6 +36,7 @@ export const cloudStorage = {
       where: { filename: oldFilename },
       data: { filename: newFilename },
     });
+    await cloudStorage.makeFilePublic(newFilename);
   },
   fileExists: async (filename: string): Promise<boolean> => {
     const [exists] = await bucket.file(filename).exists();

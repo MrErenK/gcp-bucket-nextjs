@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 
@@ -22,7 +22,7 @@ export function useUserFileManagement() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const fetchFiles = useCallback(async () => {
-    if (!session?.user?.apiKey) {
+    if (!session?.user?.apiKey || files.length > 0) {
       setLoading(false);
       return;
     }
@@ -32,7 +32,7 @@ export function useUserFileManagement() {
     try {
       const response = await fetch(`/api/user-files`, {
         headers: {
-          "x-api-key": session.user.apiKey,
+          "x-api-key": session?.user.apiKey || "",
         },
       });
       if (!response.ok) {
@@ -51,13 +51,13 @@ export function useUserFileManagement() {
     } finally {
       setLoading(false);
     }
-  }, [session]);
+  }, [session, files.length]);
 
   useEffect(() => {
-    if (session?.user?.apiKey) {
+    if (session?.user?.apiKey && files.length === 0) {
       fetchFiles();
     }
-  }, [session, fetchFiles]);
+  }, [session, fetchFiles, files.length]);
 
   const handleDelete = useCallback(
     async (filename: string) => {
@@ -115,10 +115,42 @@ export function useUserFileManagement() {
     [session?.user.apiKey, fetchFiles],
   );
 
+  const mostDownloadedFile = useMemo(() => {
+    return files.reduce(
+      (most, file) => (most.downloads > file.downloads ? most : file),
+      files[0],
+    );
+  }, [files]);
+
+  const leastDownloadedFile = useMemo(() => {
+    return files.reduce(
+      (least, file) => (least.downloads < file.downloads ? least : file),
+      files[0],
+    );
+  }, [files]);
+
+  const mostViewedFile = useMemo(() => {
+    return files.reduce(
+      (most, file) => (most.views > file.views ? most : file),
+      files[0],
+    );
+  }, [files]);
+
+  const leastViewedFile = useMemo(() => {
+    return files.reduce(
+      (least, file) => (least.views < file.views ? least : file),
+      files[0],
+    );
+  }, [files]);
+
   return {
     files,
     totalFiles,
     totalSize,
+    mostDownloadedFile,
+    leastDownloadedFile,
+    mostViewedFile,
+    leastViewedFile,
     loading,
     error,
     fetchFiles,

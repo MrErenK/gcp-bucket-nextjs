@@ -539,6 +539,13 @@ const CodeIcon = createIcon(
   </>,
 );
 
+const UserIcon = createIcon(
+  <>
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </>,
+);
+
 function getFileIcon(fileName: string) {
   const extension = fileName.split(".").pop() || "";
   const fileType = getFileType(`.${extension}`);
@@ -553,7 +560,6 @@ function getFileIcon(fileName: string) {
     case "video":
       return VideoIcon;
     default:
-      // You can add more specific checks here if needed
       if (extension === "pdf") return PdfIcon;
       if (["zip", "rar", "7z", "tar", "gz"].includes(extension))
         return ArchiveIcon;
@@ -613,5 +619,6 @@ export {
   AudioIcon,
   PdfIcon,
   CodeIcon,
+  UserIcon,
   getFileIcon,
 };

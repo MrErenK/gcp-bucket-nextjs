@@ -56,8 +56,11 @@ export function FileManager() {
   return (
     <section className="mb-8">
       <FileUploader onUploadComplete={handleRefresh} />
-      <UserFileManager />
       <>
+        <div className="flex flex-col gap-4 justify-center items-center">
+          <h2 className="text-2xl font-bold mb-4">Uploaded Files</h2>
+          <UserFileManager />
+        </div>
         <h2 className="text-2xl font-bold mb-4">Download Files</h2>
         <div className="bg-muted rounded-lg p-6">
           <SearchBar
