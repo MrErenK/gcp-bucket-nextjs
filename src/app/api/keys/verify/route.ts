@@ -5,9 +5,9 @@ export async function GET(request: NextRequest) {
   const prisma = await getPrisma();
 
   const { searchParams } = new URL(request.url);
-  const userKey = searchParams.get("user_key");
+  const key = searchParams.get("key");
 
-  if (!userKey) {
+  if (!key) {
     return NextResponse.json(
       { error: "User API key is required" },
       { status: 400 },
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const apiKey = await prisma.apiKey.findUnique({
-      where: { key: userKey },
+      where: { key: key },
       select: { id: true, description: true },
     });
 

@@ -3,7 +3,7 @@ const API_BASE_URL =
 
 export async function verifyApiKey(apiKey: string) {
   const response = await fetch(
-    `${API_BASE_URL}/api/keys/verify?user_key=${apiKey}`,
+    `${API_BASE_URL}/api/keys/verify?key=${apiKey}`,
     {
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -16,7 +16,7 @@ export async function verifyApiKey(apiKey: string) {
 
 export async function getApiKeyDescription(apiKey: string) {
   const response = await fetch(
-    `${API_BASE_URL}/api/keys/verify?user_key=${apiKey}`,
+    `${API_BASE_URL}/api/keys/verify?key=${apiKey}`,
     {
       headers: {
         Authorization: `Bearer ${apiKey}`,
