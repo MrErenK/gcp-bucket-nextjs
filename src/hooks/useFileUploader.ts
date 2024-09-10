@@ -2,11 +2,6 @@ import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { useSession } from "next-auth/react";
 
-interface UploadedFile {
-  name: string;
-  url: string;
-}
-
 export function useFileUploader(
   onUploadComplete: () => void,
 ) {
@@ -15,7 +10,7 @@ export function useFileUploader(
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState<string>("");
-  const [useCustomApiKey, setUseCustomApiKey] = useState(false);
+  const [useCustomApiKey, setUseCustomApiKey] = useState(!session?.user?.apiKey);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -60,7 +55,8 @@ export function useFileUploader(
         setFiles([]);
         setUploading(false);
         setError(null);
-        onUploadComplete(); // Call the onUploadComplete callback
+        setUploadSuccess("Files uploaded successfully!");
+        onUploadComplete();
       } else {
         const errorData = await response.json();
         setError(errorData.error || "Upload failed. Please try again.");

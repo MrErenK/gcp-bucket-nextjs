@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useFileUploader } from "@/hooks/useFileUploader";
 import { APIKeyInput } from "./APIKeyInput";
 import { DirectLinkUploader } from "./DirectLinkUploader";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import { Switch } from "@/components/ui/switch";
@@ -60,6 +60,7 @@ export function FileUploader({
   } = useFileUploader(onUploadComplete);
   const [directLinkError, setDirectLinkError] = useState<string | null>(null);
   const [showApiKey, setShowApiKey] = useState(false);
+  const [directLinkKey, setDirectLinkKey] = useState(0);
 
   const handleCopyApiKey = () => {
     navigator.clipboard.writeText(session?.user?.apiKey || "");
@@ -70,6 +71,13 @@ export function FileUploader({
     setDirectLinkError(error);
   };
 
+  const handleDirectLinkUploadSuccess = useCallback(() => {
+    onUploadComplete();
+    setDirectLinkKey(prevKey => prevKey + 1);
+  }, [onUploadComplete]);
+
+  const currentApiKey = useCustomApiKey ? apiKey : session?.user?.apiKey;
+
   return (
     <>
       <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 mb-4 sm:mb-8 lg:mb-12 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
@@ -78,44 +86,42 @@ export function FileUploader({
         </h2>
 
         {session?.user?.apiKey && (
-          <>
-            <div className="flex flex-col items-center justify-center">
-              <p className="text-md sm:text-lg lg:text-xl font-semibold text-center text-primary items-center justify-center">
-                Currently using api key:
-              </p>
-              <div className="flex items-center space-x-2">
-                <span
-                  className="font-mono text-xs sm:text-sm lg:text-base text-center text-muted-foreground items-center justify-center cursor-pointer"
-                  onClick={handleCopyApiKey}
-                  title="Click to copy"
-                >
-                  {showApiKey ? session?.user?.apiKey : '•'.repeat(40)}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowApiKey(!showApiKey)}
-                  className="p-1"
-                >
-                  {showApiKey ? (
-                    <EyeOffIcon className="h-4 w-4" />
-                  ) : (
-                    <EyeIcon className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-              <div className="flex items-center space-x-2 mb-4 justify-center mt-3">
-                <Switch
-                  id="use-custom-api-key"
-                  checked={useCustomApiKey}
-                  onCheckedChange={setUseCustomApiKey}
-                />
-                <Label htmlFor="use-custom-api-key" className="mr-2">
-                  Use custom API key
-                </Label>
-              </div>
+          <div className="flex flex-col items-center justify-center">
+            <p className="text-md sm:text-lg lg:text-xl font-semibold text-center text-primary items-center justify-center">
+              Currently using api key:
+            </p>
+            <div className="flex items-center space-x-2">
+              <span
+                className="font-mono text-xs sm:text-sm lg:text-base text-center text-muted-foreground items-center justify-center cursor-pointer"
+                onClick={handleCopyApiKey}
+                title="Click to copy"
+              >
+                {showApiKey ? session?.user?.apiKey : '•'.repeat(40)}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowApiKey(!showApiKey)}
+                className="p-1"
+              >
+                {showApiKey ? (
+                  <EyeOffIcon className="h-4 w-4" />
+                ) : (
+                  <EyeIcon className="h-4 w-4" />
+                )}
+              </Button>
             </div>
-          </>
+            <div className="flex items-center space-x-2 mb-4 justify-center mt-3">
+              <Switch
+                id="use-custom-api-key"
+                checked={useCustomApiKey}
+                onCheckedChange={setUseCustomApiKey}
+              />
+              <Label htmlFor="use-custom-api-key" className="mr-2">
+                Use custom API key
+              </Label>
+            </div>
+          </div>
         )}
 
         {(useCustomApiKey || !session?.user?.apiKey) && (
@@ -125,7 +131,7 @@ export function FileUploader({
         )}
 
         <AnimatePresence mode="wait">
-          {(session?.user?.apiKey || apiKey) && (
+          {currentApiKey && (
             <motion.div
               key="file-uploader"
               initial={{ opacity: 0, y: 20 }}
@@ -209,11 +215,27 @@ export function FileUploader({
           )}
         </AnimatePresence>
 
-        <DirectLinkUploader
-          apiKey={useCustomApiKey ? apiKey : session?.user?.apiKey || ""}
-          onUploadSuccess={onUploadComplete}
-          onUploadError={handleDirectLinkError}
-        />
+        <AnimatePresence>
+          {error && (
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="text-red-500 text-sm sm:text-base mt-2 sm:mt-3"
+            >
+              {error}
+            </motion.p>
+          )}
+        </AnimatePresence>
+
+        {currentApiKey && (
+          <DirectLinkUploader
+            key={directLinkKey}
+            apiKey={currentApiKey}
+            onUploadSuccess={handleDirectLinkUploadSuccess}
+            onUploadError={handleDirectLinkError}
+          />
+        )}
         {directLinkError && (
           <p className="text-red-500 text-sm sm:text-base mt-2 sm:mt-3">
             {directLinkError}
