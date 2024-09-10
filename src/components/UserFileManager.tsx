@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { toast } from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
+import { getApiKeyDescription } from "@/lib/apiKeyAuth";
 
 const Card = dynamic(
   () => import("@/components/ui/card").then((mod) => mod.Card),
@@ -80,7 +81,6 @@ export function UserFileManager() {
     files,
     totalFiles,
     totalSize,
-    loading,
     error,
     fetchFiles,
     handleDelete,
@@ -93,15 +93,24 @@ export function UserFileManager() {
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [fileToRename, setFileToRename] = useState("");
   const [newFileName, setNewFileName] = useState("");
+  const [apiKeyDescription, setApiKeyDescription] = useState<string | null>(null);
+
+  const handleLogout = useCallback(() => {
+    setIsLoggedIn(false);
+    setApiKeyDescription(null);
+    localStorage.removeItem("apiKey");
+    toast.success("Logged out successfully");
+  }, []);
 
   useEffect(() => {
     const checkLoginStatus = async () => {
-      // Check if there's a stored API key or some other way to determine if the user is logged in
       const storedApiKey = localStorage.getItem("apiKey");
       if (storedApiKey) {
         const success = await login(storedApiKey);
         if (success) {
           setIsLoggedIn(true);
+          const description = await getApiKeyDescription(storedApiKey);
+          setApiKeyDescription(description);
           await fetchFiles();
         }
       }
@@ -144,17 +153,20 @@ export function UserFileManager() {
       if (success) {
         setLoginError(null);
         localStorage.setItem("apiKey", apiKeyInput);
+        const description = await getApiKeyDescription(apiKeyInput);
+        setApiKeyDescription(description);
+        toast.success(`Successfully logged in as ${description}`);
       } else {
         setLoginError("Invalid API key, please check your key and try again.");
         setIsLoggedIn(false);
         localStorage.removeItem("apiKey");
-        setTimeout(() => setLoginError(null), 5000);
+        toast.error("Invalid API key, please check your key and try again.");
       }
     } catch (error) {
       setLoginError("An unexpected error occurred, please try again.");
       setIsLoggedIn(false);
       localStorage.removeItem("apiKey");
-      setTimeout(() => setLoginError(null), 5000);
+      toast.error("An unexpected error occurred, please try again.");
       console.error(error);
     }
   };
@@ -174,6 +186,7 @@ export function UserFileManager() {
   if (!isLoggedIn) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <Toaster position="top-right" />
         <Card className="border border-primary/10 shadow-xl rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-primary/20">
           <CardContent className="p-6">
             <h2 className="text-3xl font-bold mb-6 text-primary">
@@ -228,9 +241,18 @@ export function UserFileManager() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <Toaster position="top-right" />
       <Card className="border border-primary/10 shadow-xl rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
         <CardContent className="p-6">
           <div className="space-y-6">
+            {isLoggedIn && apiKeyDescription && (
+              <>
+                <div className="text-primary text-lg font-semibold">
+                  Welcome back, {apiKeyDescription}!
+                </div>
+                <Button onClick={handleLogout}>Logout</Button>
+              </>
+            )}
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Your Files</h2>
               <Button onClick={handleRefresh} className="flex items-center">

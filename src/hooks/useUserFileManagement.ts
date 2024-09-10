@@ -72,7 +72,6 @@ export function useUserFileManagement() {
           setApiKey(key);
           setIsLoggedIn(true);
           localStorage.setItem("apiKey", key);
-          toast.success("Logged in successfully, fetching your files...");
           fetchFiles(true);
           return true;
         } else {
