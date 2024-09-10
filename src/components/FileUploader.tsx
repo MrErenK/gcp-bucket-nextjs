@@ -29,6 +29,14 @@ const LoadingIcon = dynamic(
   () => import("@/components/Icons").then((mod) => mod.LoadingIcon),
   { ssr: false },
 );
+const EyeIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.EyeIcon),
+  { ssr: false },
+);
+const EyeOffIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.EyeOffIcon),
+  { ssr: false },
+);
 
 export function FileUploader({
   onUploadComplete,
@@ -51,6 +59,7 @@ export function FileUploader({
     handleRemoveFile,
   } = useFileUploader(onUploadComplete);
   const [directLinkError, setDirectLinkError] = useState<string | null>(null);
+  const [showApiKey, setShowApiKey] = useState(false);
 
   const handleDirectLinkError = (error: string) => {
     setDirectLinkError(error);
@@ -70,16 +79,30 @@ export function FileUploader({
               <p className="text-md sm:text-lg lg:text-xl font-semibold text-center text-primary items-center justify-center">
                 Currently using api key:
               </p>
-              <span
-                className="font-mono text-xs sm:text-sm lg:text-base text-center text-muted-foreground items-center justify-center cursor-pointer"
-                onClick={() => {
-                  navigator.clipboard.writeText(session?.user?.apiKey || "");
-                  toast.success("Copied to clipboard");
-                }}
-                title="Click to copy"
-              >
-                {session?.user?.apiKey}
-              </span>
+              <div className="flex items-center space-x-2">
+                <span
+                  className="font-mono text-xs sm:text-sm lg:text-base text-center text-muted-foreground items-center justify-center cursor-pointer"
+                  onClick={() => {
+                    navigator.clipboard.writeText(session?.user?.apiKey || "");
+                    toast.success("Copied to clipboard");
+                  }}
+                  title="Click to copy"
+                >
+                  {showApiKey ? session?.user?.apiKey : '•'.repeat(32)}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowApiKey(!showApiKey)}
+                  className="p-1"
+                >
+                  {showApiKey ? (
+                    <EyeOffIcon className="h-4 w-4" />
+                  ) : (
+                    <EyeIcon className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
               <div className="flex items-center space-x-2 mb-4 justify-center mt-3">
                 <Switch
                   id="use-custom-api-key"
