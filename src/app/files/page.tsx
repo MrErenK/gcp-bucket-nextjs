@@ -92,6 +92,7 @@ const FilesPage = () => {
                   updatedAt: file.updatedAt,
                   downloads: file.downloads || 0,
                   size: file.size || 0,
+                  uploadedKey: file.uploadedKey || "",
                 }))}
                 onCopy={handleCopy}
                 onDownload={handleDownload}

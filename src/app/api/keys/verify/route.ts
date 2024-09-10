@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       where: { key: key },
       select: { id: true },
     });
-
+    
     if (apiKey) {
       return NextResponse.json({ valid: true });
     } else {
@@ -54,5 +54,7 @@ export async function GET(request: NextRequest) {
       { error: "Failed to verify API key" },
       { status: 500 },
     );
+  } finally {
+    await prisma.$disconnect(); // Ensure the Prisma client is disconnected
   }
 }

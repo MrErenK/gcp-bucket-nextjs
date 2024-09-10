@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 
 interface File {
+  uploadedKey: null;
   size: number;
   downloads: number;
   name: string;

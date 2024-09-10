@@ -16,8 +16,9 @@ const LoadingIndicator = dynamic(
 interface FileData {
   name: string;
   updatedAt: string;
-  downloads?: number;
-  size?: number;
+  downloads: number;
+  size: number;
+  uploadedKey: string;
 }
 
 export function FileManager() {
@@ -63,6 +64,7 @@ export function FileManager() {
             updatedAt: file.updatedAt,
             downloads: file.downloads || 0,
             size: file.size || 0,
+            uploadedKey: file.uploadedKey || "",
           }))}
           onCopy={handleCopy}
           onDownload={handleDownload}
@@ -110,12 +112,7 @@ export function FileContent({
 
   return (
     <FileList
-      files={files.map((file) => ({
-        name: file.name,
-        updatedAt: file.updatedAt,
-        downloads: file.downloads || 0,
-        size: file.size || 0,
-      }))}
+      files={files}
       onCopy={onCopy}
       onDownload={onDownload}
       onRefresh={onRefresh}

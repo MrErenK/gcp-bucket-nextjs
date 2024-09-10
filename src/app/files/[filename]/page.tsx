@@ -26,6 +26,7 @@ interface FileDetails {
   updatedAt: string;
   downloads: number;
   views: number;
+  uploadedKey: string;
 }
 
 interface PreviewData {
@@ -230,6 +231,10 @@ export default function FilePage({ params }: { params: { filename: string } }) {
                 {
                   label: "Views",
                   value: fileDetails?.views || 0,
+                },
+                {
+                  label: "Uploaded with key",
+                  value: fileDetails?.uploadedKey || "",
                 },
               ].map((item, index) => (
                 <div

@@ -37,11 +37,17 @@ const DownloadCountIcon = dynamic(
   { ssr: false },
 );
 
+const UploadIcon = dynamic(
+  () => import("@/components/Icons").then((mod) => mod.UploadIcon),
+  { ssr: false },
+);
+
 interface File {
   name: string;
   updatedAt: string;
   size: number;
   downloads: number;
+  uploadedKey?: string;
 }
 
 interface FileListProps {
@@ -298,7 +304,14 @@ export function FileList({
                       <DownloadCountIcon className="w-4 h-4 mr-1" />
                       <strong>{file.downloads}</strong>
                       <span className="mx-2">•</span>
+                      <FileIcon className="w-4 h-4 mr-1" />
                       <span>{formatFileSize(file.size)}</span>
+                      <span className="mx-2">•</span>
+                      <UploadIcon className="w-4 h-4 mr-1" />
+                      <span>
+                        Uploaded with key:{" "}
+                        <span className="font-mono">{file.uploadedKey}</span>
+                      </span>
                     </div>
                   </div>
                 </div>

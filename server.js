@@ -1,6 +1,8 @@
 const express = require("express");
 const next = require("next");
-const { bucket } = require("./src/lib/expressStorage");
+const { s3, bucket } = require("./src/lib/expressStorage");
+const { PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const cors = require("cors");
 const busboy = require("busboy");
 const stream = require("stream");
@@ -50,8 +52,7 @@ async function uploadFromDirectLink(directLink) {
   const response = await fetch(directLink);
   if (!response.ok) throw new Error(`Failed to fetch file from ${directLink}`);
 
-  const contentType =
-    response.headers.get("content-type") || "application/octet-stream";
+  const contentType = response.headers.get("content-type") || "application/octet-stream";
   const contentDisposition = response.headers.get("content-disposition");
   const sourceUrl = new URL(directLink);
   let filename = sourceUrl.pathname.split("/").pop() || "downloaded_file";
@@ -65,23 +66,19 @@ async function uploadFromDirectLink(directLink) {
 
   filename = filename.replace(/"/g, "");
 
-  const blob = bucket.file(filename);
-  const blobStream = blob.createWriteStream();
+  const buffer = await response.arrayBuffer();
 
-  if (response.body) {
-    await pipeline(response.body, blobStream);
-  } else {
-    throw new Error("Response body is null");
-  }
+  const uploadParams = {
+    Bucket: bucket.name,
+    Key: filename,
+    Body: Buffer.from(buffer),
+    ContentType: contentType,
+    ContentDisposition: `${contentType.startsWith("text/") ? "inline" : "attachment"}; filename="${filename}"`,
+  };
 
-  await blob.makePublic();
+  await s3.send(new PutObjectCommand(uploadParams));
 
-  await blob.setMetadata({
-    contentType,
-    contentDisposition: `${contentType.startsWith("text/") ? "inline" : "attachment"}; filename="${filename}"`,
-  });
-
-  const downloadUrl = `${BASE_URL}/api/download?filename=${encodeURIComponent(filename)}`;
+  const downloadUrl = await getSignedUrl(s3, new GetObjectCommand({ Bucket: bucket.name, Key: filename }), { expiresIn: 3600 });
   return { name: filename, url: downloadUrl };
 }
 
@@ -89,9 +86,20 @@ nextApp.prepare().then(() => {
   app.post("/api/upload", async (req, res) => {
     const apiKey = req.headers["x-api-key"];
 
-    if (!apiKey || !(await verifyApiKey(apiKey))) {
+    console.log("Received API key:", apiKey); // Log the received API key
+
+    if (!apiKey) {
       return res.status(401).json({
-        error: "Unauthorized: Invalid or missing API key",
+        error: "Unauthorized: Missing API key",
+      });
+    }
+
+    const isValidKey = await verifyApiKey(apiKey);
+    console.log("API key validation result:", isValidKey); // Log the validation result
+
+    if (!isValidKey) {
+      return res.status(401).json({
+        error: "Unauthorized: Invalid API key",
         key: apiKey,
       });
     }
@@ -120,7 +128,7 @@ nextApp.prepare().then(() => {
     const uploadPromises = [];
     let filesUploaded = 0;
 
-    bb.on("file", (fieldname, file, info) => {
+    bb.on("file", async (fieldname, file, info) => {
       if (fieldname !== "files") {
         file.resume();
         return;
@@ -134,46 +142,36 @@ nextApp.prepare().then(() => {
 
       filesUploaded++;
       let fileSize = 0;
-      const blob = bucket.file(filename);
-      const blobStream = blob.createWriteStream();
+      const chunks = [];
 
       const uploadPromise = new Promise((resolveUpload, rejectUpload) => {
         file.on("data", (data) => {
           fileSize += data.length;
           if (fileSize > MAX_FILE_SIZE) {
             file.resume();
-            blobStream.destroy(
-              new Error(
-                `File ${filename} exceeds the maximum allowed size of 6 GB.`,
-              ),
-            );
-            rejectUpload(
-              new Error(
-                `File ${filename} exceeds the maximum allowed size of 6 GB.`,
-              ),
-            );
+            rejectUpload(new Error(`File ${filename} exceeds the maximum allowed size of 6 GB.`));
           }
+          chunks.push(data);
         });
 
-        file.pipe(blobStream);
-
-        blobStream.on("finish", async () => {
+        file.on("end", async () => {
           try {
-            await blob.makePublic();
-            await blob.setMetadata({
-              contentType: mimeType,
-              contentDisposition: `${mimeType.startsWith("text/") ? "inline" : "attachment"}; filename="${filename}"`,
-            });
+            const buffer = Buffer.concat(chunks);
+            const uploadParams = {
+              Bucket: bucket.name,
+              Key: filename,
+              Body: buffer,
+              ContentType: mimeType,
+              ContentDisposition: `${mimeType.startsWith("text/") ? "inline" : "attachment"}; filename="${filename}"`,
+            };
 
-            const fileUrl = `${BASE_URL}/api/download?filename=${encodeURIComponent(filename)}`;
+            await s3.send(new PutObjectCommand(uploadParams));
+
+            const fileUrl = await getSignedUrl(s3, new GetObjectCommand({ Bucket: bucket.name, Key: filename }), { expiresIn: 3600 });
             resolveUpload({ name: filename, url: fileUrl });
           } catch (error) {
             rejectUpload(error);
           }
-        });
-
-        blobStream.on("error", (error) => {
-          rejectUpload(error);
         });
       });
 

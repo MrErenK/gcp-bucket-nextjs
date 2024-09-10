@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
-import { cloudStorage } from "@/lib/cloudStorage";
+import { s3Client, bucket, GetObjectCommand, HeadObjectCommand } from "@/lib/storage";
 import { getFileType } from "@/types/filetypes";
+import { getPrisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const filename = searchParams.get("filename");
 
   if (!filename) {
-    return NextResponse.json(
-      { error: "Filename is required" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Filename is required" }, { status: 400 });
   }
 
   try {
@@ -19,9 +17,14 @@ export async function GET(request: NextRequest) {
     const fileType = getFileType(fileExtension);
 
     // Check if file exists
-    const fileExists = await cloudStorage.fileExists(filename);
+    const headObjectCommand = new HeadObjectCommand({
+      Bucket: bucket,
+      Key: filename,
+    });
 
-    if (!fileExists) {
+    try {
+      await s3Client.send(headObjectCommand);
+    } catch (error) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
@@ -35,8 +38,13 @@ export async function GET(request: NextRequest) {
 
     switch (fileType) {
       case "text":
-        const fileContent = await cloudStorage.downloadFile(filename);
-        previewData.content = fileContent.toString("utf8");
+        const getObjectCommand = new GetObjectCommand({
+          Bucket: bucket,
+          Key: filename,
+        });
+        const { Body } = await s3Client.send(getObjectCommand);
+        const fileContent = await Body!.transformToString();
+        previewData.content = fileContent;
         break;
 
       case "image":
@@ -51,16 +59,17 @@ export async function GET(request: NextRequest) {
     }
 
     // Get file stats
-    const stats = await cloudStorage.getFileStats(filename);
+    const prisma = await getPrisma();
+    const stats = await prisma.fileStats.findUnique({
+      where: { filename },
+      select: { views: true, downloads: true },
+    }) || { views: 0, downloads: 0 };
     previewData.views = stats.views;
     previewData.downloads = stats.downloads;
 
     return NextResponse.json(previewData);
   } catch (error) {
     console.error(error);
-    return NextResponse.json(
-      { error: "Error fetching file preview" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Error fetching file preview" }, { status: 500 });
   }
 }

@@ -18,5 +18,6 @@ model ApiKey {
 model FileStats {
   filename String @id
   views    Int    @default(0)
-  downloads Int   @default(0)
+  downloads    Int    @default(0)
+  uploadedKey  String?
 }
