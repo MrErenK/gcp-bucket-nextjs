@@ -22,7 +22,6 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 
 const MAX_FILE_SIZE = 6 * 1024 * 1024 * 1024; // 6 GB in bytes
-const CHUNK_SIZE = 5 * 1024 * 1024; // 5 MB chunk size
 const BASE_URL = process.env.WEB_URL || "http://localhost:3000";
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 
@@ -168,74 +167,50 @@ nextApp.prepare().then(() => {
       filesUploaded++;
       let fileSize = 0;
       const blob = bucket.file(filename);
+      const blobStream = blob.createWriteStream();
 
       const uploadPromise = new Promise((resolveUpload, rejectUpload) => {
-        const chunks = [];
-
-        file.on("data", (chunk) => {
-          fileSize += chunk.length;
+        file.on("data", (data) => {
+          fileSize += data.length;
           if (fileSize > MAX_FILE_SIZE) {
             file.resume();
-            console.log(`Upload canceled: File ${filename} exceeds size limit`);
+            blobStream.destroy(
+              new Error(
+                `File ${filename} exceeds the maximum allowed size of 6 GB.`,
+              ),
+            );
+            console.log(`Upload canceled: File ${filename} exceeds size limit`); // Log upload canceled
             rejectUpload(
               new Error(
                 `File ${filename} exceeds the maximum allowed size of 6 GB.`,
               ),
             );
-          } else {
-            chunks.push(chunk);
-            if (Buffer.concat(chunks).length >= CHUNK_SIZE) {
-              uploadChunk(blob, Buffer.concat(chunks), fileSize - chunks.length)
-                .then(() => {
-                  chunks.length = 0; // Clear the chunks array
-                })
-                .catch((error) => {
-                  console.error(`Error uploading chunk: ${error}`);
-                  rejectUpload(error);
-                });
-            }
           }
         });
 
-        file.on("end", async () => {
-          if (chunks.length > 0) {
-            try {
-              await uploadChunk(
-                blob,
-                Buffer.concat(chunks),
-                fileSize - chunks.length,
-              );
-            } catch (error) {
-              console.error(`Error uploading final chunk: ${error}`);
-              rejectUpload(error);
-              return;
-            }
-          }
+        file.pipe(blobStream);
 
+        blobStream.on("finish", async () => {
           try {
             await blob.makePublic();
             await blob.setMetadata({
               contentType: mimeType,
-              contentDisposition: `${
-                mimeType.startsWith("text/") ? "inline" : "attachment"
-              }; filename="${filename}"`,
+              contentDisposition: `${mimeType.startsWith("text/") ? "inline" : "attachment"}; filename="${filename}"`,
             });
 
-            const fileUrl = `${BASE_URL}/api/download?filename=${encodeURIComponent(
-              filename,
-            )}`;
+            const fileUrl = `${BASE_URL}/api/download?filename=${encodeURIComponent(filename)}`;
             console.log(
               `Uploaded file details: Name: ${filename}, URL: ${fileUrl}`,
-            );
+            ); // Log file details
             resolveUpload({ name: filename, url: fileUrl });
           } catch (error) {
-            console.log(`Upload canceled: Error processing ${filename}`);
+            console.log(`Upload canceled: Error processing ${filename}`); // Log upload canceled
             rejectUpload(error);
           }
         });
 
-        file.on("error", (error) => {
-          console.log(`Upload canceled: Error uploading ${filename}`);
+        blobStream.on("error", (error) => {
+          console.log(`Upload canceled: Error uploading ${filename}`); // Log upload canceled
           rejectUpload(error);
         });
       });
@@ -245,7 +220,7 @@ nextApp.prepare().then(() => {
 
     bb.on("finish", async () => {
       if (!filesUploaded) {
-        console.log("Upload canceled: No valid file was uploaded");
+        console.log("Upload canceled: No valid file was uploaded"); // Log upload canceled
         res.status(400).json({ error: "No valid file was uploaded" });
       } else {
         try {
@@ -271,14 +246,10 @@ nextApp.prepare().then(() => {
             })),
           });
           console.log(
-            `Upload completed: Files uploaded to ${
-              bucket.name
-            } with the following names: ${uploadedFiles
-              .map((file) => file.name)
-              .join(", ")} using the api key: ${apiKeyDescription}`,
+            `Upload completed: Files uploaded to ${bucket.name} with the following names: ${uploadedFiles.map((file) => file.name).join(", ")} using the api key: ${apiKeyDescription}`,
           );
         } catch (error) {
-          console.log("Upload canceled: Error uploading files");
+          console.log("Upload canceled: Error uploading files"); // Log upload canceled
           res
             .status(500)
             .json({ error: `Error uploading files: ${error.message}` });
@@ -288,7 +259,7 @@ nextApp.prepare().then(() => {
 
     bb.on("error", (error) => {
       console.error(error);
-      console.log("Upload canceled: Error in busboy");
+      console.log("Upload canceled: Error in busboy"); // Log upload canceled
       res
         .status(500)
         .json({ error: `Error uploading files: ${error.message}` });
@@ -325,18 +296,5 @@ nextApp.prepare().then(() => {
     console.error("Failed to start server:", error);
   });
 });
-
-async function uploadChunk(blob, chunk, offset) {
-  return new Promise((resolve, reject) => {
-    const stream = blob.createWriteStream({
-      resumable: true,
-      startByte: offset,
-    });
-
-    stream.on("error", reject);
-    stream.on("finish", resolve);
-    stream.end(chunk);
-  });
-}
 
 console.log("Preparing Next.js app...");
