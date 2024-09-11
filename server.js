@@ -1,29 +1,29 @@
-const express = require("express");
-const next = require("next");
-const { bucket } = require("./src/lib/expressStorage");
-const { prisma } = require("./src/lib/expressPrisma");
-const cors = require("cors");
-const busboy = require("busboy");
-const stream = require("stream");
-const { promisify } = require("util");
-const { URL } = require("url");
+const fastifyPlugin = require("fastify-plugin");
+const multipart = require("@fastify/multipart");
 const dotenv = require("dotenv");
+const Fastify = require("fastify");
+const Next = require("next");
+const { pipeline } = require("stream/promises");
+const { URL } = require("url");
+const { prisma } = require("./src/lib/expressPrisma");
+const { bucket } = require("./src/lib/expressStorage");
 
 dotenv.config({ path: `.env.local`, override: true });
 
-const pipeline = promisify(stream.pipeline);
-
 const dev = process.env.NODE_ENV !== "production";
-const nextApp = next({ dev });
+const nextApp = Next({ dev });
 const handle = nextApp.getRequestHandler();
 
-const app = express();
-const port = process.env.PORT || 3000;
-app.use(cors());
+const fastify = Fastify();
+const port = parseInt(process.env.PORT || "3000", 10);
+
+fastify.register(fastifyPlugin(multipart));
 
 const MAX_FILE_SIZE = 6 * 1024 * 1024 * 1024; // 6 GB in bytes
+const CHUNK_SIZE = 100 * 1024 * 1024; // 100 MB in bytes
 const BASE_URL = process.env.WEB_URL || "http://localhost:3000";
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
+const UPLOAD_TIMEOUT = 60 * 60 * 1000; // 60 minutes in milliseconds
 
 if (!ADMIN_API_KEY) {
   throw new Error("ADMIN_API_KEY environment variable is not set");
@@ -70,18 +70,24 @@ async function uploadFromDirectLink(directLink) {
 
   filename = filename.replace(/"/g, "");
 
-  const blob = bucket.file(filename);
-  const blobStream = blob.createWriteStream();
+  const file = bucket.file(filename);
+  const writeStream = file.createWriteStream({
+    resumable: true,
+    chunkSize: CHUNK_SIZE,
+    metadata: {
+      contentType,
+    },
+  });
 
   if (response.body) {
-    await pipeline(response.body, blobStream);
+    await pipeline(response.body, writeStream);
   } else {
     throw new Error("Response body is null");
   }
 
-  await blob.makePublic();
+  await file.makePublic();
 
-  await blob.setMetadata({
+  await file.setMetadata({
     contentType,
     contentDisposition: `${contentType.startsWith("text/") ? "inline" : "attachment"}; filename="${filename}"`,
   });
@@ -91,11 +97,11 @@ async function uploadFromDirectLink(directLink) {
 }
 
 nextApp.prepare().then(() => {
-  app.post("/api/upload", async (req, res) => {
-    const apiKey = req.headers["x-api-key"];
+  fastify.post("/api/upload", async (request, reply) => {
+    const apiKey = request.headers["x-api-key"];
 
     if (!apiKey || !(await verifyApiKey(apiKey))) {
-      return res.status(401).json({
+      return reply.status(401).send({
         error: "Unauthorized: Invalid or missing API key",
         key: apiKey,
       });
@@ -103,190 +109,204 @@ nextApp.prepare().then(() => {
 
     console.log("Upload started");
 
-    const contentType = req.headers["content-type"] || "";
+    const uploadTimeout = setTimeout(() => {
+      console.log("Upload canceled: Timeout reached");
+      reply
+        .status(408)
+        .send({ error: "Request Timeout: Upload took too long" });
+      request.raw.destroy();
+    }, UPLOAD_TIMEOUT);
+
+    const contentType =
+      request.headers["content-type"] || "application/octet-stream";
 
     if (contentType.includes("application/json")) {
       let body;
       try {
-        body = await new Promise((resolve, reject) => {
-          let data = "";
-          req.on("data", (chunk) => {
-            data += chunk;
-          });
-          req.on("end", () => {
-            try {
-              resolve(JSON.parse(data));
-            } catch (e) {
-              reject(e);
-            }
-          });
-        });
+        body = await request.body;
       } catch (error) {
-        console.log("Upload canceled: Invalid JSON body"); // Log upload canceled
-        return res.status(400).json({ error: "Invalid JSON body" });
+        clearTimeout(uploadTimeout);
+        console.log("Upload canceled: Invalid JSON body");
+        return reply.status(400).send({ error: "Invalid JSON body" });
       }
 
       if (body && body.directLink) {
         try {
           const uploadedFile = await uploadFromDirectLink(body.directLink);
+          clearTimeout(uploadTimeout);
           const apikey = await getApiKeyDescription(apiKey);
           console.log("Upload completed successfully");
           console.log(
             `Uploaded file details: Name: ${uploadedFile.name}, URL: ${uploadedFile.url}, apiKey: ${apikey}`,
           );
-          return res.json({
+          return reply.send({
             message: "File uploaded successfully from direct link",
             file: uploadedFile,
           });
         } catch (error) {
+          clearTimeout(uploadTimeout);
           console.error(error);
-          console.log("Upload canceled: Error uploading from direct link"); // Log upload canceled
-          return res.status(500).json({
+          console.log(
+            "Upload canceled: Error uploading from direct link",
+            error,
+          );
+          return reply.status(500).send({
             error: `Error uploading file from direct link: ${error.message}`,
           });
         }
       }
     }
 
-    const bb = busboy({ headers: req.headers });
+    const parts = request.parts();
     const uploadPromises = [];
     let filesUploaded = 0;
 
-    bb.on("file", (fieldname, file, info) => {
-      if (fieldname !== "files") {
-        file.resume();
-        return;
-      }
-
-      const { filename, mimeType } = info;
-      if (!filename) {
-        file.resume();
-        return;
-      }
-
-      filesUploaded++;
-      let fileSize = 0;
-      const blob = bucket.file(filename);
-      const blobStream = blob.createWriteStream();
-
-      const uploadPromise = new Promise((resolveUpload, rejectUpload) => {
-        file.on("data", (data) => {
-          fileSize += data.length;
-          if (fileSize > MAX_FILE_SIZE) {
-            file.resume();
-            blobStream.destroy(
-              new Error(
-                `File ${filename} exceeds the maximum allowed size of 6 GB.`,
-              ),
-            );
-            console.log(`Upload canceled: File ${filename} exceeds size limit`); // Log upload canceled
-            rejectUpload(
-              new Error(
-                `File ${filename} exceeds the maximum allowed size of 6 GB.`,
-              ),
-            );
-          }
-        });
-
-        file.pipe(blobStream);
-
-        blobStream.on("finish", async () => {
-          try {
-            await blob.makePublic();
-            await blob.setMetadata({
-              contentType: mimeType,
-              contentDisposition: `${mimeType.startsWith("text/") ? "inline" : "attachment"}; filename="${filename}"`,
-            });
-
-            const fileUrl = `${BASE_URL}/api/download?filename=${encodeURIComponent(filename)}`;
-            console.log(
-              `Uploaded file details: Name: ${filename}, URL: ${fileUrl}`,
-            ); // Log file details
-            resolveUpload({ name: filename, url: fileUrl });
-          } catch (error) {
-            console.log(`Upload canceled: Error processing ${filename}`); // Log upload canceled
-            rejectUpload(error);
-          }
-        });
-
-        blobStream.on("error", (error) => {
-          console.log(`Upload canceled: Error uploading ${filename}`); // Log upload canceled
-          rejectUpload(error);
-        });
-      });
-
-      uploadPromises.push(uploadPromise);
-    });
-
-    bb.on("finish", async () => {
-      if (!filesUploaded) {
-        console.log("Upload canceled: No valid file was uploaded"); // Log upload canceled
-        res.status(400).json({ error: "No valid file was uploaded" });
-      } else {
-        try {
-          const uploadedFiles = await Promise.all(uploadPromises);
-          res.json({
-            message: "Files uploaded successfully",
-            files: uploadedFiles,
-          });
-          const apiKeyDescription = await getApiKeyDescription(apiKey);
-          await prisma.fileStats.deleteMany({
-            where: {
-              filename: {
-                in: uploadedFiles.map((file) => file.name),
-              },
-            },
-          });
-          await prisma.fileStats.createMany({
-            data: uploadedFiles.map((file) => ({
-              filename: file.name,
-              views: 0,
-              downloads: 0,
-              uploadedKey: apiKeyDescription,
-            })),
-          });
-          console.log(
-            `Upload completed: Files uploaded to ${bucket.name} with the following names: ${uploadedFiles.map((file) => file.name).join(", ")} using the api key: ${apiKeyDescription}`,
-          );
-        } catch (error) {
-          console.log("Upload canceled: Error uploading files"); // Log upload canceled
-          res
-            .status(500)
-            .json({ error: `Error uploading files: ${error.message}` });
+    for await (const part of parts) {
+      if (part.type === "file") {
+        const { filename, mimetype, file } = part;
+        if (!filename) {
+          continue;
         }
+
+        filesUploaded++;
+        let fileSize = 0;
+
+        const uploadPromise = new Promise(
+          async (resolveUpload, rejectUpload) => {
+            try {
+              const gcsFile = bucket.file(filename);
+              const writeStream = gcsFile.createWriteStream({
+                resumable: true,
+                chunkSize: CHUNK_SIZE,
+                metadata: {
+                  contentType: mimetype,
+                },
+              });
+
+              for await (const chunk of file) {
+                fileSize += chunk.length;
+                if (fileSize > MAX_FILE_SIZE) {
+                  file.destroy();
+                  writeStream.destroy(new Error("File size limit exceeded"));
+                  console.log(
+                    `Upload canceled: File ${filename} exceeds size limit`,
+                  );
+                  rejectUpload(
+                    new Error(
+                      `File ${filename} exceeds the maximum allowed size of 6 GB.`,
+                    ),
+                  );
+                  break;
+                }
+                writeStream.write(chunk);
+              }
+
+              writeStream.on("error", (error) => {
+                console.error(`Error uploading ${filename}:`, error);
+                rejectUpload(error);
+              });
+
+              writeStream.on("finish", async () => {
+                try {
+                  await gcsFile.makePublic();
+                  await gcsFile.setMetadata({
+                    contentDisposition: `${
+                      mimetype.startsWith("text/") ? "inline" : "attachment"
+                    }; filename="${filename}"`,
+                  });
+
+                  const fileUrl = `${BASE_URL}/api/download?filename=${encodeURIComponent(
+                    filename,
+                  )}`;
+                  console.log(
+                    `Uploaded file details: Name: ${filename}, URL: ${fileUrl}`,
+                  );
+                  resolveUpload({ name: filename, url: fileUrl });
+                } catch (error) {
+                  console.log(
+                    `Upload canceled: Error processing ${filename}`,
+                    error,
+                  );
+                  rejectUpload(error);
+                }
+              });
+
+              await pipeline(file, writeStream);
+            } catch (error) {
+              console.log(
+                `Upload canceled: Error setting up upload for ${filename}`,
+                error,
+              );
+              rejectUpload(error);
+            }
+          },
+        );
+
+        uploadPromises.push(uploadPromise);
       }
-    });
+    }
 
-    bb.on("error", (error) => {
-      console.error(error);
-      console.log("Upload canceled: Error in busboy"); // Log upload canceled
-      res
-        .status(500)
-        .json({ error: `Error uploading files: ${error.message}` });
-    });
-
-    req.pipe(bb);
+    clearTimeout(uploadTimeout);
+    if (!filesUploaded) {
+      console.log("Upload canceled: No valid file was uploaded");
+      return reply.status(400).send({ error: "No valid file was uploaded" });
+    } else {
+      try {
+        const uploadedFiles = await Promise.all(uploadPromises);
+        const apiKeyDescription = await getApiKeyDescription(apiKey);
+        await prisma.fileStats.deleteMany({
+          where: {
+            filename: {
+              in: uploadedFiles.map((file) => file.name),
+            },
+          },
+        });
+        await prisma.fileStats.createMany({
+          data: uploadedFiles.map((file) => ({
+            filename: file.name,
+            views: 0,
+            downloads: 0,
+            uploadedKey: apiKeyDescription || undefined,
+          })),
+        });
+        console.log(
+          `Upload completed: Files uploaded to ${
+            bucket.name
+          } with the following names: ${uploadedFiles
+            .map((file) => file.name)
+            .join(", ")} using the api key: ${apiKeyDescription}`,
+        );
+        return reply.send({
+          message: "Files uploaded successfully",
+          files: uploadedFiles,
+        });
+      } catch (error) {
+        console.log("Upload canceled: Error uploading files", error);
+        return reply.status(500).send({
+          error: `Error uploading files: ${error.message}`,
+        });
+      }
+    }
   });
 
   // Handle all other routes with Next.js
-  app.all("*", (req, res) => {
-    return handle(req, res);
+  fastify.all("*", (request, reply) => {
+    return handle(request.raw, reply.raw);
   });
 
   const findAvailablePort = async (port) => {
     return new Promise((resolve, reject) => {
-      const server = app.listen(port, () => {
-        console.log(`> Ready on http://localhost:${port}`);
-        resolve(port);
-      });
-
-      server.on("error", (error) => {
-        if (error.code === "EADDRINUSE") {
-          console.log(`Port ${port} is in use, trying another port...`);
-          server.close();
-          resolve(findAvailablePort(parseInt(port) + 1));
+      fastify.listen({ port, host: "0.0.0.0" }, (err) => {
+        if (err) {
+          if (err.code === "EADDRINUSE") {
+            console.log(`Port ${port} is in use, trying another port...`);
+            resolve(findAvailablePort(port + 1));
+          } else {
+            reject(err);
+          }
         } else {
-          reject(error);
+          console.log(`> Ready on http://localhost:${port}`);
+          resolve(port);
         }
       });
     });
