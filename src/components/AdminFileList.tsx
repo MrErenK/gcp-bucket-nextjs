@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { getFileIcon } from "@/components/Icons";
 
 const FileIcon = dynamic(
   () => import("@/components/Icons").then((mod) => mod.FileIcon),
@@ -55,6 +56,7 @@ const RenameIcon = dynamic(
 );
 
 interface File {
+  id: string;
   name: string;
   updatedAt: string;
   size: number;
@@ -62,10 +64,8 @@ interface File {
   uploadedKey: string | null;
 }
 
-interface FileListProps {
+interface AdminFileListProps {
   files: File[];
-  onCopy: (filename: string) => void;
-  onDownload: (filename: string) => void;
   onRefresh: () => Promise<void>;
   totalFiles: number;
   totalSize: number;
@@ -79,9 +79,13 @@ interface SortState {
   orders: Record<SortType, SortOrder>;
 }
 
-export function AdminFileList({ files, onRefresh }: FileListProps) {
+export function AdminFileList({
+  files,
+  onRefresh,
+  totalFiles,
+  totalSize,
+}: AdminFileListProps) {
   const { sortState, updateSort } = useFileManagement();
-  const [loading, setLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [fileToDelete, setFileToDelete] = useState("");
@@ -180,8 +184,8 @@ export function AdminFileList({ files, onRefresh }: FileListProps) {
     </Button>
   );
 
-  const handleDelete = async (filename: string) => {
-    setFileToDelete(filename);
+  const handleDelete = async (fileId: string) => {
+    setFileToDelete(fileId);
     setShowDeleteDialog(true);
   };
 
@@ -193,7 +197,7 @@ export function AdminFileList({ files, onRefresh }: FileListProps) {
     }
     try {
       const response = await fetch(
-        `/api/delete?filename=${encodeURIComponent(fileToDelete)}`,
+        `/api/delete?fileId=${encodeURIComponent(fileToDelete)}`,
         {
           method: "POST",
           headers: {
@@ -215,9 +219,9 @@ export function AdminFileList({ files, onRefresh }: FileListProps) {
     setFileToDelete("");
   };
 
-  const handleRename = async (filename: string) => {
-    setFileToRename(filename);
-    setNewFileName(filename);
+  const handleRename = async (fileId: string, fileName: string) => {
+    setFileToRename(fileId);
+    setNewFileName(fileName);
     setShowRenameDialog(true);
   };
 
@@ -240,8 +244,8 @@ export function AdminFileList({ files, onRefresh }: FileListProps) {
           Authorization: `Bearer ${adminApiKey}`,
         },
         body: JSON.stringify({
-          oldFilename: fileToRename,
-          newFilename: newFileName,
+          fileId: fileToRename,
+          newFileName: newFileName,
         }),
       });
 
@@ -285,7 +289,7 @@ export function AdminFileList({ files, onRefresh }: FileListProps) {
               disabled={isLoading}
             >
               {isLoading ? (
-                <LoadingIndicator loading="refresh" />
+                <p className="animate-pulse">Refreshing...</p>
               ) : (
                 <>
                   <RefreshIcon className="w-4 h-4 mr-2" />
@@ -345,9 +349,11 @@ export function AdminFileList({ files, onRefresh }: FileListProps) {
       ) : (
         <AnimatePresence>
           {sortedFiles.map((file) => {
+            const FileTypeIcon = getFileIcon(file.name);
+
             return (
               <motion.div
-                key={file.name}
+                key={file.id}
                 className="bg-card rounded-lg p-4 sm:p-6 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -356,10 +362,10 @@ export function AdminFileList({ files, onRefresh }: FileListProps) {
               >
                 <div className="flex flex-col gap-4 w-full">
                   <div className="flex items-start gap-4">
-                    <FileIcon className="w-10 h-10 sm:w-12 sm:h-12 text-primary flex-shrink-0" />
+                    <FileTypeIcon className="w-10 h-10 sm:w-12 sm:h-12 text-primary flex-shrink-0" />
                     <div className="flex-grow min-w-0">
                       <Link
-                        href={`/files/${encodeURIComponent(file.name)}`}
+                        href={`/admin/files/${encodeURIComponent(file.id)}`}
                         passHref
                       >
                         <h3 className="font-semibold text-primary hover:text-primary/80 cursor-pointer text-lg sm:text-xl break-words">
@@ -387,14 +393,14 @@ export function AdminFileList({ files, onRefresh }: FileListProps) {
                   <div className="flex flex-wrap gap-2 w-full justify-start mt-2">
                     <FileActionButton
                       variant="secondary"
-                      onClick={() => handleRename(file.name)}
+                      onClick={() => handleRename(file.id, file.name)}
                       disabled={false}
                       icon={<RenameIcon className="w-4 h-4" />}
                       label="Rename"
                     />
                     <FileActionButton
                       variant="destructive"
-                      onClick={() => handleDelete(file.name)}
+                      onClick={() => handleDelete(file.id)}
                       disabled={false}
                       icon={<TrashIcon className="w-4 h-4" />}
                       label="Delete"

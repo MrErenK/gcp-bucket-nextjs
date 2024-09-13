@@ -5,7 +5,6 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import BackupModeWarning from "@/components/BackupModeWarning";
 import BuyMeCoffeeWidget from "@/components/BuyMeCoffeeWidget";
-import { AuthProvider } from "@/components/AuthProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -13,9 +12,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "EreN's Bucket",
-  description:
-    "Google cloud storage bucket hosting for myself (and maybe fellow developers).",
+  title: "EreN's Drive",
+  description: "Google drive index for myself (and maybe fellow developers).",
   icons: [
     {
       rel: "apple-touch-icon",
@@ -56,13 +54,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <AuthProvider>
-          <ThemeProvider attribute="class" defaultTheme="dark">
-            <BackupModeWarning />
-            {children}
-            <BuyMeCoffeeWidget />
-          </ThemeProvider>
-        </AuthProvider>
+        <ThemeProvider attribute="class" defaultTheme="dark">
+          <BackupModeWarning />
+          {children}
+          <BuyMeCoffeeWidget />
+        </ThemeProvider>
       </body>
     </html>
   );

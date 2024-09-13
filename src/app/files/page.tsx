@@ -96,12 +96,15 @@ const FilesPage = () => {
                 loading={loading}
                 initialLoadDone={initialLoadDone}
                 files={files.map((file) => ({
-                  ...file,
+                  id: file.id,
                   name: file.name,
-                  updatedAt: file.updatedAt,
+                  updatedAt: file.modifiedTime,
                   downloads: file.downloads || 0,
-                  size: file.size || 0,
-                  uploadedKey: file.uploadedKey || "",
+                  size:
+                    typeof file.size === "string"
+                      ? parseInt(file.size, 10)
+                      : file.size || 0,
+                  uploadedKey: (file as any).uploadedKey || "",
                 }))}
                 onCopy={handleCopy}
                 onDownload={handleDownload}

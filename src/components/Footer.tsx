@@ -27,7 +27,7 @@ const Footer: React.FC = () => {
               </h2>
             </Link>
             <p className="mt-2 text-muted-foreground text-sm">
-              A cloud storage solution for developers.
+              A cloud storage solution for developers (mostly myself).
             </p>
           </div>
           <nav className="space-y-4 text-center sm:text-left">
@@ -41,14 +41,6 @@ const Footer: React.FC = () => {
                   className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   All Files
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/files/manage"
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Manage Your Files
                 </Link>
               </li>
             </ul>
@@ -79,7 +71,7 @@ const Footer: React.FC = () => {
         </div>
         <div className="mt-8 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
           <p className="text-sm text-muted-foreground text-center sm:text-left">
-            © {new Date().getFullYear()} MrErenK Cloud Storage. All rights
+            © {new Date().getFullYear()} MrErenK Drive Index. All rights
             reserved.
           </p>
           <p className="text-sm text-muted-foreground flex items-center justify-center">

@@ -9,10 +9,6 @@ import { formatFileSize } from "@/lib/utils";
 import { useFileManagement } from "@/hooks/useFileManagement";
 import { getFileIcon } from "@/components/Icons";
 
-const FileIcon = dynamic(
-  () => import("@/components/Icons").then((mod) => mod.FileIcon),
-  { ssr: false },
-);
 const CopyIcon = dynamic(
   () => import("@/components/Icons").then((mod) => mod.CopyIcon),
   { ssr: false },
@@ -47,6 +43,7 @@ const ApiKeyIcon = dynamic(
 );
 
 interface File {
+  id: string;
   name: string;
   updatedAt: string;
   size: number;
@@ -56,8 +53,8 @@ interface File {
 
 interface FileListProps {
   files: File[];
-  onCopy: (filename: string) => void;
-  onDownload: (filename: string) => void;
+  onCopy: (fileId: string) => void;
+  onDownload: (fileId: string) => void;
   onRefresh: () => Promise<void>;
   totalFiles: number;
   totalSize: number;
@@ -94,22 +91,22 @@ export function FileList({
     "transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary hover:text-primary-foreground";
 
   const handleCopy = useCallback(
-    (filename: string) => {
-      onCopy(filename);
-      setCopiedStates((prev) => ({ ...prev, [filename]: true }));
+    (fileId: string) => {
+      onCopy(fileId);
+      setCopiedStates((prev) => ({ ...prev, [fileId]: true }));
       setTimeout(() => {
-        setCopiedStates((prev) => ({ ...prev, [filename]: false }));
+        setCopiedStates((prev) => ({ ...prev, [fileId]: false }));
       }, 2000);
     },
     [onCopy],
   );
 
   const handleDownload = useCallback(
-    (filename: string) => {
-      onDownload(filename);
-      setDownloadingStates((prev) => ({ ...prev, [filename]: true }));
+    (fileId: string) => {
+      onDownload(fileId);
+      setDownloadingStates((prev) => ({ ...prev, [fileId]: true }));
       setTimeout(() => {
-        setDownloadingStates((prev) => ({ ...prev, [filename]: false }));
+        setDownloadingStates((prev) => ({ ...prev, [fileId]: false }));
       }, 2000);
     },
     [onDownload],
@@ -274,13 +271,13 @@ export function FileList({
       </div>
       <AnimatePresence>
         {sortedFiles.map((file) => {
-          const isCopied = copiedStates[file.name];
-          const isDownloading = downloadingStates[file.name];
+          const isCopied = copiedStates[file.id];
+          const isDownloading = downloadingStates[file.id];
           const FileTypeIcon = getFileIcon(file.name);
 
           return (
             <motion.div
-              key={file.name}
+              key={file.id}
               className="bg-card rounded-lg p-3 sm:p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -292,7 +289,7 @@ export function FileList({
                   <FileTypeIcon className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-primary flex-shrink-0" />
                   <div className="flex-grow min-w-0">
                     <Link
-                      href={`/files/${encodeURIComponent(file.name)}`}
+                      href={`/files/${encodeURIComponent(file.id)}`}
                       passHref
                     >
                       <h3 className="font-semibold text-primary hover:text-primary/80 cursor-pointer text-base sm:text-lg md:text-xl break-words">
@@ -328,14 +325,14 @@ export function FileList({
                 <div className="flex flex-wrap gap-2 w-full justify-start mt-1 sm:mt-2">
                   <FileActionButton
                     variant={isCopied ? "default" : "outline"}
-                    onClick={() => handleCopy(file.name)}
+                    onClick={() => handleCopy(file.id)}
                     disabled={isCopied}
                     icon={<CopyIcon className="w-3 h-3 sm:w-4 sm:h-4" />}
                     label={isCopied ? "Copied!" : "Copy"}
                   />
                   <FileActionButton
                     variant="outline"
-                    onClick={() => handleDownload(file.name)}
+                    onClick={() => handleDownload(file.id)}
                     disabled={isDownloading}
                     icon={<DownloadIcon className="w-3 h-3 sm:w-4 sm:h-4" />}
                     label={isDownloading ? "Downloading..." : "Download"}

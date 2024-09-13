@@ -52,11 +52,11 @@ export default function Home() {
       <Toaster
         position="top-right"
         toastOptions={{
-          className: '',
+          className: "",
           style: {
             zIndex: 9999,
-            top: '1rem',
-            right: '1rem',
+            top: "1rem",
+            right: "1rem",
           },
         }}
       />
@@ -69,7 +69,7 @@ export default function Home() {
               aria-hidden="true"
             />
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary leading-tight pt-4">
-              File Manager
+              Goolag Drive
             </h1>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
@@ -79,7 +79,7 @@ export default function Home() {
               className="transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary hover:text-primary-foreground w-full sm:w-auto text-lg py-3 px-4"
             >
               <a
-                href="https://github.com/MrErenK/gcp-bucket-nextjs"
+                href="https://github.com/MrErenK/gcp-bucket-nextjs/tree/google-drive"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center w-full"

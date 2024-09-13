@@ -1,37 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cloudStorage } from "@/lib/cloudStorage";
 
-const CDN_URL = process.env.CDN_URL;
-
-if (!CDN_URL) {
-  throw new Error("CDN_URL environment variable is not set");
-}
-
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const filename = searchParams.get("filename");
+  const fileId = searchParams.get("fileId");
 
-  if (!filename) {
-    return NextResponse.json(
-      { error: "Filename is required" },
-      { status: 400 },
-    );
+  if (!fileId) {
+    return NextResponse.json({ error: "File ID is required" }, { status: 400 });
   }
 
   try {
     // Check if file exists
-    const fileExists = await cloudStorage.fileExists(filename);
+    const fileExists = await cloudStorage.fileExists(fileId);
+    const filename = await cloudStorage.getFileName(fileId);
     if (!fileExists) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
-    await cloudStorage.incrementFileDownloads(filename);
+    // Increment download count
+    await cloudStorage.incrementFileDownloads(fileId, filename as string);
 
-    // Construct the CDN URL
-    const cdnFileUrl = `${CDN_URL}/${encodeURIComponent(filename)}`;
+    // Get file metadata
+    const fileMetadata = await cloudStorage.getFileMetadata(fileId);
 
-    // Redirect to the CDN URL
-    return NextResponse.redirect(cdnFileUrl, 302);
+    // Get download URL
+    const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+
+    // Set response headers
+    const headers = new Headers();
+    headers.set(
+      "Content-Disposition",
+      `attachment; filename="${fileMetadata.name}"`,
+    );
+    headers.set("Content-Type", fileMetadata.mimeType);
+
+    // Redirect to the download URL
+    return NextResponse.redirect(downloadUrl, {
+      headers: headers,
+      status: 302,
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json(

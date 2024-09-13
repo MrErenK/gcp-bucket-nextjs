@@ -5,25 +5,24 @@ import { getFileType } from "@/types/filetypes";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const filename = searchParams.get("filename");
+  const fileId = searchParams.get("fileId");
 
-  if (!filename) {
-    return NextResponse.json(
-      { error: "Filename is required" },
-      { status: 400 },
-    );
+  if (!fileId) {
+    return NextResponse.json({ error: "File ID is required" }, { status: 400 });
   }
 
   try {
-    const fileExtension = path.extname(filename).toLowerCase();
-    const fileType = getFileType(fileExtension);
-
     // Check if file exists
-    const fileExists = await cloudStorage.fileExists(filename);
+    const fileExists = await cloudStorage.fileExists(fileId);
 
     if (!fileExists) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
+
+    // Get file metadata
+    const fileMetadata = await cloudStorage.getFileMetadata(fileId);
+    const fileExtension = path.extname(fileMetadata.name).toLowerCase();
+    const fileType = getFileType(fileExtension);
 
     const previewData: {
       content?: string;
@@ -35,25 +34,33 @@ export async function GET(request: NextRequest) {
 
     switch (fileType) {
       case "text":
-        const fileContent = await cloudStorage.downloadFile(filename);
+        const fileContent = await cloudStorage.downloadFile(fileId);
         previewData.content = fileContent.toString("utf8");
         break;
 
       case "image":
+        previewData.previewUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+        break;
+
       case "audio":
       case "video":
-        previewData.previewUrl = `${process.env.NEXT_PUBLIC_CDN_URL}/${filename}`;
+        previewData.previewUrl = `https://drive.google.com/file/d/${fileId}/preview`;
         break;
 
       default:
         previewData.fileType = fileType;
-        previewData.previewUrl = `${process.env.NEXT_PUBLIC_CDN_URL}/${filename}`;
+        previewData.previewUrl = `https://drive.google.com/file/d/${fileId}/view`;
     }
 
     // Get file stats
-    const stats = await cloudStorage.getFileStats(filename);
+    const stats = await cloudStorage.getFileStats(fileId);
     previewData.views = stats.views;
     previewData.downloads = stats.downloads;
+
+    const filename = await cloudStorage.getFileName(fileId);
+
+    // Increment view count
+    await cloudStorage.incrementFileViews(fileId, filename as string);
 
     return NextResponse.json(previewData);
   } catch (error) {

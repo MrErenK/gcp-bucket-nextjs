@@ -25,9 +25,11 @@ const Header = dynamic(() => import("./Header").then((mod) => mod.default), {
 });
 
 interface FileDetails {
+  id: string;
   name: string;
-  size: number;
-  updatedAt: string;
+  size: string;
+  modifiedTime: string;
+  mimeType: string;
   downloads: number;
   views: number;
   uploadedKey: string | null;
@@ -47,11 +49,7 @@ export default function FilePage({ params }: { params: { filename: string } }) {
   const { handleDownload, handleCopy } = useFileManagement();
   const [loading, setLoading] = useState(true);
 
-  const fileName = decodeURIComponent(params.filename);
-  const fileExtension = fileName
-    .substring(fileName.lastIndexOf("."))
-    .toLowerCase();
-  const fileType = getFileType(fileExtension);
+  const fileId = decodeURIComponent(params.filename);
 
   const buttonClasses =
     "transition duration-300 ease-in-out transform hover:scale-105 hover:bg-primary hover:text-primary-foreground";
@@ -59,9 +57,7 @@ export default function FilePage({ params }: { params: { filename: string } }) {
   useEffect(() => {
     const fetchFileDetails = async () => {
       try {
-        const response = await fetch(
-          `/api/files?filename=${encodeURIComponent(fileName)}`,
-        );
+        const response = await fetch(`/api/files?fileId=${fileId}`);
         if (!response.ok) throw new Error("Failed to fetch file details");
         const data = await response.json();
         setFileDetails(data);
@@ -70,25 +66,9 @@ export default function FilePage({ params }: { params: { filename: string } }) {
       }
     };
 
-    const incrementFileViews = async () => {
-      try {
-        const response = await fetch(
-          `/api/views?filename=${encodeURIComponent(fileName)}`,
-          {
-            method: "POST",
-          },
-        );
-        if (!response.ok) throw new Error("Failed to increment file views");
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
     const fetchPreviewData = async () => {
       try {
-        const response = await fetch(
-          `/api/preview?filename=${encodeURIComponent(fileName)}`,
-        );
+        const response = await fetch(`/api/preview?fileId=${fileId}`);
         if (!response.ok) throw new Error("Failed to fetch preview data");
         const data = await response.json();
         setPreviewData(data);
@@ -100,16 +80,18 @@ export default function FilePage({ params }: { params: { filename: string } }) {
     };
 
     fetchFileDetails();
-    incrementFileViews();
     fetchPreviewData();
-  }, [fileName]);
+  }, [fileId]);
 
-  function formatFileSize(bytes: number) {
-    if (bytes === 0) return "0 Bytes";
+  function formatFileSize(bytes: string) {
+    const parsedBytes = parseInt(bytes, 10);
+    if (parsedBytes === 0) return "0 Bytes";
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    const i = Math.floor(Math.log(parsedBytes) / Math.log(k));
+    return (
+      parseFloat((parsedBytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+    );
   }
 
   function renderPreview() {
@@ -120,19 +102,27 @@ export default function FilePage({ params }: { params: { filename: string } }) {
     }
 
     if (previewData.previewUrl) {
+      const fileType = getFileType(fileDetails?.name.split(".").pop() || "");
       switch (fileType) {
         case "image":
-          return <ImagePreview src={previewData.previewUrl} alt={fileName} />;
+          return (
+            <ImagePreview
+              src={previewData.previewUrl}
+              alt={fileDetails?.name || ""}
+            />
+          );
         case "audio":
           return <AudioPreview src={previewData.previewUrl} />;
         case "video":
           return <VideoPreview src={previewData.previewUrl} />;
         default:
           return (
-            <p className="text-gray-600 dark:text-gray-400">
-              Preview is not available for this file type. Please download to
-              view its contents.
-            </p>
+            <div className="flex items-center justify-center p-4 sm:p-8 md:p-12 lg:p-16">
+              <p className="text-center text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 dark:text-gray-400 max-w-md">
+                Preview is not available for this file type. Please download to
+                view its contents.
+              </p>
+            </div>
           );
       }
     }
@@ -192,8 +182,8 @@ export default function FilePage({ params }: { params: { filename: string } }) {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-background/80">
       <Header
-        handleCopy={() => handleCopy(fileName)}
-        handleDownload={() => handleDownload(fileName)}
+        handleCopy={() => handleCopy(fileDetails?.name || "")}
+        handleDownload={() => handleDownload(fileId)}
         copied={copied}
       />
       <div className="flex justify-end p-4 sm:p-6">
@@ -216,17 +206,17 @@ export default function FilePage({ params }: { params: { filename: string } }) {
                 },
                 {
                   label: "File Size",
-                  value: formatFileSize(fileDetails?.size || 0),
+                  value: formatFileSize(fileDetails?.size || "0"),
                 },
                 {
                   label: "Last Modified",
                   value: new Date(
-                    fileDetails?.updatedAt || "",
+                    fileDetails?.modifiedTime || "",
                   ).toLocaleString(),
                 },
                 {
                   label: "File Type",
-                  value: fileType.charAt(0).toUpperCase() + fileType.slice(1),
+                  value: fileDetails?.mimeType,
                 },
                 {
                   label: "Downloads",

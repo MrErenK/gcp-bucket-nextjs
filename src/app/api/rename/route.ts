@@ -16,17 +16,17 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { oldFilename, newFilename } = body;
+  const { fileId, newFilename } = body;
 
-  if (!oldFilename || !newFilename) {
+  if (!fileId || !newFilename) {
     return NextResponse.json(
-      { error: "Old and new filenames are required" },
+      { error: "File ID and new filename is required" },
       { status: 400 },
     );
   }
 
   try {
-    await cloudStorage.renameFile(oldFilename, newFilename);
+    await cloudStorage.renameFile(fileId, newFilename);
     return NextResponse.json(
       { message: "File renamed successfully" },
       { status: 200 },

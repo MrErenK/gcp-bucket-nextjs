@@ -5,7 +5,7 @@ const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 
 export async function POST(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const filename = searchParams.get("filename");
+  const fileId = searchParams.get("fileId");
   const authHeader = req.headers.get("authorization");
   const token = authHeader?.split(" ")[1];
 
@@ -17,15 +17,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!filename) {
-    return NextResponse.json(
-      { error: "Filename is required" },
-      { status: 400 },
-    );
+  if (!fileId) {
+    return NextResponse.json({ error: "FileID is required" }, { status: 400 });
   }
 
   try {
-    await cloudStorage.deleteFile(filename);
+    await cloudStorage.deleteFile(fileId);
     return NextResponse.json(
       { message: "File deleted successfully" },
       { status: 200 },

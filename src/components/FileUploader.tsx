@@ -8,9 +8,6 @@ import { APIKeyInput } from "./APIKeyInput";
 import { DirectLinkUploader } from "./DirectLinkUploader";
 import { useCallback, useState } from "react";
 import dynamic from "next/dynamic";
-import { useSession } from "next-auth/react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { toast } from "react-hot-toast";
 
 const UploadIcon = dynamic(
@@ -29,29 +26,18 @@ const LoadingIcon = dynamic(
   () => import("@/components/Icons").then((mod) => mod.LoadingIcon),
   { ssr: false },
 );
-const EyeIcon = dynamic(
-  () => import("@/components/Icons").then((mod) => mod.EyeIcon),
-  { ssr: false },
-);
-const EyeOffIcon = dynamic(
-  () => import("@/components/Icons").then((mod) => mod.EyeOffIcon),
-  { ssr: false },
-);
 
 export function FileUploader({
   onUploadComplete,
 }: {
   onUploadComplete: () => void;
 }) {
-  const { data: session } = useSession();
   const {
     files,
     uploading,
     error,
     apiKey,
     setApiKey,
-    useCustomApiKey,
-    setUseCustomApiKey,
     getRootProps,
     getInputProps,
     isDragActive,
@@ -59,13 +45,7 @@ export function FileUploader({
     handleRemoveFile,
   } = useFileUploader(onUploadComplete);
   const [directLinkError, setDirectLinkError] = useState<string | null>(null);
-  const [showApiKey, setShowApiKey] = useState(false);
   const [directLinkKey, setDirectLinkKey] = useState(0);
-
-  const handleCopyApiKey = () => {
-    navigator.clipboard.writeText(session?.user?.apiKey || "");
-    toast.success("Copied to clipboard");
-  };
 
   const handleDirectLinkError = (error: string) => {
     setDirectLinkError(error);
@@ -73,10 +53,8 @@ export function FileUploader({
 
   const handleDirectLinkUploadSuccess = useCallback(() => {
     onUploadComplete();
-    setDirectLinkKey(prevKey => prevKey + 1);
+    setDirectLinkKey((prevKey) => prevKey + 1);
   }, [onUploadComplete]);
-
-  const currentApiKey = useCustomApiKey ? apiKey : session?.user?.apiKey;
 
   return (
     <>
@@ -85,53 +63,12 @@ export function FileUploader({
           Upload Files
         </h2>
 
-        {session?.user?.apiKey && (
-          <div className="flex flex-col items-center justify-center">
-            <p className="text-md sm:text-lg lg:text-xl font-semibold text-center text-primary items-center justify-center">
-              Currently using api key:
-            </p>
-            <div className="flex items-center space-x-2">
-              <span
-                className="font-mono text-xs sm:text-sm lg:text-base text-center text-muted-foreground items-center justify-center cursor-pointer"
-                onClick={handleCopyApiKey}
-                title="Click to copy"
-              >
-                {showApiKey ? session?.user?.apiKey : '•'.repeat(40)}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowApiKey(!showApiKey)}
-                className="p-1"
-              >
-                {showApiKey ? (
-                  <EyeOffIcon className="h-4 w-4" />
-                ) : (
-                  <EyeIcon className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-            <div className="flex items-center space-x-2 mb-4 justify-center mt-3">
-              <Switch
-                id="use-custom-api-key"
-                checked={useCustomApiKey}
-                onCheckedChange={setUseCustomApiKey}
-              />
-              <Label htmlFor="use-custom-api-key" className="mr-2">
-                Use custom API key
-              </Label>
-            </div>
-          </div>
-        )}
-
-        {(useCustomApiKey || !session?.user?.apiKey) && (
-          <div className="mb-4 sm:mb-6 lg:mb-8">
-            <APIKeyInput apiKey={apiKey} setApiKey={setApiKey} />
-          </div>
-        )}
+        <div className="mb-4 sm:mb-6 lg:mb-8">
+          <APIKeyInput apiKey={apiKey} setApiKey={setApiKey} />
+        </div>
 
         <AnimatePresence mode="wait">
-          {currentApiKey && (
+          {apiKey && (
             <motion.div
               key="file-uploader"
               initial={{ opacity: 0, y: 20 }}
@@ -228,10 +165,10 @@ export function FileUploader({
           )}
         </AnimatePresence>
 
-        {currentApiKey && (
+        {apiKey && (
           <DirectLinkUploader
             key={directLinkKey}
-            apiKey={currentApiKey}
+            apiKey={apiKey}
             onUploadSuccess={handleDirectLinkUploadSuccess}
             onUploadError={handleDirectLinkError}
           />

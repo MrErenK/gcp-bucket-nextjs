@@ -30,7 +30,8 @@ const AdminFileList = dynamic(
 );
 
 export default function AdminFileManager() {
-  const { files, totalFiles, totalSize, fetchFiles } = useFileManagement();
+  const { files, totalFiles, totalSize, fetchFiles } = useFileManagement(true);
+
   useEffect(() => {
     fetchFiles();
   }, [fetchFiles]);
@@ -38,20 +39,23 @@ export default function AdminFileManager() {
   const handleRefresh = useCallback(async () => {
     await fetchFiles();
   }, [fetchFiles]);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <Card className="border border-primary/10 shadow-xl rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
         <CardContent className="p-6">
           <AdminFileList
             files={files.map((file) => ({
+              id: file.id,
               name: file.name,
-              updatedAt: file.updatedAt,
+              updatedAt: file.modifiedTime,
               downloads: file.downloads || 0,
-              size: file.size || 0,
+              size:
+                typeof file.size === "string"
+                  ? parseInt(file.size, 10)
+                  : file.size || 0,
               uploadedKey: file.uploadedKey || null,
             }))}
-            onCopy={() => {}}
-            onDownload={() => {}}
             onRefresh={handleRefresh}
             totalFiles={totalFiles}
             totalSize={totalSize}

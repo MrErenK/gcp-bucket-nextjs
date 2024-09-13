@@ -1,21 +1,27 @@
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { useSession } from "next-auth/react";
 
-export function useFileUploader(
-  onUploadComplete: () => void,
-) {
-  const { data: session } = useSession();
+export function useFileUploader(onUploadComplete: () => void) {
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState<string>("");
-  const [useCustomApiKey, setUseCustomApiKey] = useState(!session?.user?.apiKey);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
-    setError(null);
+    setFiles((prevFiles) => {
+      const newFiles = acceptedFiles.filter((newFile) => {
+        const exists = prevFiles.some(
+          (existingFile) => existingFile.name === newFile.name,
+        );
+        if (exists) {
+          setError(`File "${newFile.name}" already exists in the upload list.`);
+          return false;
+        }
+        return true;
+      });
+      return [...prevFiles, ...newFiles];
+    });
     setUploadSuccess(null);
   }, []);
 
@@ -29,8 +35,7 @@ export function useFileUploader(
 
   const handleUpload = useCallback(async () => {
     if (files.length === 0) return;
-    const currentApiKey = useCustomApiKey ? apiKey : session?.user?.apiKey;
-    if (!currentApiKey) {
+    if (!apiKey) {
       setError("API key is required.");
       return;
     }
@@ -46,7 +51,7 @@ export function useFileUploader(
       const response = await fetch("/api/upload", {
         method: "POST",
         headers: {
-          "x-api-key": currentApiKey,
+          "x-api-key": apiKey,
         },
         body: formData,
       });
@@ -67,7 +72,7 @@ export function useFileUploader(
     } finally {
       setUploading(false);
     }
-  }, [files, apiKey, useCustomApiKey, onUploadComplete, session?.user?.apiKey]);
+  }, [files, apiKey, onUploadComplete]);
 
   const handleRemoveFile = (fileName: string) => {
     setFiles((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
@@ -80,8 +85,6 @@ export function useFileUploader(
     uploadSuccess,
     apiKey,
     setApiKey,
-    useCustomApiKey,
-    setUseCustomApiKey,
     getRootProps,
     getInputProps,
     isDragActive,

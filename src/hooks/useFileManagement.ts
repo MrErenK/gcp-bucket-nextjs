@@ -2,11 +2,13 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 
 interface File {
-  size: number;
-  downloads: number;
+  id: string;
   name: string;
-  updatedAt: string;
-  uploadedKey: string | null;
+  size: string | number;
+  modifiedTime: string;
+  mimeType: string;
+  downloads: number;
+  uploadedKey?: string;
 }
 
 type SortType = "name" | "date" | "size" | "downloads";
@@ -57,14 +59,14 @@ export function useFileManagement(disablePagination = false) {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/files?${disabledPagination ? "all=true" : `page=${currentPage}`}&search=${debouncedSearchTerm}&sort=${sortState.by}&order=${sortState.orders[sortState.by]}`,
+        `/api/files?${disablePagination ? "all=true" : `page=${currentPage}`}&search=${debouncedSearchTerm}&sort=${sortState.by}&order=${sortState.orders[sortState.by]}`,
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
       const data = await response.json();
       setFiles(data.files);
-      setTotalPages(disabledPagination ? 1 : data.totalPages);
+      setTotalPages(disablePagination ? 1 : data.totalPages);
       setTotalFiles(data.totalFiles);
       setTotalSize(data.totalSize);
     } catch (error) {
@@ -73,7 +75,7 @@ export function useFileManagement(disablePagination = false) {
       setLoading(false);
       setInitialLoadDone(true);
     }
-  }, [currentPage, debouncedSearchTerm, sortState, disabledPagination]);
+  }, [currentPage, debouncedSearchTerm, sortState, disablePagination]);
 
   const updateSort = useCallback((type: SortType) => {
     setSortState((prev) => ({
@@ -91,12 +93,10 @@ export function useFileManagement(disablePagination = false) {
     setCurrentPage(1);
   }, []);
 
-  const handleCopy = useCallback((filename: string) => {
+  const handleCopy = useCallback((fileId: string) => {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard
-        .writeText(
-          `${window.location.origin}/api/download?filename=${filename}`,
-        )
+        .writeText(`${window.location.origin}/api/download?fileId=${fileId}`)
         .then(() => {
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
@@ -107,7 +107,7 @@ export function useFileManagement(disablePagination = false) {
     } else {
       // Fallback for browsers that don't support the Clipboard API
       const textArea = document.createElement("textarea");
-      textArea.value = `${window.location.origin}/api/download?filename=${filename}`;
+      textArea.value = `${window.location.origin}/api/download?fileId=${fileId}`;
       document.body.appendChild(textArea);
       textArea.select();
       try {
@@ -121,8 +121,8 @@ export function useFileManagement(disablePagination = false) {
     }
   }, []);
 
-  const handleDownload = useCallback((filename: string) => {
-    window.location.href = `/api/download?filename=${filename}`;
+  const handleDownload = useCallback((fileId: string) => {
+    window.location.href = `/api/download?fileId=${fileId}`;
   }, []);
 
   const memoizedValues = useMemo(

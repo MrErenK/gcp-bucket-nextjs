@@ -4,7 +4,6 @@ import { Pagination } from "./Pagination";
 import { SearchBar } from "./SearchBar";
 import { useFileManagement } from "@/hooks/useFileManagement";
 import dynamic from "next/dynamic";
-import { UserFileManager } from "@/components/UserFileManager";
 import { toast } from "react-hot-toast";
 
 const LoadingIndicator = dynamic(
@@ -22,11 +21,12 @@ const FileUploader = dynamic(
 );
 
 interface FileData {
+  id: string;
   name: string;
   updatedAt: string;
-  downloads?: number;
-  size?: number;
-  uploadedKey?: string;
+  downloads: number;
+  size: number;
+  uploadedKey: string | null;
 }
 
 export function FileManager() {
@@ -46,12 +46,12 @@ export function FileManager() {
     totalSize,
   } = useFileManagement(false);
 
-  useEffect(() => {
-    fetchFiles();
-  }, [fetchFiles]);
-
   const handleRefresh = useCallback(async () => {
     await fetchFiles();
+  }, [fetchFiles]);
+
+  useEffect(() => {
+    fetchFiles();
   }, [fetchFiles]);
 
   const handleUploadComplete = useCallback(() => {
@@ -66,10 +66,6 @@ export function FileManager() {
     <section className="mb-8">
       <FileUploader onUploadComplete={handleUploadComplete} />
       <>
-        <div className="flex flex-col gap-4 justify-center items-center">
-          <h2 className="text-2xl font-bold mb-4">Uploaded Files</h2>
-          <UserFileManager />
-        </div>
         <h2 className="text-2xl font-bold mb-4">Download Files</h2>
         <div className="bg-muted rounded-lg p-6">
           <SearchBar
@@ -80,12 +76,15 @@ export function FileManager() {
             loading={loading}
             initialLoadDone={initialLoadDone}
             files={files.map((file) => ({
-              ...file,
+              id: file.id,
               name: file.name,
-              updatedAt: file.updatedAt,
+              updatedAt: file.modifiedTime,
               downloads: file.downloads || 0,
-              size: file.size || 0,
-              uploadedKey: file.uploadedKey || undefined,
+              size:
+                typeof file.size === "string"
+                  ? parseInt(file.size, 10)
+                  : file.size || 0,
+              uploadedKey: (file as any).uploadedKey || null,
             }))}
             onCopy={handleCopy}
             onDownload={handleDownload}
@@ -93,6 +92,7 @@ export function FileManager() {
             totalFiles={totalFiles}
             totalSize={totalSize}
           />
+
           {!loading && initialLoadDone && files.length > 0 && (
             <Pagination
               currentPage={currentPage}
@@ -110,8 +110,8 @@ interface FileContentProps {
   loading: boolean;
   initialLoadDone: boolean;
   files: FileData[];
-  onCopy: (filename: string) => void;
-  onDownload: (filename: string) => void;
+  onCopy: (fileId: string) => void;
+  onDownload: (fileId: string) => void;
   onRefresh: () => Promise<void>;
   totalFiles: number;
   totalSize: number;
@@ -133,13 +133,7 @@ export function FileContent({
 
   return (
     <FileList
-      files={files.map((file) => ({
-        name: file.name,
-        updatedAt: file.updatedAt,
-        downloads: file.downloads || 0,
-        size: file.size || 0,
-        uploadedKey: file.uploadedKey || null,
-      }))}
+      files={files}
       onCopy={onCopy}
       onDownload={onDownload}
       onRefresh={onRefresh}

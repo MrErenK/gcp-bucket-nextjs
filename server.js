@@ -1,42 +1,44 @@
-const fastifyPlugin = require("fastify-plugin");
-const multipart = require("@fastify/multipart");
-const dotenv = require("dotenv");
-const Fastify = require("fastify");
-const Next = require("next");
-const { pipeline } = require("stream/promises");
-const { URL } = require("url");
+const express = require("express");
+const next = require("next");
+const { drive } = require("./src/lib/expressStorage");
 const { prisma } = require("./src/lib/expressPrisma");
-const { bucket } = require("./src/lib/expressStorage");
+const cors = require("cors");
+const busboy = require("busboy");
+const stream = require("stream");
+const { promisify } = require("util");
+const { URL } = require("url");
+const dotenv = require("dotenv");
 
 dotenv.config({ path: `.env.local`, override: true });
 
+const pipeline = promisify(stream.pipeline);
+
 const dev = process.env.NODE_ENV !== "production";
-const nextApp = Next({ dev });
+const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
 
-const fastify = Fastify();
-const port = parseInt(process.env.PORT || "3000", 10);
-
-fastify.register(fastifyPlugin(multipart));
+const app = express();
+const port = process.env.PORT || 3000;
+app.use(cors());
 
 const MAX_FILE_SIZE = 6 * 1024 * 1024 * 1024; // 6 GB in bytes
-const CHUNK_SIZE = 100 * 1024 * 1024; // 100 MB in bytes
 const BASE_URL = process.env.WEB_URL || "http://localhost:3000";
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
-const UPLOAD_TIMEOUT = 60 * 60 * 1000; // 60 minutes in milliseconds
+const GOOGLE_DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID;
 
 if (!ADMIN_API_KEY) {
   throw new Error("ADMIN_API_KEY environment variable is not set");
 }
 
+if (!GOOGLE_DRIVE_FOLDER_ID) {
+  throw new Error("GOOGLE_DRIVE_FOLDER_ID environment variable is not set");
+}
+
 async function verifyApiKey(apiKey) {
   try {
     const response = await fetch(`${BASE_URL}/api/keys/verify?key=${apiKey}`);
-    if (response.ok) {
-      const data = await response.json();
-      return data.valid === true;
-    }
-    return false;
+    const data = await response.json();
+    return data.valid;
   } catch (error) {
     console.error("Error verifying API key:", error);
     return false;
@@ -70,38 +72,49 @@ async function uploadFromDirectLink(directLink) {
 
   filename = filename.replace(/"/g, "");
 
-  const file = bucket.file(filename);
-  const writeStream = file.createWriteStream({
-    resumable: true,
-    chunkSize: CHUNK_SIZE,
-    metadata: {
-      contentType,
+  // Check if file with the same name exists
+  const existingFiles = await drive.files.list({
+    q: `name='${filename}' and '${GOOGLE_DRIVE_FOLDER_ID}' in parents and trashed=false`,
+    fields: "files(id, name)",
+  });
+
+  if (existingFiles.data.files.length > 0) {
+    throw new Error(`A file with the name "${filename}" already exists.`);
+  }
+
+  const driveResponse = await drive.files.create({
+    requestBody: {
+      name: filename,
+      parents: [GOOGLE_DRIVE_FOLDER_ID],
+    },
+    media: {
+      mimeType: contentType,
+      body: response.body,
     },
   });
 
-  if (response.body) {
-    await pipeline(response.body, writeStream);
-  } else {
-    throw new Error("Response body is null");
-  }
-
-  await file.makePublic();
-
-  await file.setMetadata({
-    contentType,
-    contentDisposition: `${contentType.startsWith("text/") ? "inline" : "attachment"}; filename="${filename}"`,
+  await drive.permissions.create({
+    fileId: driveResponse.data.id,
+    requestBody: {
+      role: "reader",
+      type: "anyone",
+    },
   });
 
-  const downloadUrl = `${BASE_URL}/api/download?filename=${encodeURIComponent(filename)}`;
-  return { name: filename, url: downloadUrl };
+  const downloadUrl = `${BASE_URL}/api/download?fileId=${driveResponse.data.id}`;
+  return { name: filename, url: downloadUrl, id: driveResponse.data.id };
 }
 
 nextApp.prepare().then(() => {
-  fastify.post("/api/upload", async (request, reply) => {
-    const apiKey = request.headers["x-api-key"];
+  app.post("/api/upload", async (req, res) => {
+    const apiKey = req.headers["x-api-key"];
 
     if (!apiKey || !(await verifyApiKey(apiKey))) {
-      return reply.status(401).send({
+      console.log(
+        "Upload canceled: Unauthorized. Invalid or missing API key:",
+        apiKey,
+      );
+      return res.status(401).json({
         error: "Unauthorized: Invalid or missing API key",
         key: apiKey,
       });
@@ -109,204 +122,258 @@ nextApp.prepare().then(() => {
 
     console.log("Upload started");
 
-    const uploadTimeout = setTimeout(() => {
-      console.log("Upload canceled: Timeout reached");
-      reply
-        .status(408)
-        .send({ error: "Request Timeout: Upload took too long" });
-      request.raw.destroy();
-    }, UPLOAD_TIMEOUT);
-
-    const contentType =
-      request.headers["content-type"] || "application/octet-stream";
+    const contentType = req.headers["content-type"] || "";
 
     if (contentType.includes("application/json")) {
       let body;
       try {
-        body = await request.body;
+        body = await new Promise((resolve, reject) => {
+          let data = "";
+          req.on("data", (chunk) => {
+            data += chunk;
+          });
+          req.on("end", () => {
+            try {
+              resolve(JSON.parse(data));
+            } catch (e) {
+              reject(e);
+            }
+          });
+        });
       } catch (error) {
-        clearTimeout(uploadTimeout);
         console.log("Upload canceled: Invalid JSON body");
-        return reply.status(400).send({ error: "Invalid JSON body" });
+        return res.status(400).json({ error: "Invalid JSON body" });
       }
 
       if (body && body.directLink) {
         try {
           const uploadedFile = await uploadFromDirectLink(body.directLink);
-          clearTimeout(uploadTimeout);
           const apikey = await getApiKeyDescription(apiKey);
           console.log("Upload completed successfully");
           console.log(
             `Uploaded file details: Name: ${uploadedFile.name}, URL: ${uploadedFile.url}, apiKey: ${apikey}`,
           );
-          return reply.send({
+          return res.json({
             message: "File uploaded successfully from direct link",
             file: uploadedFile,
           });
         } catch (error) {
-          clearTimeout(uploadTimeout);
           console.error(error);
-          console.log(
-            "Upload canceled: Error uploading from direct link",
-            error,
-          );
-          return reply.status(500).send({
+          console.log("Upload canceled: Error uploading from direct link");
+          return res.status(500).json({
             error: `Error uploading file from direct link: ${error.message}`,
           });
         }
       }
     }
 
-    const parts = request.parts();
+    const bb = busboy({ headers: req.headers });
     const uploadPromises = [];
     let filesUploaded = 0;
 
-    for await (const part of parts) {
-      if (part.type === "file") {
-        const { filename, mimetype, file } = part;
-        if (!filename) {
-          continue;
-        }
+    bb.on("file", async (fieldname, file, info) => {
+      if (fieldname !== "files") {
+        file.resume();
+        return;
+      }
 
-        filesUploaded++;
-        let fileSize = 0;
+      const { filename, mimeType } = info;
+      if (!filename) {
+        file.resume();
+        return;
+      }
 
-        const uploadPromise = new Promise(
-          async (resolveUpload, rejectUpload) => {
+      // Check if file with the same name exists
+      const existingFiles = await drive.files.list({
+        q: `name='${filename}' and '${GOOGLE_DRIVE_FOLDER_ID}' in parents and trashed=false`,
+        fields: "files(id, name)",
+      });
+
+      if (existingFiles.data.files.length > 0) {
+        console.log(`Upload canceled: File ${filename} already exists`);
+        file.resume();
+        uploadPromises.push(
+          Promise.reject(new Error(`File ${filename} already exists`)),
+        );
+        jsonRes = {
+          error: `A file with the name "${filename}" already exists.`,
+        };
+        return res.status(400).json(jsonRes);
+      }
+
+      filesUploaded++;
+      let fileSize = 0;
+
+      const uploadPromise = new Promise((resolveUpload, rejectUpload) => {
+        const chunks = [];
+
+        file.on("data", (data) => {
+          fileSize += data.length;
+          if (fileSize > MAX_FILE_SIZE) {
+            file.resume();
+            console.log(`Upload canceled: File ${filename} exceeds size limit`);
+            rejectUpload(
+              new Error(
+                `File ${filename} exceeds the maximum allowed size of 6 GB.`,
+              ),
+            );
+          } else {
+            chunks.push(data);
+          }
+        });
+
+        file.on("end", async () => {
+          if (fileSize <= MAX_FILE_SIZE) {
             try {
-              const gcsFile = bucket.file(filename);
-              const writeStream = gcsFile.createWriteStream({
-                resumable: true,
-                chunkSize: CHUNK_SIZE,
-                metadata: {
-                  contentType: mimetype,
+              const fileBuffer = Buffer.concat(chunks);
+              const driveResponse = await drive.files.create({
+                requestBody: {
+                  name: filename,
+                  parents: [GOOGLE_DRIVE_FOLDER_ID],
+                },
+                media: {
+                  mimeType: mimeType,
+                  body: stream.Readable.from(fileBuffer),
                 },
               });
 
-              for await (const chunk of file) {
-                fileSize += chunk.length;
-                if (fileSize > MAX_FILE_SIZE) {
-                  file.destroy();
-                  writeStream.destroy(new Error("File size limit exceeded"));
-                  console.log(
-                    `Upload canceled: File ${filename} exceeds size limit`,
-                  );
-                  rejectUpload(
-                    new Error(
-                      `File ${filename} exceeds the maximum allowed size of 6 GB.`,
-                    ),
-                  );
-                  break;
-                }
-                writeStream.write(chunk);
-              }
-
-              writeStream.on("error", (error) => {
-                console.error(`Error uploading ${filename}:`, error);
-                rejectUpload(error);
+              await drive.permissions.create({
+                fileId: driveResponse.data.id,
+                requestBody: {
+                  role: "reader",
+                  type: "anyone",
+                },
               });
 
-              writeStream.on("finish", async () => {
-                try {
-                  await gcsFile.makePublic();
-                  await gcsFile.setMetadata({
-                    contentDisposition: `${
-                      mimetype.startsWith("text/") ? "inline" : "attachment"
-                    }; filename="${filename}"`,
-                  });
-
-                  const fileUrl = `${BASE_URL}/api/download?filename=${encodeURIComponent(
-                    filename,
-                  )}`;
-                  console.log(
-                    `Uploaded file details: Name: ${filename}, URL: ${fileUrl}`,
-                  );
-                  resolveUpload({ name: filename, url: fileUrl });
-                } catch (error) {
-                  console.log(
-                    `Upload canceled: Error processing ${filename}`,
-                    error,
-                  );
-                  rejectUpload(error);
-                }
-              });
-
-              await pipeline(file, writeStream);
-            } catch (error) {
+              const fileUrl = `${BASE_URL}/api/download?fileId=${driveResponse.data.id}`;
               console.log(
-                `Upload canceled: Error setting up upload for ${filename}`,
-                error,
+                `Uploaded file details: Name: ${filename}, URL: ${fileUrl}`,
               );
+              resolveUpload({
+                name: filename,
+                url: fileUrl,
+                id: driveResponse.data.id,
+              });
+            } catch (error) {
+              console.log(`Upload canceled: Error uploading ${filename}`);
               rejectUpload(error);
             }
-          },
-        );
+          }
+        });
+      });
 
-        uploadPromises.push(uploadPromise);
-      }
-    }
+      uploadPromises.push(uploadPromise);
+    });
 
-    clearTimeout(uploadTimeout);
-    if (!filesUploaded) {
-      console.log("Upload canceled: No valid file was uploaded");
-      return reply.status(400).send({ error: "No valid file was uploaded" });
-    } else {
-      try {
-        const uploadedFiles = await Promise.all(uploadPromises);
-        const apiKeyDescription = await getApiKeyDescription(apiKey);
-        await prisma.fileStats.deleteMany({
-          where: {
-            filename: {
-              in: uploadedFiles.map((file) => file.name),
-            },
-          },
-        });
-        await prisma.fileStats.createMany({
-          data: uploadedFiles.map((file) => ({
-            filename: file.name,
-            views: 0,
-            downloads: 0,
-            uploadedKey: apiKeyDescription || undefined,
-          })),
-        });
-        console.log(
-          `Upload completed: Files uploaded to ${
-            bucket.name
-          } with the following names: ${uploadedFiles
-            .map((file) => file.name)
-            .join(", ")} using the api key: ${apiKeyDescription}`,
-        );
-        return reply.send({
-          message: "Files uploaded successfully",
-          files: uploadedFiles,
-        });
-      } catch (error) {
-        console.log("Upload canceled: Error uploading files", error);
-        return reply.status(500).send({
-          error: `Error uploading files: ${error.message}`,
-        });
+    bb.on("finish", async () => {
+      if (uploadPromises.length === 0) {
+        console.log("Upload canceled: No valid files were uploaded");
+        res.status(400).json({ error: "No valid files were uploaded" });
+      } else {
+        try {
+          const results = await Promise.allSettled(uploadPromises);
+          const uploadedFiles = results
+            .filter((result) => result.status === "fulfilled")
+            .map((result) => result.value);
+          const errors = results
+            .filter((result) => result.status === "rejected")
+            .map((result) => result.reason.message);
+
+          if (uploadedFiles.length === 0) {
+            console.log("Upload failed: All files encountered errors");
+            res
+              .status(400)
+              .json({ error: "All files encountered errors", details: errors });
+          } else {
+            const apiKeyDescription = await getApiKeyDescription(apiKey);
+            const existingStats = await prisma.fileStats.findMany({
+              where: {
+                fileId: {
+                  in: uploadedFiles.map((file) => file.id),
+                },
+              },
+              select: { fileId: true },
+            });
+
+            if (existingStats.length > 0) {
+              await prisma.fileStats.deleteMany({
+                where: {
+                  fileId: {
+                    in: existingStats.map((stat) => stat.fileId),
+                  },
+                },
+              });
+            }
+            await prisma.fileStats.createMany({
+              data: uploadedFiles.map((file) => ({
+                fileId: file.id,
+                filename: file.name,
+                views: 0,
+                downloads: 0,
+                uploadedKey: apiKeyDescription,
+              })),
+            });
+            console.log(
+              `Upload completed: Files uploaded to Google Drive with the following names: ${uploadedFiles.map((file) => file.name).join(", ")} using the api key: ${apiKeyDescription}`,
+            );
+
+            if (errors.length > 0) {
+              res.json({
+                message:
+                  "Some files uploaded successfully, others encountered errors",
+                files: uploadedFiles,
+                errors: errors,
+              });
+            } else {
+              res.json({
+                message: "All files uploaded successfully",
+                files: uploadedFiles,
+              });
+            }
+          }
+        } catch (error) {
+          console.log("Upload canceled: Error uploading files");
+          if (!res.headersSent) {
+            res
+              .status(500)
+              .json({ error: `Error uploading files: ${error.message}` });
+          }
+        }
       }
-    }
+    });
+
+    bb.on("error", (error) => {
+      console.error(error);
+      console.log("Upload canceled: Error in busboy");
+      if (!res.headersSent) {
+        res
+          .status(500)
+          .json({ error: `Error uploading files: ${error.message}` });
+      }
+    });
+
+    req.pipe(bb);
   });
 
   // Handle all other routes with Next.js
-  fastify.all("*", (request, reply) => {
-    return handle(request.raw, reply.raw);
+  app.all("*", (req, res) => {
+    return handle(req, res);
   });
 
   const findAvailablePort = async (port) => {
     return new Promise((resolve, reject) => {
-      fastify.listen({ port, host: "0.0.0.0" }, (err) => {
-        if (err) {
-          if (err.code === "EADDRINUSE") {
-            console.log(`Port ${port} is in use, trying another port...`);
-            resolve(findAvailablePort(port + 1));
-          } else {
-            reject(err);
-          }
+      const server = app.listen(port, () => {
+        console.log(`> Ready on http://localhost:${port}`);
+        resolve(port);
+      });
+
+      server.on("error", (error) => {
+        if (error.code === "EADDRINUSE") {
+          console.log(`Port ${port} is in use, trying another port...`);
+          server.close();
+          resolve(findAvailablePort(parseInt(port) + 1));
         } else {
-          console.log(`> Ready on http://localhost:${port}`);
-          resolve(port);
+          reject(error);
         }
       });
     });

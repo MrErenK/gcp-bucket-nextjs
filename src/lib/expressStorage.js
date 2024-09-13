@@ -1,25 +1,18 @@
-const { Storage } = require("@google-cloud/storage");
+const { google } = require("googleapis");
 const { readFileSync } = require("fs");
-const dotenv = require("dotenv");
 const path = require("path");
+const dotenv = require("dotenv");
 
 dotenv.config({ path: `.env.local`, override: true });
 
-const keyFilePath = path.resolve(process.cwd(), "google-cloud-key.json");
+const keyFilePath = path.resolve(process.cwd(), "google-drive-key.json");
 const keyFileContents = readFileSync(keyFilePath, "utf8");
 
-const storage = new Storage({
-  projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+const auth = new google.auth.GoogleAuth({
   credentials: JSON.parse(keyFileContents),
+  scopes: ["https://www.googleapis.com/auth/drive"],
 });
 
-const bucketName = process.env.GOOGLE_CLOUD_BUCKET_NAME;
-if (!bucketName) {
-  throw new Error(
-    "GOOGLE_CLOUD_BUCKET_NAME is not defined in the environment variables",
-  );
-}
+const drive = google.drive({ version: "v3", auth });
 
-const bucket = storage.bucket(bucketName);
-
-module.exports = { storage, bucket };
+module.exports = { drive };
