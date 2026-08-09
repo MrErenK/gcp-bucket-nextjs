@@ -45,7 +45,7 @@ const Switch = React.forwardRef<
           sizeClasses.root,
           "cursor-pointer rounded-full transition-colors",
           "border-2 border-transparent",
-          "focus-visible:outline-none focus-visible:ring-2",
+          "focus-visible:outline-hidden focus-visible:ring-2",
           "focus-visible:ring-primary/20 focus-visible:ring-offset-2",
           "disabled:cursor-not-allowed disabled:opacity-50",
           "data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",

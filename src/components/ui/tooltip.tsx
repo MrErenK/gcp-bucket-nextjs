@@ -6,8 +6,8 @@ import { cva } from "class-variance-authority";
 const tooltipVariants = cva(
   [
     "z-50 overflow-hidden rounded-md",
-    "border border-primary/10",
-    "bg-background/95 backdrop-blur-sm",
+    "border",
+    "bg-background",
     "px-3 py-1.5 text-sm text-foreground",
     "shadow-md animate-in fade-in-0",
     "zoom-in-95 data-[state=closed]:animate-out",
@@ -73,7 +73,7 @@ const Tooltip = ({
               <TooltipPrimitive.Arrow
                 className={cn(
                   "fill-background/95",
-                  "border-primary/10",
+                  "border-border",
                   variant === "error" && "fill-destructive/90",
                   variant === "success" && "fill-green-500/90",
                 )}

@@ -19,12 +19,12 @@ export function SearchBar({ searchTerm, onChange }: SearchBarProps) {
         placeholder="Search files..."
         className={cn(
           "w-full h-12 pl-11 pr-4 rounded-xl",
-          "bg-background/50 backdrop-blur-sm",
-          "border-2 border-primary/20",
+          "bg-background",
+          "border-2 border-input",
           "text-foreground placeholder:text-muted-foreground",
-          "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary",
+          "focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary",
           "transition-all duration-300",
-          "shadow-sm hover:shadow-md",
+          "shadow-xs hover:shadow-md",
         )}
         value={searchTerm}
         onChange={onChange}

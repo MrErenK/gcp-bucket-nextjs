@@ -29,8 +29,8 @@ export function LoadingIndicator({
     <div
       className={cn(
         "flex items-center justify-center gap-3 p-4",
-        "bg-card/50 backdrop-blur-sm rounded-xl",
-        "border border-primary/10",
+        "bg-card rounded-xl",
+        "border",
         "shadow-lg",
         className,
       )}

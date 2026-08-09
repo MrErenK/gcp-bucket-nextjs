@@ -6,11 +6,7 @@ import {
   InfoIcon,
   FileManagerIcon,
   UploadIcon,
-  AdminIcon,
   AlertIcon,
-  DownloadIcon,
-  KernelIcon,
-  CopyIcon,
 } from "@/components/ui/Icons";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
@@ -40,95 +36,18 @@ export default function InfoPage() {
       content: [
         {
           subtitle: "Upload Methods",
-          description: "Multiple ways to upload files to our platform",
+          description: "How to upload files to the platform",
           content: (
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <h4 className="font-medium text-lg">Web Interface</h4>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <Card className="bg-primary/5 p-4">
-                    <h5 className="font-medium mb-2">Link Upload</h5>
-                    <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
-                      <li>Go to the main page</li>
-                      <li>Navigate to the direct link upload section</li>
-                      <li>Paste your direct download link</li>
-                      <li>Click &quot;Upload from Link&quot;</li>
-                      <li>Wait for the server to upload the file</li>
-                    </ol>
-                  </Card>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="font-medium text-lg">Command Line Upload</h4>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <Card className="bg-primary/5 p-4">
-                    <div className="space-y-3">
-                      <h5 className="font-medium">Upload Script</h5>
-                      <div className="space-y-2">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                          <div className="flex-grow">
-                            <p className="text-sm font-medium">
-                              Download Script
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              Get our command-line upload tool
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="group transition-all duration-300 hover:border-primary/50"
-                              onClick={() =>
-                                (window.location.href = "/api/download-script")
-                              }
-                            >
-                              <DownloadIcon className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:scale-110" />
-                              Download
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="group transition-all duration-300 hover:border-primary/50"
-                              onClick={() =>
-                                navigator.clipboard.writeText(
-                                  `wget -O upload.sh ${window.location.origin}/api/download-script && chmod +x upload.sh`,
-                                )
-                              }
-                            >
-                              <CopyIcon className="w-4 h-4 mr-2" />
-                              Copy
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                  <Card className="bg-primary/5 p-4">
-                    <div className="space-y-3">
-                      <h5 className="font-medium">Usage Examples</h5>
-                      <div className="space-y-2 font-mono text-xs">
-                        <div className="bg-card/50 p-2 rounded-lg">
-                          # Upload single file
-                          <br />
-                          ./upload.sh file.zip
-                        </div>
-                        <div className="bg-card/50 p-2 rounded-lg">
-                          # Upload multiple files
-                          <br />
-                          ./upload.sh file1.zip file2.zip
-                        </div>
-                        <div className="bg-card/50 p-2 rounded-lg">
-                          # Upload from URL
-                          <br />
-                          ./upload.sh -l https://example.com/file.zip
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-              </div>
+            <div className="space-y-4">
+              <Card className="bg-accent p-4">
+                <h5 className="font-medium mb-2">Direct Link Upload</h5>
+                <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+                  <li>Go to the main page</li>
+                  <li>Paste a direct download URL into the input field</li>
+                  <li>Click &quot;Upload from Link&quot;</li>
+                  <li>Wait for the server to fetch and store the file</li>
+                </ol>
+              </Card>
             </div>
           ),
         },
@@ -137,15 +56,14 @@ export default function InfoPage() {
           description: "Requirements and limitations for file uploads",
           content: (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Card className="bg-primary/5 p-4">
+              <Card className="bg-accent p-4">
                 <h5 className="font-medium mb-2">Size Limits</h5>
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Minimum size: 500MB</li>
-                  <li>• Maximum size: 3GB</li>
-                  <li>• Recommended: 1-2GB</li>
+                  <li>• Minimum size: 1MB</li>
+                  <li>• Maximum size: 5GB</li>
                 </ul>
               </Card>
-              <Card className="bg-primary/5 p-4">
+              <Card className="bg-accent p-4">
                 <h5 className="font-medium mb-2">Supported Types</h5>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li>• Archive files (.zip, .rar, etc.)</li>
@@ -153,147 +71,12 @@ export default function InfoPage() {
                   <li>• System images</li>
                 </ul>
               </Card>
-              <Card className="bg-primary/5 p-4">
+              <Card className="bg-accent p-4">
                 <h5 className="font-medium mb-2">Restrictions</h5>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li>• No audio files</li>
                   <li>• No video files</li>
                   <li>• No text files</li>
-                </ul>
-              </Card>
-            </div>
-          ),
-        },
-      ],
-    },
-    {
-      title: "Kernel Upload",
-      icon: KernelIcon,
-      content: [
-        {
-          subtitle: "Upload Methods",
-          description: "Ways to upload kernel files",
-          content: (
-            <div className="space-y-6">
-              {/* Web Upload Section */}
-              <div className="space-y-4">
-                <h4 className="font-medium text-lg">Web Interface</h4>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <Card className="bg-primary/5 p-4">
-                    <h5 className="font-medium mb-2">Upload Steps</h5>
-                    <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
-                      <li>Go to the main page</li>
-                      <li>Go to Kernel Upload section</li>
-                      <li>Select or drag your kernel ZIP file</li>
-                      <li>Wait for validation and upload</li>
-                      <li>And boom, done</li>
-                    </ol>
-                  </Card>
-                  <Card className="bg-primary/5 p-4">
-                    <h5 className="font-medium mb-2">Validation</h5>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li>• ZIP format verification</li>
-                      <li>• Size validation</li>
-                      <li>• Checksum generation</li>
-                      <li>• Integrity check</li>
-                    </ul>
-                  </Card>
-                </div>
-              </div>
-
-              {/* Command Line Section */}
-              <div className="space-y-4">
-                <h4 className="font-medium text-lg">Command Line Upload</h4>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <Card className="bg-primary/5 p-4">
-                    <div className="space-y-3">
-                      <h5 className="font-medium">Script Download</h5>
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                        <div className="flex-grow">
-                          <p className="text-sm font-medium">
-                            Get Upload Script
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Download our kernel upload script
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="group transition-all duration-300 hover:border-primary/50"
-                            onClick={() =>
-                              (window.location.href = "/api/download-script")
-                            }
-                          >
-                            <DownloadIcon className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:scale-110" />
-                            Download
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="group transition-all duration-300 hover:border-primary/50"
-                            onClick={() =>
-                              navigator.clipboard.writeText(
-                                `wget -O upload.sh ${window.location.origin}/api/download-script && chmod +x upload.sh`,
-                              )
-                            }
-                          >
-                            <CopyIcon className="w-4 h-4 mr-2" />
-                            Copy
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                  <Card className="bg-primary/5 p-4">
-                    <div className="space-y-3">
-                      <h5 className="font-medium">Usage Example</h5>
-                      <div className="space-y-2 font-mono text-xs">
-                        <div className="bg-card/50 p-2 rounded-lg">
-                          # Upload kernel file
-                          <br />
-                          ./upload.sh -k kernel.zip
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          The script will validate, upload, and return the
-                          download URL and checksum
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-              </div>
-            </div>
-          ),
-        },
-        {
-          subtitle: "Requirements",
-          description: "Specific requirements for kernel files",
-          content: (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Card className="bg-primary/5 p-4">
-                <h5 className="font-medium mb-2">File Specifications</h5>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Format: ZIP only</li>
-                  <li>• Size: 10MB - 50MB</li>
-                  <li>• Valid ZIP structure</li>
-                </ul>
-              </Card>
-              <Card className="bg-primary/5 p-4">
-                <h5 className="font-medium mb-2">Security</h5>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• SHA-256 checksum</li>
-                  <li>• Format validation</li>
-                  <li>• Integrity checks</li>
-                </ul>
-              </Card>
-              <Card className="bg-primary/5 p-4">
-                <h5 className="font-medium mb-2">Features</h5>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Automatic validation</li>
-                  <li>• Instant checksums</li>
-                  <li>• Direct download URLs</li>
                 </ul>
               </Card>
             </div>
@@ -309,8 +92,8 @@ export default function InfoPage() {
           subtitle: "Size Limitations",
           description: "File size requirements and limits",
           details: [
-            "Minimum size: 500MB",
-            "Maximum size: 3GB",
+            "Minimum size: 1MB",
+            "Maximum size: 5GB",
             "Files outside these limits will be rejected",
           ],
         },
@@ -338,36 +121,22 @@ export default function InfoPage() {
           description: "REST API endpoints for file operations",
           content: (
             <div className="grid grid-cols-1 gap-4">
-              <Card className="bg-primary/5 p-4">
-                <h5 className="font-medium mb-2">File Upload Endpoints</h5>
+              <Card className="bg-accent p-4">
+                <h5 className="font-medium mb-2">Upload</h5>
                 <div className="space-y-4 text-sm text-muted-foreground">
                   <div>
-                    <code className="bg-card/50 px-2 py-1 rounded">
-                      /api/upload
+                    <code className="bg-card px-2 py-1 rounded">
+                      POST /api/upload
                     </code>
                     <ul className="mt-2 ml-4 space-y-1">
-                      <li>• POST: Upload files directly or via URL</li>
-                      <li>• Supports multipart/form-data and JSON</li>
-                      <li>• Returns file URL and name</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <code className="bg-card/50 px-2 py-1 rounded">
-                      /api/upload-kernel
-                    </code>
-                    <ul className="mt-2 ml-4 space-y-1">
-                      <li>• POST: Upload kernel ZIP files</li>
-                      <li>• Supports multipart/form-data</li>
-                      <li>• Returns URL, checksum, and size</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <code className="bg-card/50 px-2 py-1 rounded">
-                      /api/download-script
-                    </code>
-                    <ul className="mt-2 ml-4 space-y-1">
-                      <li>• GET: Download upload script</li>
-                      <li>• Returns shell script for CLI uploads</li>
+                      <li>
+                        • Body:{" "}
+                        <code>
+                          &#123;&quot;directLink&quot;:
+                          &quot;https://…&quot;&#125;
+                        </code>
+                      </li>
+                      <li>• Returns file name and download URL</li>
                     </ul>
                   </div>
                 </div>
@@ -377,32 +146,19 @@ export default function InfoPage() {
         },
         {
           subtitle: "API Usage",
-          description: "Examples of using the API endpoints",
+          description: "Example curl command",
           content: (
             <div className="space-y-4">
-              <Card className="bg-primary/5 p-4">
-                <h5 className="font-medium mb-2">Upload Examples</h5>
+              <Card className="bg-accent p-4">
                 <div className="space-y-3 font-mono text-xs">
-                  <div className="bg-card/50 p-2 rounded-lg">
-                    # Upload file using curl
-                    <br />
-                    curl -X POST -F &quot;files=@file.zip&quot;
-                    http://localhost:3000/api/upload
-                  </div>
-                  <div className="bg-card/50 p-2 rounded-lg">
-                    # Upload from URL
-                    <br />
+                  <div className="bg-card p-2 rounded-lg">
                     {'curl -X POST -H "Content-Type: application/json" \\'}
                     <br />
-                    {'-d \'{"directLink":"https://example.com/file.zip"}\' \\'}
+                    {
+                      '-d \'{{"directLink":"https://example.com/file.zip"}}\'  \\'
+                    }
                     <br />
                     {"http://localhost:3000/api/upload"}
-                  </div>
-                  <div className="bg-card/50 p-2 rounded-lg">
-                    # Upload kernel file
-                    <br />
-                    curl -X POST -F &quot;file=@kernel.zip&quot;
-                    http://localhost:3000/api/upload-kernel
                   </div>
                 </div>
               </Card>
@@ -414,7 +170,7 @@ export default function InfoPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-background/80">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header />
 
       <main className="container mx-auto px-4 py-8 max-w-5xl">
@@ -431,12 +187,12 @@ export default function InfoPage() {
             <motion.div
               initial={{ scale: 0.5 }}
               animate={{ scale: 1 }}
-              className="mx-auto p-4 bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl w-fit"
+              className="mx-auto p-4 bg-accent border rounded-2xl w-fit"
             >
-              <InfoIcon className="w-10 h-10 text-primary" />
+              <InfoIcon className="w-10 h-10" />
             </motion.div>
             <div className="space-y-2">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-[hsl(var(--gradient-1))] via-[hsl(var(--gradient-2))] to-[hsl(var(--gradient-3))] bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold tracking-tight">
                 Documentation & Usage Guide
               </h1>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -455,14 +211,13 @@ export default function InfoPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card className="relative overflow-hidden bg-card/50 backdrop-blur-sm border border-primary/10 transition-all duration-300 hover:shadow-lg hover:border-primary/20">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full -z-10" />
-                  <CardHeader className="space-y-4 border-b border-primary/10">
+                <Card hover className="overflow-hidden">
+                  <CardHeader className="space-y-4">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <section.icon className="w-6 h-6 text-primary" />
+                      <div className="p-2 bg-accent rounded-lg">
+                        <section.icon className="w-6 h-6" />
                       </div>
-                      <CardTitle className="text-2xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent pt-4">
+                      <CardTitle className="text-2xl pt-4">
                         {section.title}
                       </CardTitle>
                     </div>
@@ -523,7 +278,7 @@ export default function InfoPage() {
                         )}
 
                         {item.notes && (
-                          <div className="bg-primary/5 rounded-lg p-4 border border-primary/10">
+                          <div className="bg-accent rounded-lg p-4 border">
                             <h4 className="font-medium mb-2">
                               Important Notes:
                             </h4>

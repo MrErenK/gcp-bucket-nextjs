@@ -16,7 +16,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/80 backdrop-blur-sm",
+      "fixed inset-0 z-50 bg-black/80",
       "data-[state=open]:animate-in data-[state=closed]:animate-out",
       "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className,
@@ -36,8 +36,8 @@ const DialogContent = React.forwardRef<
       ref={ref}
       className={cn(
         "fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%]",
-        "bg-background/95 backdrop-blur-xl",
-        "border border-primary/10 shadow-lg",
+        "bg-background",
+        "border shadow-lg",
         "duration-200 rounded-xl p-6",
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
         "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
@@ -53,9 +53,9 @@ const DialogContent = React.forwardRef<
         className={cn(
           "absolute right-4 top-4 rounded-lg opacity-70",
           "transition-opacity hover:opacity-100",
-          "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+          "focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2",
           "disabled:pointer-events-none",
-          "p-2 hover:bg-primary/10",
+          "p-2 hover:bg-accent",
         )}
       >
         <XIcon className="h-4 w-4" />
@@ -87,7 +87,7 @@ const DialogFooter = ({
   <div
     className={cn(
       "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-      "pt-6 mt-6 border-t border-primary/10",
+      "pt-6 mt-6 border-t",
       className,
     )}
     {...props}
@@ -102,9 +102,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-2xl font-semibold leading-none tracking-tight",
-      "bg-gradient-to-br from-foreground to-foreground/70",
-      "bg-clip-text text-transparent",
+      "text-2xl font-semibold leading-none tracking-tight text-foreground",
       className,
     )}
     {...props}

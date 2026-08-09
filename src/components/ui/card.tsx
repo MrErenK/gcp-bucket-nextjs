@@ -4,21 +4,14 @@ import { cn } from "@/lib/utils";
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & {
-    gradient?: boolean;
     hover?: boolean;
   }
->(({ className, gradient, hover, ...props }, ref) => (
+>(({ className, hover, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      "rounded-xl border border-primary/10 bg-card text-card-foreground shadow-sm transition-all duration-300",
-      gradient && [
-        "bg-gradient-to-b from-card/50 to-card shadow-lg",
-        "before:absolute before:inset-0 before:-z-10 before:rounded-xl",
-        "before:bg-gradient-to-b before:from-primary/5 before:to-primary/10",
-        "before:blur-xl before:transition-all before:duration-300",
-      ],
-      hover && "hover:shadow-lg hover:border-primary/20 hover:scale-[1.01]",
+      "rounded-xl border bg-card text-card-foreground shadow-xs transition-colors duration-200",
+      hover && "hover:border-foreground/25",
       className,
     )}
     {...props}
@@ -28,18 +21,11 @@ Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & {
-    gradient?: boolean;
-  }
->(({ className, gradient, ...props }, ref) => (
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn(
-      "flex flex-col space-y-1.5 p-6",
-      gradient && "bg-gradient-to-b from-primary/5 to-transparent",
-      "border-b border-primary/10",
-      className,
-    )}
+    className={cn("flex flex-col space-y-1.5 border-b p-6", className)}
     {...props}
   />
 ));
@@ -52,9 +38,7 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      "text-2xl font-semibold leading-tight tracking-tight",
-      "bg-gradient-to-br from-foreground to-foreground/70",
-      "bg-clip-text text-transparent",
+      "text-2xl font-semibold leading-tight tracking-tight text-foreground",
       className,
     )}
     {...props}

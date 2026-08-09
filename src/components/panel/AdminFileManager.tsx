@@ -39,8 +39,7 @@ export default function AdminFileManager() {
       className="max-w-7xl mx-auto px-3 sm:px-6 md:px-8 lg:px-10 py-8 sm:py-10 md:py-12 lg:py-16"
     >
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/2 rounded-lg sm:rounded-xl md:rounded-2xl blur-sm" />
-        <Card className="relative bg-card/60 backdrop-blur-sm border border-primary/20 rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-primary/30">
+        <Card className="relative bg-card border rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-md hover:border-foreground/25">
           <CardContent className="p-4 sm:p-6 md:p-8 lg:p-10">
             <StorageStats totalSize={totalSize} totalFiles={totalFiles} />
             <div className="h-8" />

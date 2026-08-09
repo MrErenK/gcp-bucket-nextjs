@@ -6,7 +6,6 @@ import {
   TelegramIcon,
   HeartIcon,
   FileIcon,
-  AdminIcon,
   CloudIcon,
   InfoIcon,
 } from "@/components/ui/Icons";
@@ -51,13 +50,13 @@ const Footer: React.FC = () => {
       className="group relative p-2 rounded-xl transition-all duration-300"
       aria-label={label}
     >
-      <div className="absolute inset-0 bg-primary/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute inset-0 bg-accent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       <Icon className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground group-hover:text-primary transition-colors duration-300" />
     </motion.a>
   );
 
   return (
-    <footer className="relative bg-gradient-to-t from-background/95 via-background/60 to-background/30 shadow-lg border-t border-primary/30">
+    <footer className="border-t border-border bg-card">
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 items-start">
           <motion.div
@@ -66,13 +65,11 @@ const Footer: React.FC = () => {
             className="space-y-3 sm:space-y-4 flex flex-col items-center md:items-start"
           >
             <Link href="/" className="inline-block group">
-              <div className="flex items-center gap-2 sm:gap-3 p-2 rounded-2xl hover:bg-primary/10 transition-all duration-500">
+              <div className="flex items-center gap-2 sm:gap-3 p-2 rounded-2xl hover:bg-accent transition-all duration-500">
                 <div className="relative">
                   <CloudIcon className="relative w-6 h-6 sm:w-8 sm:h-8 text-primary transition-all duration-500 group-hover:scale-125 group-hover:rotate-[-15deg] mb-4" />
                 </div>
-                <h2 className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-[hsl(var(--gradient-1))] via-[hsl(var(--gradient-2))] to-[hsl(var(--gradient-3))] bg-clip-text text-transparent">
-                  Cloud Storage
-                </h2>
+                <h2 className="text-xl sm:text-2xl font-bold">Cloud Storage</h2>
               </div>
             </Link>
             <p className="text-xs sm:text-sm text-muted-foreground/90 leading-relaxed font-medium text-center md:text-left">
@@ -87,15 +84,10 @@ const Footer: React.FC = () => {
             transition={{ delay: 0.1 }}
             className="space-y-3 sm:space-y-4 flex flex-col items-center md:items-start pt-5"
           >
-            <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-[hsl(var(--gradient-1))] to-[hsl(var(--gradient-2))] bg-clip-text text-transparent">
-              Quick Links
-            </h3>
+            <h3 className="text-lg sm:text-xl font-bold">Quick Links</h3>
             <ul className="space-y-2 w-full flex flex-col items-center md:items-start">
               <FooterLink href="/files" icon={FileIcon}>
                 All Files
-              </FooterLink>
-              <FooterLink href="/panel" icon={AdminIcon}>
-                Admin Panel
               </FooterLink>
               <FooterLink href="/info" icon={InfoIcon}>
                 Information
@@ -109,9 +101,7 @@ const Footer: React.FC = () => {
             transition={{ delay: 0.2 }}
             className="space-y-3 sm:space-y-4 flex flex-col items-center md:items-start pt-5"
           >
-            <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-[hsl(var(--gradient-1))] to-[hsl(var(--gradient-2))] bg-clip-text text-transparent">
-              Connect
-            </h3>
+            <h3 className="text-lg sm:text-xl font-bold">Connect</h3>
             <div className="flex gap-3 sm:gap-4 justify-center md:justify-start w-full">
               <SocialLink
                 href="https://github.com/MrErenK"
@@ -131,7 +121,7 @@ const Footer: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="mt-6 sm:mt-8 pt-4 border-t border-primary/15"
+          className="mt-6 sm:mt-8 pt-4 border-t"
         >
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
             <p className="text-[10px] sm:text-xs font-medium text-muted-foreground/90 text-center sm:text-left">

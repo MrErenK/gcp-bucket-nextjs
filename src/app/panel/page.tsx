@@ -4,7 +4,8 @@ import { Toaster } from "react-hot-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginForm } from "@/components/panel/LoginForm";
 import { MainPanel } from "@/components/panel/MainPanel";
-import { Header } from "./Header";
+import { Header } from "@/components/layout/Header";
+import { AdminIcon } from "@/components/ui/Icons";
 import { motion, AnimatePresence } from "framer-motion";
 
 const PanelPage = () => {
@@ -21,12 +22,12 @@ const PanelPage = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-gradient-to-b from-background to-background/80"
+      className="min-h-screen bg-background"
     >
       <Toaster
         position="top-right"
         toastOptions={{
-          className: "bg-card/50 border border-primary/10 backdrop-blur-sm",
+          className: "bg-card border border-border",
           duration: 3000,
         }}
       />
@@ -39,7 +40,7 @@ const PanelPage = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            <Header />
+            <Header showNav={false} />
             <main className="container mx-auto px-4 sm:px-6 min-h-[calc(100vh-4rem)] flex items-center justify-center">
               <LoginForm
                 adminApiKey={adminApiKey}
@@ -51,20 +52,20 @@ const PanelPage = () => {
             </main>
           </motion.div>
         ) : (
-          <motion.main
+          <motion.div
             key="panel"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-7xl"
+            className="min-h-screen flex flex-col"
           >
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--gradient-1))/0.1] to-[hsl(var(--gradient-2))/0.1] rounded-2xl sm:rounded-3xl" />
-              <div className="relative bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-3xl border border-primary/10 shadow-lg overflow-hidden">
+            <Header title="Admin Panel" titleIcon={AdminIcon} />
+            <main className="grow container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-7xl">
+              <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
                 <MainPanel />
               </div>
-            </div>
-          </motion.main>
+            </main>
+          </motion.div>
         )}
       </AnimatePresence>
     </motion.div>

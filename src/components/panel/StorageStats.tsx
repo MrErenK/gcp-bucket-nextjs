@@ -18,14 +18,12 @@ export function StorageStats({ totalSize, totalFiles }: StorageStatsProps) {
       className="space-y-6"
     >
       <div className="flex flex-col gap-4">
-        <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-          Storage Overview
-        </h3>
+        <h3 className="text-lg font-semibold">Storage Overview</h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="relative bg-card/50 backdrop-blur-sm rounded-xl border border-primary/10 p-4 overflow-hidden">
+          <div className="relative bg-card rounded-xl border p-4 overflow-hidden">
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
+              <div className="p-2 bg-accent border rounded-lg">
                 <DatabaseIcon className="w-5 h-5 text-primary" />
               </div>
               <div>
@@ -35,7 +33,7 @@ export function StorageStats({ totalSize, totalFiles }: StorageStatsProps) {
             </div>
 
             <div className="space-y-2">
-              <div className="relative h-2 bg-primary/10 rounded-full overflow-hidden">
+              <div className="relative h-2 bg-muted rounded-full overflow-hidden">
                 <motion.div
                   className="absolute inset-y-0 left-0 bg-primary"
                   initial={{ width: 0 }}
@@ -53,9 +51,9 @@ export function StorageStats({ totalSize, totalFiles }: StorageStatsProps) {
             </div>
           </div>
 
-          <div className="relative bg-card/50 backdrop-blur-sm rounded-xl border border-primary/10 p-4">
+          <div className="relative bg-card rounded-xl border p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
+              <div className="p-2 bg-accent border rounded-lg">
                 <FileStatsIcon className="w-5 h-5 text-primary" />
               </div>
               <div>

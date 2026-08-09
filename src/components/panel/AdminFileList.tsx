@@ -196,14 +196,13 @@ export function AdminFileList({
         animate={{ opacity: 1, y: 0 }}
         className="relative"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/2 rounded-2xl blur-sm" />
-        <div className="relative bg-card rounded-2xl p-3 md:p-6 shadow-xl border border-primary/10">
+        <div className="relative bg-card rounded-2xl p-3 md:p-6 shadow-sm border">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 md:mb-6">
             <div className="space-y-1 w-full sm:w-auto">
               <motion.h2
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="text-lg md:text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent"
+                className="text-lg md:text-2xl font-bold"
               >
                 Files Management
               </motion.h2>
@@ -223,7 +222,7 @@ export function AdminFileList({
               size="sm"
               disabled={isLoading}
               className={cn(
-                "group transition-all duration-300 hover:border-primary/50 w-full sm:w-auto text-xs md:text-sm",
+                "group transition-all duration-300 hover:border-foreground/40 w-full sm:w-auto text-xs md:text-sm",
                 isLoading && "opacity-50 cursor-not-allowed",
               )}
             >
@@ -242,14 +241,14 @@ export function AdminFileList({
               <Button
                 key={type}
                 onClick={() => updateSort(type)}
-                variant={sortState.by === type ? "default" : "outline"}
+                variant={sortState.by === type ? "default" : "outline-solid"}
                 size="sm"
                 className={cn(
                   "transition-all duration-300 min-w-[80px] flex-1 sm:flex-none",
                   "text-xs md:text-sm px-2 md:px-4",
                   sortState.by === type
-                    ? "bg-primary/10 text-primary hover:bg-primary/20"
-                    : "hover:border-primary/50",
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : "hover:border-foreground/40",
                 )}
               >
                 <SortIcon
@@ -284,7 +283,7 @@ export function AdminFileList({
                   }}
                   className={cn(
                     "group relative bg-card rounded-lg p-2 md:p-4 lg:p-5",
-                    "border border-primary/10 hover:border-primary/30",
+                    "border hover:border-foreground/25",
                     "shadow-md hover:shadow-lg",
                     "transition-all duration-300",
                   )}
@@ -294,7 +293,7 @@ export function AdminFileList({
                       <div className="flex items-start gap-2 sm:gap-3">
                         <motion.div
                           whileHover={{ scale: 1.05 }}
-                          className="p-1.5 sm:p-2 bg-primary/5 rounded-lg shrink-0"
+                          className="p-1.5 sm:p-2 bg-accent rounded-lg shrink-0"
                         >
                           <FileIcon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 text-primary" />
                         </motion.div>
@@ -329,7 +328,7 @@ export function AdminFileList({
                           onClick={() => handleRename(file.name)}
                           variant="outline"
                           size="default"
-                          className="transition-all duration-300 flex-1 text-[10px] xs:text-[11px] sm:text-sm md:text-base h-6 xs:h-7 sm:h-8 md:h-9 lg:h-10 px-1.5 xs:px-2 sm:px-4 md:px-6 hover:border-primary/50"
+                          className="transition-all duration-300 flex-1 text-[10px] xs:text-[11px] sm:text-sm md:text-base h-6 xs:h-7 sm:h-8 md:h-9 lg:h-10 px-1.5 xs:px-2 sm:px-4 md:px-6 hover:border-foreground/40"
                         >
                           <RenameIcon className="w-2.5 h-2.5 xs:w-3 xs:h-3 md:w-4 md:h-4 mr-1 md:mr-2 shrink-0" />
                           Rename
@@ -364,7 +363,7 @@ export function AdminFileList({
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="sm:max-w-md mx-4">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold bg-gradient-to-r from-destructive to-destructive/70 bg-clip-text text-transparent">
+            <DialogTitle className="text-xl font-semibold text-destructive">
               Confirm Delete
             </DialogTitle>
           </DialogHeader>
@@ -391,7 +390,7 @@ export function AdminFileList({
               type="button"
               variant="outline"
               onClick={() => setShowDeleteDialog(false)}
-              className="w-full sm:w-auto transition-all duration-300 hover:border-primary/50"
+              className="w-full sm:w-auto transition-all duration-300 hover:border-foreground/40"
             >
               Cancel
             </Button>
@@ -410,7 +409,7 @@ export function AdminFileList({
       <Dialog open={showRenameDialog} onOpenChange={setShowRenameDialog}>
         <DialogContent className="sm:max-w-md mx-4">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            <DialogTitle className="text-xl font-semibold">
               Rename File
             </DialogTitle>
           </DialogHeader>
@@ -448,7 +447,7 @@ export function AdminFileList({
                   setShowRenameDialog(false);
                   setNewFileName("");
                 }}
-                className="w-full sm:w-auto transition-all duration-300 hover:border-primary/50"
+                className="w-full sm:w-auto transition-all duration-300 hover:border-foreground/40"
               >
                 Cancel
               </Button>

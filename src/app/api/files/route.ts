@@ -15,12 +15,17 @@ export async function GET(request: NextRequest) {
   try {
     // If a filename is provided, return details for that specific file
     if (filename) {
-      const fileExists = await cloudStorage.fileExists(filename);
-      if (!fileExists) {
-        return NextResponse.json({ error: "File not found" }, { status: 404 });
+      let metadata;
+      try {
+        metadata = await cloudStorage.getFileMetadata(filename);
+      } catch (error) {
+        const status = (error as { $metadata?: { httpStatusCode?: number } })
+          .$metadata?.httpStatusCode;
+        if (status === 404 || (error as Error).name === "NotFound") {
+          return NextResponse.json({ error: "File not found" }, { status: 404 });
+        }
+        throw error;
       }
-
-      const metadata = await cloudStorage.getFileMetadata(filename);
 
       return NextResponse.json({
         name: filename,
@@ -29,22 +34,15 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Pagination, search, and sorting functionality
     const files = await cloudStorage.listFiles();
-    const filteredFiles = await Promise.all(
-      files
-        .filter((file) =>
-          file.name.toLowerCase().includes(search.toLowerCase()),
-        )
-        .map(async (file) => {
-          const metadata = await cloudStorage.getFileMetadata(file.name);
-          return {
-            name: file.name,
-            updatedAt: metadata.updated,
-            size: parseInt(String(metadata.size) || "0", 10),
-          };
-        }),
-    );
+    const needle = search.toLowerCase();
+    const filteredFiles = files
+      .filter((file) => file.name.toLowerCase().includes(needle))
+      .map((file) => ({
+        name: file.name,
+        updatedAt: file.updated,
+        size: file.size,
+      }));
 
     // Sort the filtered files
     const sortedFiles = filteredFiles.sort((a, b) => {

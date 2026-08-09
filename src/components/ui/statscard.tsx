@@ -13,12 +13,12 @@ export function StatsCard({
     <div
       className={cn(
         "flex items-center gap-2 px-3 py-1.5",
-        "bg-card/50 backdrop-blur-sm",
-        "border border-primary/10 rounded-lg",
-        "transition-all duration-300 hover:border-primary/20",
+        "bg-card",
+        "border rounded-lg",
+        "transition-all duration-300 hover:border-foreground/25",
       )}
     >
-      <Icon className="w-4 h-4 text-primary/80" />
+      <Icon className="w-4 h-4 text-muted-foreground" />
       <div className="flex flex-col">
         <span className="text-xs text-muted-foreground">{label}</span>
         <span className="text-sm font-medium">{value}</span>

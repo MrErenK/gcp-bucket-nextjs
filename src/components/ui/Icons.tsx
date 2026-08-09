@@ -664,25 +664,6 @@ const AdminIcon = createIcon(
   </>,
 );
 
-const KernelIcon = createIcon(
-  <>
-    <rect x="2" y="2" width="20" height="20" rx="2" />
-    <path d="M6 2v4M10 2v4M14 2v4M18 2v4M6 18v4M10 18v4M14 18v4M18 18v4" />
-    <path d="M2 6h4M2 10h4M2 14h4M2 18h4M18 6h4M18 10h4M18 14h4M18 18h4" />
-    <rect x="8" y="8" width="8" height="8" rx="1" />
-    <circle cx="10" cy="10" r="0.5" fill="currentColor" />
-    <circle cx="14" cy="10" r="0.5" fill="currentColor" />
-    <circle cx="10" cy="14" r="0.5" fill="currentColor" />
-    <circle cx="14" cy="14" r="0.5" fill="currentColor" />
-    <path d="M7 12h10M12 7v10" stroke="currentColor" strokeWidth="0.25" />
-    <path
-      d="M4 4l2 2M4 20l2-2M20 4l-2 2M20 20l-2-2"
-      stroke="currentColor"
-      strokeWidth="0.5"
-    />
-  </>,
-);
-
 const FolderIcon = createIcon(
   <>
     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
@@ -751,6 +732,5 @@ export {
   AlertCircleIcon,
   FileSearchIcon,
   AdminIcon,
-  KernelIcon,
   FolderIcon,
 };

@@ -10,7 +10,7 @@ const inputVariants = cva(
     variants: {
       variant: {
         default:
-          "border-2 border-input hover:border-primary/50 focus:border-primary",
+          "border-2 border-input hover:border-foreground/40 focus:border-primary",
         ghost:
           "border-none shadow-none focus:border-none placeholder:text-muted-foreground/50",
         error:
@@ -71,7 +71,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       inputVariants({ variant, size, rounded }),
       "file:border-0 file:bg-transparent file:text-sm file:font-medium",
       "placeholder:text-muted-foreground/60",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20",
+      "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/20",
       "disabled:cursor-not-allowed disabled:opacity-50",
       leftIcon && "pl-10",
       rightIcon && "pr-10",

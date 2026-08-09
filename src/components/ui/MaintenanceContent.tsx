@@ -17,7 +17,7 @@ export function MaintenanceContent() {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[9999] backdrop-blur-md">
+    <div className="fixed inset-0 z-9999 backdrop-blur-md">
       <div className="fixed inset-0 bg-background/90" />
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -26,8 +26,7 @@ export function MaintenanceContent() {
       >
         <div className="w-full max-w-2xl">
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-primary/5 rounded-2xl blur-xl" />
-            <div className="relative bg-card/50 backdrop-blur-sm rounded-2xl border border-primary/10 overflow-hidden">
+            <div className="relative bg-card rounded-2xl border shadow-sm overflow-hidden">
               <div className="px-6 py-8 sm:p-10 space-y-6">
                 <div className="space-y-2 text-center">
                   <motion.div
@@ -40,11 +39,11 @@ export function MaintenanceContent() {
                     }}
                     className="flex justify-center"
                   >
-                    <div className="p-3 bg-primary/10 rounded-xl">
-                      <WrenchIcon className="w-12 h-12 text-primary" />
+                    <div className="p-3 bg-accent border rounded-xl">
+                      <WrenchIcon className="w-12 h-12" />
                     </div>
                   </motion.div>
-                  <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                  <h2 className="text-2xl sm:text-3xl font-bold">
                     Maintenance in Progress
                   </h2>
                 </div>
@@ -56,11 +55,9 @@ export function MaintenanceContent() {
                     downtime.
                   </p>
 
-                  <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
+                  <div className="bg-accent rounded-xl p-4 border">
                     <p className="text-sm text-center">
-                      <span className="font-semibold text-primary">
-                        Reason:
-                      </span>{" "}
+                      <span className="font-semibold">Reason:</span>{" "}
                       <span className="text-muted-foreground">{reason}</span>
                     </p>
                   </div>

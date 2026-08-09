@@ -35,17 +35,12 @@ export default function ThemeSwitch() {
       className={cn(
         "relative w-16 h-8 rounded-full p-1",
         "flex items-center justify-start",
-        "focus:outline-none focus-visible:ring-2",
-        "focus-visible:ring-primary/50",
-        "shadow-lg transition-all duration-300",
+        "focus:outline-hidden focus-visible:ring-2",
+        "focus-visible:ring-ring focus-visible:ring-offset-2",
+        "focus-visible:ring-offset-background",
+        "bg-muted border shadow-xs transition-all duration-300",
         "disabled:opacity-50 disabled:cursor-not-allowed",
       )}
-      style={{
-        background:
-          theme === "dark"
-            ? "linear-gradient(to right, rgb(55, 65, 81), rgb(17, 24, 39))"
-            : "linear-gradient(to right, rgb(249, 250, 251), rgb(209, 213, 219))",
-      }}
       onClick={handleThemeChange}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -55,19 +50,16 @@ export default function ThemeSwitch() {
       whileTap={{ scale: 0.95 }}
     >
       <motion.div
-        className={cn(
-          "absolute inset-0 rounded-full opacity-0 transition-opacity duration-300",
-          theme === "dark" ? "bg-blue-500/20" : "bg-yellow-500/20",
-        )}
+        className="absolute inset-0 rounded-full bg-accent opacity-0 transition-opacity duration-300"
         animate={{ opacity: isHovered ? 1 : 0 }}
       />
 
       <motion.div
         className={cn(
-          "w-6 h-6 rounded-full shadow-md",
+          "w-6 h-6 rounded-full shadow-xs",
           "flex items-center justify-center",
           "relative z-10",
-          theme === "dark" ? "bg-gray-800" : "bg-white",
+          "bg-background border",
         )}
         animate={{
           x: theme === "dark" ? 32 : 0,
@@ -87,37 +79,11 @@ export default function ThemeSwitch() {
           transition={{ duration: 0.5 }}
         >
           {theme === "dark" ? (
-            <MoonIcon className="w-4 h-4 text-yellow-200" />
+            <MoonIcon className="w-4 h-4 text-foreground" />
           ) : (
-            <SunIcon className="w-4 h-4 text-yellow-500" />
+            <SunIcon className="w-4 h-4 text-foreground" />
           )}
         </motion.div>
-
-        {theme === "light" && (
-          <motion.div
-            className="absolute inset-0"
-            animate={{
-              rotate: isHovered ? 360 : 0,
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-          >
-            {[...Array(8)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-1 h-1 bg-yellow-300/50 rounded-full"
-                style={{
-                  top: "50%",
-                  left: "50%",
-                  transform: `rotate(${i * 45}deg) translateY(-10px)`,
-                }}
-              />
-            ))}
-          </motion.div>
-        )}
       </motion.div>
     </motion.button>
   );

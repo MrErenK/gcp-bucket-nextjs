@@ -59,8 +59,12 @@ export function DirectLinkUploader({
       clearInterval(progressInterval);
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText);
+        const raw = await response.text();
+        let message = raw;
+        try {
+          message = JSON.parse(raw).error || raw;
+        } catch {}
+        throw new Error(message || `Upload failed (${response.status})`);
       }
 
       setUploadProgress(100);
@@ -85,7 +89,7 @@ export function DirectLinkUploader({
             Upload from Direct Link
           </h3>
           <p className="text-xs sm:text-sm md:text-base text-center text-muted-foreground">
-            Upload files from direct download links (500MB - 3GB)
+            Upload files from direct download links (1MB - 5GB)
           </p>
         </motion.div>
 
@@ -100,7 +104,7 @@ export function DirectLinkUploader({
                 "h-10 sm:h-12 text-sm sm:text-base",
                 "h-12 pl-4 pr-12",
                 "bg-background",
-                "border-2 border-primary/20",
+                "border-2 border-input",
                 "focus:border-primary focus:ring-primary/30",
                 "rounded-xl transition-all duration-300",
                 "placeholder:text-muted-foreground/60",
@@ -122,10 +126,10 @@ export function DirectLinkUploader({
               className={cn(
                 "h-10 sm:h-12 text-sm sm:text-base",
                 "w-full h-12 rounded-xl font-medium",
-                "bg-gradient-to-r from-primary to-primary/80",
-                "hover:from-primary/90 hover:to-primary/70",
-                "disabled:from-gray-400 disabled:to-gray-400/80",
-                "shadow-lg hover:shadow-xl disabled:shadow-none",
+                "bg-primary text-primary-foreground",
+                "hover:bg-primary/90",
+                "disabled:bg-muted disabled:text-muted-foreground",
+                "shadow-sm hover:shadow disabled:shadow-none",
                 "transition-all duration-300",
                 "transform hover:scale-[1.02] active:scale-[0.98]",
               )}

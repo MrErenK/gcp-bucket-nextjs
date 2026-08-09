@@ -108,12 +108,4 @@ export function getFileType(extension: string): FileType {
   return "other";
 }
 
-export enum FileCategory {
-  KERNEL = "KERNEL",
-  ROM = "ROM",
-}
 
-export const getFileCategory = (fileSize: number): FileCategory => {
-  const SIZE_THRESHOLD = 512 * 1024 * 1024; // 512MB in bytes
-  return fileSize < SIZE_THRESHOLD ? FileCategory.KERNEL : FileCategory.ROM;
-};

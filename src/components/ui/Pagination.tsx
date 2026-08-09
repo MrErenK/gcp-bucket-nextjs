@@ -26,7 +26,7 @@ export function Pagination({
           variant="outline"
           className={cn(
             "group transition-all duration-300",
-            "hover:border-primary/50 hover:bg-primary/5",
+            "hover:border-foreground/40 hover:bg-accent",
             "disabled:opacity-50 disabled:hover:bg-transparent",
           )}
         >
@@ -43,12 +43,12 @@ export function Pagination({
               <Button
                 key={page}
                 onClick={() => onPageChange(page)}
-                variant={isActive ? "default" : "outline"}
+                variant={isActive ? "default" : "outline-solid"}
                 className={cn(
                   "min-w-[40px] transition-all duration-300",
                   isActive
-                    ? "bg-primary/10 text-primary hover:bg-primary/20"
-                    : "hover:border-primary/50 hover:bg-primary/5",
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : "hover:border-foreground/40 hover:bg-accent",
                 )}
               >
                 {page}
@@ -63,7 +63,7 @@ export function Pagination({
           variant="outline"
           className={cn(
             "group transition-all duration-300",
-            "hover:border-primary/50 hover:bg-primary/5",
+            "hover:border-foreground/40 hover:bg-accent",
             "disabled:opacity-50 disabled:hover:bg-transparent",
           )}
         >

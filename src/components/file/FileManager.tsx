@@ -5,7 +5,7 @@ import { SearchBar } from "@/components/ui/SearchBar";
 import { useFileManagement } from "@/hooks/useFileManagement";
 import { toast, Toast } from "react-hot-toast";
 import { FileUploader } from "@/components/file/FileUploader";
-import { KernelUploader, KernelUploadResponse } from "./KernelUploader";
+
 import {
   FileStatsIcon,
   DatabaseIcon,
@@ -19,7 +19,6 @@ import { StatsCard } from "@/components/ui/statscard";
 import { FilesSkeleton } from "@/components/ui/FilesSkeleton";
 import { cn } from "@/lib/utils";
 import { FolderView } from "@/components/file/FolderView";
-import { FileCategory } from "@/types/filetypes";
 
 interface FileData {
   name: string;
@@ -45,7 +44,6 @@ export function FileManager() {
   } = useFileManagement(false);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [activeFolder, setActiveFolder] = useState<FileCategory | null>(null);
 
   useEffect(() => {
     const initialLoad = async () => {
@@ -60,57 +58,6 @@ export function FileManager() {
     setIsRefreshing(false);
   }, [fetchFiles]);
 
-  const handleKernelUpload = useCallback(
-    (response: KernelUploadResponse) => {
-      handleRefresh();
-      toast.custom((t: Toast) => (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className={cn(
-            "pointer-events-auto flex w-full max-w-[90vw] sm:max-w-xl rounded-lg",
-            "bg-card border border-primary/10",
-            "shadow-lg",
-            t.visible ? "animate-in" : "animate-out",
-          )}
-        >
-          <div className="flex-1 p-4 min-w-0">
-            <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <CheckIcon className="h-6 w-6 text-primary" />
-                </div>
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">Kernel Upload Successful</p>
-                <p className="mt-1 text-sm text-muted-foreground truncate">
-                  {response.kernel.name}
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Checksum: {response.kernel.checksum}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="flex-shrink-0">
-            <button
-              onClick={() => toast.dismiss(t.id)}
-              className={cn(
-                "flex items-center justify-center w-12 h-full",
-                "hover:bg-primary/5 transition-colors duration-200",
-                "border-l border-primary/10",
-              )}
-            >
-              <XIcon className="h-5 w-5 text-muted-foreground" />
-            </button>
-          </div>
-        </motion.div>
-      ));
-    },
-    [handleRefresh],
-  );
-
   const handleUploadComplete = useCallback(
     (file: { name: string; url: string }) => {
       handleRefresh();
@@ -121,7 +68,7 @@ export function FileManager() {
           exit={{ opacity: 0, y: -20 }}
           className={cn(
             "pointer-events-auto flex w-full max-w-[90vw] sm:max-w-xl rounded-lg",
-            "bg-card border border-primary/10",
+            "bg-card border",
             "shadow-lg",
             t.visible ? "animate-in" : "animate-out",
           )}
@@ -129,8 +76,8 @@ export function FileManager() {
           <div className="flex-1 p-4 min-w-0">
             {" "}
             <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="shrink-0">
+                <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center">
                   <CheckIcon className="h-6 w-6 text-primary" />
                 </div>
               </div>
@@ -146,14 +93,14 @@ export function FileManager() {
               </div>
             </div>
           </div>
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             {" "}
             <button
               onClick={() => toast.dismiss(t.id)}
               className={cn(
                 "flex items-center justify-center w-12 h-full",
-                "hover:bg-primary/5 transition-colors duration-200",
-                "border-l border-primary/10",
+                "hover:bg-accent transition-colors duration-200",
+                "border-l",
               )}
             >
               <XIcon className="h-5 w-5 text-muted-foreground" />
@@ -172,17 +119,9 @@ export function FileManager() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative rounded-2xl border border-primary/10 overflow-hidden"
+        className="relative rounded-2xl border overflow-hidden"
       >
         <FileUploader onUploadCompleteAction={handleUploadComplete} />
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative rounded-2xl border border-primary/10 overflow-hidden"
-      >
-        <KernelUploader onUploadComplete={handleKernelUpload} />
       </motion.div>
 
       <motion.div
@@ -191,12 +130,12 @@ export function FileManager() {
         transition={{ delay: 0.2 }}
         className="relative"
       >
-        <div className="relative rounded-2xl border border-primary/10 overflow-hidden bg-card p-4 md:p-6">
+        <div className="relative rounded-2xl border overflow-hidden bg-card p-4 md:p-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-4 mb-4 md:mb-6">
             <motion.h2
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent"
+              className="text-2xl md:text-3xl font-bold"
             >
               Download Files
             </motion.h2>
@@ -223,8 +162,7 @@ export function FileManager() {
             animate={{ opacity: 1, y: 0 }}
             className="relative"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/2 rounded-2xl blur-sm" />
-            <div className="relative bg-card rounded-2xl border border-primary/10 shadow-xl overflow-hidden">
+            <div className="relative bg-card rounded-2xl border shadow-sm overflow-hidden">
               <div className="p-4 md:p-6 space-y-4 md:space-y-6">
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -268,8 +206,6 @@ export function FileManager() {
                         onCopyAction={handleCopy}
                         onDownloadAction={handleDownload}
                         onRefreshAction={handleRefresh}
-                        activeFolder={activeFolder}
-                        setActiveFolderAction={setActiveFolder}
                       />
                     </motion.div>
                   )}
@@ -290,8 +226,6 @@ interface FileContentProps {
   onCopyAction: (filename: string) => void;
   onDownloadAction: (filename: string) => void;
   onRefreshAction: () => Promise<void>;
-  activeFolder: FileCategory | null;
-  setActiveFolderAction: (folder: FileCategory | null) => void;
 }
 
 export function FileContent({
@@ -301,8 +235,6 @@ export function FileContent({
   onCopyAction,
   onDownloadAction,
   onRefreshAction,
-  activeFolder,
-  setActiveFolderAction,
 }: FileContentProps) {
   if (!initialLoadDone) return null;
 
@@ -317,9 +249,9 @@ export function FileContent({
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          className="p-4 rounded-full bg-primary/5"
+          className="p-4 rounded-full bg-accent"
         >
-          <FileIcon className="w-8 h-8 text-primary/60" />
+          <FileIcon className="w-8 h-8 text-muted-foreground" />
         </motion.div>
         <motion.p
           initial={{ y: 20, opacity: 0 }}
@@ -344,8 +276,6 @@ export function FileContent({
       onCopyAction={onCopyAction}
       onDownloadAction={onDownloadAction}
       onRefreshAction={onRefreshAction}
-      activeFolder={activeFolder}
-      setActiveFolder={setActiveFolderAction}
     />
   );
 }

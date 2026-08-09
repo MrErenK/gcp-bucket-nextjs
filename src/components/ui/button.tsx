@@ -5,22 +5,24 @@ import { cn } from "@/lib/utils";
 import { LoadingIcon } from "@/components/ui/Icons";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all duration-300 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xs",
         outline:
           "border-2 border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        "outline-solid":
+          "border-2 border-input bg-background hover:bg-accent hover:border-foreground/40",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-xs",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        gradient:
-          "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl",
+        solid:
+          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -33,7 +35,7 @@ const buttonVariants = cva(
         true: "w-full",
       },
       loading: {
-        true: "relative !text-transparent transition-none hover:!text-transparent",
+        true: "relative text-transparent! transition-none hover:text-transparent!",
       },
     },
     defaultVariants: {

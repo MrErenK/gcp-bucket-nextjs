@@ -19,16 +19,15 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-background/80 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-md"
       >
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-destructive/20 via-destructive/10 to-transparent rounded-2xl blur-lg" />
-          <Card className="relative bg-card/50 backdrop-blur-sm border-primary/10 rounded-2xl overflow-hidden">
-            <CardHeader className="space-y-4 border-b border-primary/10 p-6">
+          <Card className="relative bg-card border-border rounded-2xl overflow-hidden">
+            <CardHeader className="space-y-4 border-b p-6">
               <motion.div
                 initial={{ scale: 0.5 }}
                 animate={{

@@ -41,3 +41,4 @@ google-cloud-key.json
 upload.sh
 *.zip
 /Telegram/
+.claude/

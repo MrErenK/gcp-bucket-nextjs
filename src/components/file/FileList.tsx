@@ -136,14 +136,13 @@ export function FileList({
         animate={{ opacity: 1, y: 0 }}
         className="relative"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/2 rounded-2xl blur-sm" />
-        <div className="relative bg-card rounded-2xl p-3 md:p-6 shadow-xl border border-primary/10">
+        <div className="relative bg-card rounded-2xl p-3 md:p-6 shadow-sm border">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 md:mb-6">
             <div className="space-y-1 w-full sm:w-auto">
               <motion.h2
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="text-lg md:text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent"
+                className="text-lg md:text-2xl font-bold"
               >
                 Files
               </motion.h2>
@@ -164,7 +163,7 @@ export function FileList({
                 size="sm"
                 disabled={isRefreshing}
                 className={cn(
-                  "group transition-all duration-300 hover:border-primary/50 w-full sm:w-auto text-xs md:text-sm",
+                  "group transition-all duration-300 hover:border-foreground/40 w-full sm:w-auto text-xs md:text-sm",
                   isRefreshing && "opacity-50 cursor-not-allowed",
                 )}
               >
@@ -182,7 +181,7 @@ export function FileList({
                   onClick={() => router.push("/files")}
                   variant="outline"
                   size="sm"
-                  className="group transition-all duration-300 hover:border-primary/50 w-full sm:w-auto text-xs md:text-sm"
+                  className="group transition-all duration-300 hover:border-foreground/40 w-full sm:w-auto text-xs md:text-sm"
                 >
                   <AllFilesIcon className="w-3 h-3 md:w-4 md:h-4 mr-1.5 md:mr-2 transition-transform duration-300 group-hover:scale-110" />
                   View All
@@ -196,14 +195,14 @@ export function FileList({
               <Button
                 key={type}
                 onClick={() => updateSort(type)}
-                variant={sortState.by === type ? "default" : "outline"}
+                variant={sortState.by === type ? "default" : "outline-solid"}
                 size="sm"
                 className={cn(
                   "transition-all duration-300 min-w-[80px] flex-1 sm:flex-none",
                   "text-xs md:text-sm px-2 md:px-4",
                   sortState.by === type
-                    ? "bg-primary/10 text-primary hover:bg-primary/20"
-                    : "hover:border-primary/50",
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : "hover:border-foreground/40",
                 )}
               >
                 <SortIcon
@@ -243,7 +242,7 @@ export function FileList({
                     }}
                     className={cn(
                       "group relative bg-card rounded-lg p-2 md:p-4 lg:p-5",
-                      "border border-primary/10 hover:border-primary/30",
+                      "border hover:border-foreground/25",
                       "shadow-md hover:shadow-lg",
                       "transition-all duration-300",
                     )}
@@ -253,7 +252,7 @@ export function FileList({
                         <div className="flex items-start gap-2 sm:gap-3">
                           <motion.div
                             whileHover={{ scale: 1.05 }}
-                            className="p-1.5 sm:p-2 bg-primary/5 rounded-lg shrink-0"
+                            className="p-1.5 sm:p-2 bg-accent rounded-lg shrink-0"
                           >
                             <FileTypeIcon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 text-primary" />
                           </motion.div>
@@ -286,13 +285,13 @@ export function FileList({
                         <div className="flex flex-col xs:flex-row gap-1.5 sm:gap-2">
                           <Button
                             onClick={() => handleCopy(file.name)}
-                            variant={isCopied ? "default" : "outline"}
+                            variant={isCopied ? "default" : "outline-solid"}
                             size="default"
                             className={cn(
                               "transition-all duration-300 flex-1 text-[8px] xs:text-[10px] sm:text-sm md:text-base h-6 xs:h-7 sm:h-8 md:h-9 lg:h-10 px-1.5 xs:px-2 sm:px-4 md:px-6",
                               isCopied
                                 ? "bg-green-500/10 text-green-500 hover:bg-green-500/20"
-                                : "hover:border-primary/50",
+                                : "hover:border-foreground/40",
                             )}
                             disabled={isCopied}
                           >
@@ -337,7 +336,7 @@ export function FileList({
                             variant="outline"
                             size="default"
                             className={cn(
-                              "transition-all duration-300 hover:border-primary/50 flex-1 text-[8px] xs:text-[10px] sm:text-sm md:text-base h-6 xs:h-7 sm:h-8 md:h-9 lg:h-10 px-1.5 xs:px-2 sm:px-4 md:px-6",
+                              "transition-all duration-300 hover:border-foreground/40 flex-1 text-[8px] xs:text-[10px] sm:text-sm md:text-base h-6 xs:h-7 sm:h-8 md:h-9 lg:h-10 px-1.5 xs:px-2 sm:px-4 md:px-6",
                               isDownloading && "opacity-50",
                             )}
                             disabled={isDownloading}

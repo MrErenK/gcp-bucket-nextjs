@@ -1,94 +1,257 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+import ThemeSwitch from "@/components/ui/ThemeSwitch";
+import { Button } from "@/components/ui/button";
+import { Tooltip } from "@/components/ui/tooltip";
 import {
   CloudIcon,
   FileIcon,
-  AdminIcon,
   InfoIcon,
+  ArrowLeftIcon,
+  MenuIcon,
+  XIcon,
 } from "@/components/ui/Icons";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 
-export function Header() {
+type IconType = React.ComponentType<{ className?: string }>;
+
+export interface HeaderAction {
+  icon: IconType;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  tooltip?: string;
+}
+
+export interface HeaderProps {
+  /** Section name shown next to the brand, e.g. "Admin Panel". */
+  title?: string;
+  titleIcon?: IconType;
+  /** Set false on pages that only need the brand and actions. */
+  showNav?: boolean;
+  /** Renders a back arrow pointing at this route. */
+  backHref?: string;
+  /** Page-specific buttons, collapsed into the menu on small screens. */
+  actions?: HeaderAction[];
+}
+
+const NAV_LINKS = [
+  { href: "/files", label: "Files", icon: FileIcon },
+  { href: "/info", label: "Info", icon: InfoIcon },
+];
+
+export function Header({
+  title,
+  titleIcon: TitleIcon,
+  showNav = true,
+  backHref,
+  actions = [],
+}: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
+    const handleScroll = () => setIsScrolled(window.scrollY > 8);
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const NavLink = ({
-    href,
-    icon: Icon,
-    children,
-  }: {
-    href: string;
-    icon: any;
-    children: React.ReactNode;
-  }) => (
-    <Link
-      href={href}
-      className={cn(
-        "group flex items-center gap-2 rounded-lg",
-        "transition-all duration-300",
-        "text-muted-foreground hover:text-primary",
-        "hover:bg-primary/5 hover:scale-105",
-        "font-medium relative overflow-hidden",
-        "px-2 py-1.5 sm:px-4 sm:py-2",
-      )}
-    >
-      <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      <div className="relative">
-        <div className="absolute inset-0 bg-primary/20 rounded-full blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <Icon className="w-4 h-4 relative transition-transform duration-300 group-hover:scale-110" />
-      </div>
-      <span className="relative text-sm sm:text-base">{children}</span>
-    </Link>
-  );
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isMenuOpen]);
+
+  useEffect(() => setIsMenuOpen(false), [pathname]);
+
+  const hasMenu = showNav || actions.length > 0;
 
   return (
     <motion.header
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
+      initial={{ y: -64, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       className={cn(
-        "sticky top-0 z-40 w-full transition-all duration-300",
-        "border-b border-primary/10",
-        "bg-gradient-to-b from-background/80 to-background/20",
-        isScrolled
-          ? "backdrop-blur-sm backdrop-saturate-150 shadow-lg"
-          : "backdrop-blur-sm backdrop-saturate-100",
+        "sticky top-0 z-50 w-full border-b bg-background/90 backdrop-blur-md",
+        "transition-shadow duration-300",
+        isScrolled ? "shadow-sm" : "shadow-none",
       )}
     >
-      <div className="container mx-auto px-2 sm:px-4 h-16">
-        <div className="flex h-full items-center justify-between">
-          <Link
-            href="/"
-            className="group flex items-center gap-1.5 sm:gap-2 md:gap-3 px-2 md:px-3 py-2 rounded-xl transition-all duration-300"
-          >
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-[hsl(var(--gradient-1))] to-[hsl(var(--gradient-2))] opacity-10 rounded-full blur-[1px] group-hover:opacity-20 group-hover:blur-[2px] transition-all duration-300" />
-              <CloudIcon className="relative w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-primary transition-all duration-300 group-hover:scale-110 group-hover:rotate-[-10deg]" />
-            </div>
-            <span className="font-bold text-sm sm:text-lg md:text-xl lg:text-2xl bg-gradient-to-r from-[hsl(var(--gradient-1))] via-[hsl(var(--gradient-2))] to-[hsl(var(--gradient-3))] bg-clip-text text-transparent truncate">
-              Cloud Storage
-            </span>
-          </Link>
+      <div className="container mx-auto flex h-16 items-center gap-2 px-4 sm:px-6">
+        {backHref && (
+          <Tooltip text="Go back">
+            <Link
+              href={backHref}
+              aria-label="Go back"
+              className={cn(
+                "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
+                "text-muted-foreground transition-colors duration-200",
+                "hover:bg-accent hover:text-foreground",
+              )}
+            >
+              <ArrowLeftIcon className="h-5 w-5" />
+            </Link>
+          </Tooltip>
+        )}
 
-          <nav className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
-            <NavLink href="/files" icon={FileIcon}>
-              Files
-            </NavLink>
-            <NavLink href="/panel" icon={AdminIcon}>
-              Admin
-            </NavLink>
-            <NavLink href="/info" icon={InfoIcon}>
-              Info
-            </NavLink>
-          </nav>
+        <Link
+          href="/"
+          className="group flex min-w-0 items-center gap-2 rounded-lg px-1 py-1.5"
+        >
+          <CloudIcon className="h-6 w-6 shrink-0 transition-transform duration-300 group-hover:scale-110" />
+          <span className="truncate text-base font-semibold tracking-tight sm:text-lg">
+            Cloud Storage
+          </span>
+        </Link>
+
+        {title && (
+          <div className="hidden min-w-0 items-center gap-2 sm:flex">
+            <span aria-hidden className="h-5 w-px bg-border" />
+            {TitleIcon && <TitleIcon className="h-4 w-4 shrink-0" />}
+            <span className="truncate text-sm font-medium text-muted-foreground">
+              {title}
+            </span>
+          </div>
+        )}
+
+        <div className="ml-auto flex items-center gap-1">
+          {showNav && (
+            <nav className="hidden items-center gap-1 md:flex">
+              {NAV_LINKS.map(({ href, label, icon: Icon }) => {
+                const isActive = pathname === href;
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    aria-current={isActive ? "page" : undefined}
+                    className={cn(
+                      "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium",
+                      "transition-colors duration-200 hover:bg-accent",
+                      isActive
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          )}
+
+          {actions.length > 0 && (
+            <div className="hidden items-center gap-1 md:flex">
+              {actions.map((action) => (
+                <Tooltip key={action.label} text={action.tooltip ?? action.label}>
+                  <Button
+                    onClick={action.onClick}
+                    disabled={action.disabled}
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-lg"
+                  >
+                    <action.icon className="h-5 w-5" />
+                    <span className="sr-only">{action.label}</span>
+                  </Button>
+                </Tooltip>
+              ))}
+            </div>
+          )}
+
+          <div className="ml-1 hidden sm:block">
+            <ThemeSwitch />
+          </div>
+
+          {hasMenu && (
+            <Button
+              onClick={() => setIsMenuOpen((open) => !open)}
+              variant="ghost"
+              size="icon"
+              aria-expanded={isMenuOpen}
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              className={cn("rounded-lg", showNav ? "md:hidden" : "sm:hidden")}
+            >
+              {isMenuOpen ? (
+                <XIcon className="h-5 w-5" />
+              ) : (
+                <MenuIcon className="h-5 w-5" />
+              )}
+            </Button>
+          )}
         </div>
       </div>
+
+      <AnimatePresence initial={false}>
+        {isMenuOpen && (
+          <motion.div
+            ref={menuRef}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className={cn(
+              "overflow-hidden border-t bg-background",
+              showNav ? "md:hidden" : "sm:hidden",
+            )}
+          >
+            <div className="container mx-auto space-y-1 px-4 py-3 sm:px-6">
+              {showNav &&
+                NAV_LINKS.map(({ href, label, icon: Icon }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium",
+                      "transition-colors duration-200 hover:bg-accent",
+                      pathname === href
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{label}</span>
+                  </Link>
+                ))}
+
+              {actions.map((action) => (
+                <Button
+                  key={action.label}
+                  onClick={() => {
+                    action.onClick();
+                    setIsMenuOpen(false);
+                  }}
+                  disabled={action.disabled}
+                  variant="ghost"
+                  block
+                  className="justify-start gap-3 rounded-lg px-3 py-2.5"
+                >
+                  <action.icon className="h-4 w-4" />
+                  <span>{action.label}</span>
+                </Button>
+              ))}
+
+              <div className="flex justify-end pt-2 sm:hidden">
+                <ThemeSwitch />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.header>
   );
 }
+
+export default Header;
