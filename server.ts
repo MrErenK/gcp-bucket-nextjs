@@ -61,34 +61,122 @@ async function getUniqueFilename(originalFilename: string): Promise<string> {
   return newFilename;
 }
 
+// Content-Type → extension fallback, used only when neither the URL nor the
+// Content-Disposition header supplies a usable file extension. Audio, video and
+// text types are intentionally omitted since they are rejected on upload.
+const MIME_EXTENSIONS: Record<string, string> = {
+  "application/pdf": ".pdf",
+  "application/zip": ".zip",
+  "application/x-zip-compressed": ".zip",
+  "application/gzip": ".gz",
+  "application/x-gzip": ".gz",
+  "application/x-tar": ".tar",
+  "application/x-7z-compressed": ".7z",
+  "application/x-rar-compressed": ".rar",
+  "application/vnd.rar": ".rar",
+  "application/x-bzip2": ".bz2",
+  "application/json": ".json",
+  "application/xml": ".xml",
+  "application/rtf": ".rtf",
+  "application/msword": ".doc",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+    ".docx",
+  "application/vnd.ms-excel": ".xls",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
+  "application/vnd.ms-powerpoint": ".ppt",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+    ".pptx",
+  "application/vnd.android.package-archive": ".apk",
+  "application/x-msdownload": ".exe",
+  "application/x-apple-diskimage": ".dmg",
+  "application/x-iso9660-image": ".iso",
+  "application/epub+zip": ".epub",
+  "application/wasm": ".wasm",
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/gif": ".gif",
+  "image/webp": ".webp",
+  "image/svg+xml": ".svg",
+  "image/bmp": ".bmp",
+  "image/tiff": ".tiff",
+  "image/avif": ".avif",
+  "image/heic": ".heic",
+  "image/x-icon": ".ico",
+  "image/vnd.microsoft.icon": ".ico",
+  "font/woff": ".woff",
+  "font/woff2": ".woff2",
+  "font/ttf": ".ttf",
+  "font/otf": ".otf",
+};
+
+function extensionFromContentType(contentType: string): string {
+  const type = contentType.split(";")[0].trim().toLowerCase();
+  return MIME_EXTENSIONS[type] ?? "";
+}
+
+// A path segment "looks like a filename" only if it ends in a short, non-numeric
+// extension (e.g. report.pdf, archive.7z — but not /v1.2 or /1234567890).
+function hasFileExtension(segment: string): boolean {
+  return /\.[a-zA-Z0-9]{1,8}$/.test(segment) && !/\.\d+$/.test(segment);
+}
+
+// Sanitize a candidate name and guarantee it has an extension, deriving one from
+// the response's Content-Type when the name itself lacks one.
+function finalizeFilename(rawName: string, contentType: string): string {
+  const name = sanitizeFilename(rawName.replace(/"/g, ""));
+  if (path.extname(name)) return name;
+  const ext = extensionFromContentType(contentType);
+  return ext ? name + ext : name;
+}
+
 function extractFilename(
   directLink: string,
   contentDisposition: string | null,
+  contentType: string,
 ): string {
-  let filename =
-    new URL(directLink).pathname.split("/").pop() || "downloaded_file";
-
+  // 1. Content-Disposition is the most authoritative source for the name.
   if (contentDisposition) {
     // Prefer RFC 5987 encoded filename* (e.g. filename*=UTF-8''foo%20bar.zip)
     const rfc5987 = contentDisposition.match(
       /filename\*=(?:UTF-8|utf-8)'[^']*'([^;\s]+)/i,
     );
     if (rfc5987) {
+      let name: string;
       try {
-        filename = decodeURIComponent(rfc5987[1]);
+        name = decodeURIComponent(rfc5987[1]);
       } catch {
-        filename = rfc5987[1];
+        name = rfc5987[1];
       }
-    } else {
-      // Basic filename="foo.zip" or filename=foo.zip
-      const basic = contentDisposition.match(
-        /filename="([^"]+)"|filename=([^;\s]+)/i,
-      );
-      if (basic) filename = (basic[1] ?? basic[2]).replace(/^"|"$/g, "");
+      return finalizeFilename(name, contentType);
     }
+    // Basic filename="foo.zip" or filename=foo.zip
+    const basic = contentDisposition.match(
+      /filename="([^"]+)"|filename=([^;\s]+)/i,
+    );
+    if (basic) return finalizeFilename(basic[1] ?? basic[2] ?? "", contentType);
   }
 
-  return sanitizeFilename(filename.replace(/"/g, ""));
+  // 2. Fall back to the URL path. Prefer the last segment that actually looks
+  //    like a filename, which handles links such as /files/report.pdf/download
+  //    where the trailing segment ("download") is not the real name.
+  const segments = new URL(directLink).pathname
+    .split("/")
+    .map((segment) => {
+      try {
+        return decodeURIComponent(segment);
+      } catch {
+        return segment;
+      }
+    })
+    .filter(Boolean);
+
+  const named = [...segments].reverse().find(hasFileExtension);
+  if (named) return finalizeFilename(named, contentType);
+
+  // 3. Nothing usable in the URL (e.g. it ends in "/download") — build a name
+  //    from the trailing segment plus an extension inferred from Content-Type.
+  const base = segments[segments.length - 1] || "downloaded_file";
+  return finalizeFilename(base, contentType);
 }
 
 // ── Validation helpers ────────────────────────────────────────────────────────
@@ -145,6 +233,7 @@ async function uploadFromDirectLink(directLink: string): Promise<UploadedFile> {
     let filename = extractFilename(
       directLink,
       response.headers.get("content-disposition"),
+      contentType,
     );
 
     filename = await getUniqueFilename(filename);

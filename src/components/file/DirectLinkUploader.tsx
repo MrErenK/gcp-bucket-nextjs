@@ -70,6 +70,7 @@ export function DirectLinkUploader({
       setUploadProgress(100);
       const data = await response.json();
       onUploadSuccessAction(data.file);
+      setDirectLink("");
     } catch (error) {
       clearInterval(progressInterval);
       handleError((error as Error).message);
