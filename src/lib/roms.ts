@@ -4,6 +4,7 @@ import {
   type RomRelease,
   type RomVariant,
 } from "@/lib/rom-filename";
+import { SITE } from "@/lib/site";
 import { listStored } from "@/lib/storage";
 import { readIndex } from "@/lib/storage-index";
 
@@ -25,6 +26,7 @@ export type Rom = {
   sha256: string | null;
   downloads: number;
   url: string;
+  absoluteUrl: string;
 };
 
 export async function loadRoms(): Promise<Rom[]> {
@@ -33,6 +35,7 @@ export async function loadRoms(): Promise<Rom[]> {
   return files.map((file) => {
     const parsed = parseRomFilename(file.file);
     const record = index.get(file.file);
+    const url = `/api/files/${encodeURIComponent(file.file)}`;
 
     return {
       id: file.file,
@@ -51,7 +54,8 @@ export async function loadRoms(): Promise<Rom[]> {
       sizeBytes: file.bytes,
       sha256: record?.sha256 ?? null,
       downloads: record?.downloads ?? 0,
-      url: `/api/files/${encodeURIComponent(file.file)}`,
+      url,
+      absoluteUrl: `${SITE.url}${url}`,
     };
   });
 }

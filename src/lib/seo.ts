@@ -46,7 +46,7 @@ export function pageMetadata(seo: PageSeo): Metadata {
 }
 
 function romNode(rom: Rom): Record<string, unknown> {
-  const download = `${SITE_ORIGIN}${rom.url}`;
+  const download = rom.absoluteUrl;
   const distribution: Record<string, unknown> = {
     "@type": "DataDownload",
     contentUrl: download,

@@ -282,7 +282,10 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                       >
                         download
                       </BracketLink>
-                      <CopyButton value={rom.url} label="Copy download URL">
+                      <CopyButton
+                        value={rom.absoluteUrl}
+                        label="Copy download URL"
+                      >
                         url
                       </CopyButton>
                     </div>
