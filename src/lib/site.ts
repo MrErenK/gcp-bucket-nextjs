@@ -1,8 +1,10 @@
 const FALLBACK_ORIGIN = "http://localhost:3000";
 
+export const CONFIGURED_ORIGIN: string | null =
+  (process.env.SITE_URL ?? "").trim().replace(/\/+$/, "") || null;
+
 function origin(): string {
-  const configured = (process.env.SITE_URL ?? "").trim().replace(/\/+$/, "");
-  if (configured) return configured;
+  if (CONFIGURED_ORIGIN) return CONFIGURED_ORIGIN;
 
   if (process.env.NODE_ENV === "production") {
     console.warn(
