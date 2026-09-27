@@ -20,6 +20,9 @@
 # production
 /build
 
+# runtime state
+/data
+
 # misc
 .DS_Store
 *.pem
@@ -39,3 +42,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+docs.md

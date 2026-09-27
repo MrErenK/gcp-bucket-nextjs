@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  color-scheme: light;
+
+  --bg: #ffffff;
+  --bg-subtle: #fafafa;
+  --fg: #000000;
+  --fg-muted: #737373;
+  --fg-muted-strong: #525252;
+
+  --line: #000000;
+  --line-subtle: #e5e5e5;
+
+  --invert-bg: #000000;
+  --invert-fg: #ffffff;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #000000;
+  --bg-subtle: #0a0a0a;
+  --fg: #ffffff;
+  --fg-muted: #a3a3a3;
+  --fg-muted-strong: #d4d4d4;
+
+  --line: #ffffff;
+  --line-subtle: #262626;
+
+  --invert-bg: #ffffff;
+  --invert-fg: #000000;
+}
+
+@theme inline {
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, "SF Mono",
+    Menlo, Consolas, "Liberation Mono", monospace;
+  --font-sans: var(--font-geist-mono), ui-monospace, SFMono-Regular, "SF Mono",
+    Menlo, Consolas, "Liberation Mono", monospace;
+
+  --color-background: var(--bg);
+  --color-surface: var(--bg-subtle);
+  --color-foreground: var(--fg);
+  --color-muted: var(--fg-muted);
+  --color-muted-strong: var(--fg-muted-strong);
+  --color-line: var(--line);
+  --color-line-subtle: var(--line-subtle);
+  --color-invert: var(--invert-bg);
+  --color-invert-foreground: var(--invert-fg);
+
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-mono);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+  }
+
+  table {
+    border-collapse: collapse;
+  }
+
+  ::selection {
+    background: var(--invert-bg);
+    color: var(--invert-fg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 1px;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-shadow: none !important;
+  }
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) var(--bg-subtle);
+}
+
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--bg-subtle);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border: 3px solid var(--bg-subtle);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--fg-muted);
+}
+
+*::-webkit-scrollbar-corner {
+  background: var(--bg-subtle);
+}
