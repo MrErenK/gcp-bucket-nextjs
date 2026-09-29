@@ -235,7 +235,15 @@ export function parseRomFilename(filename: string): ParsedRomFilename {
   const raw = filename.trim();
   const tokens = tokenize(stripArchiveExtension(raw));
 
-  let nameEnd = 0;
+  let nameStart = 0;
+  while (
+    nameStart + 1 < tokens.length &&
+    IMAGE_WORDS[tokens[nameStart].toLowerCase()]
+  ) {
+    nameStart += 1;
+  }
+
+  let nameEnd = nameStart;
   while (
     nameEnd + 1 < tokens.length &&
     /^[a-z]{2,}$/i.test(tokens[nameEnd]) &&
@@ -244,7 +252,7 @@ export function parseRomFilename(filename: string): ParsedRomFilename {
     nameEnd += 1;
   }
 
-  const rawName = tokens.slice(0, nameEnd + 1).join("");
+  const rawName = tokens.slice(nameStart, nameEnd + 1).join("");
   const name = canonicalName(rawName);
 
   const stamp = readStamp(tokens);
@@ -254,7 +262,7 @@ export function parseRomFilename(filename: string): ParsedRomFilename {
       claimed.add(stamp.index + offset);
     }
   }
-  for (let index = 0; index <= nameEnd; index += 1) claimed.add(index);
+  for (let index = nameStart; index <= nameEnd; index += 1) claimed.add(index);
 
   let version: string | null = null;
   let revision: string | null = null;
