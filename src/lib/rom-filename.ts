@@ -265,6 +265,7 @@ export function parseRomFilename(filename: string): ParsedRomFilename {
   for (let index = nameStart; index <= nameEnd; index += 1) claimed.add(index);
 
   let version: string | null = null;
+  let versionIndex = -1;
   let revision: string | null = null;
   let variant: RomVariant = "unknown";
   let release: RomRelease = "unknown";
@@ -309,8 +310,10 @@ export function parseRomFilename(filename: string): ParsedRomFilename {
     }
 
     if (VERSION_TOKEN.test(token)) {
-      if (!version) version = token;
-      else unparsed.push(token);
+      if (!version) {
+        version = token;
+        versionIndex = index;
+      } else unparsed.push(token);
       continue;
     }
 
@@ -319,10 +322,14 @@ export function parseRomFilename(filename: string): ParsedRomFilename {
 
   let device: string | null = null;
   if (candidates.length > 0) {
+    const beforeVersion = candidates.find(
+      (candidate) => candidate.index === versionIndex - 1,
+    );
     const afterStamp = stamp
       ? candidates.find((candidate) => candidate.index > stamp.index)
       : undefined;
-    const chosen = afterStamp ?? candidates[candidates.length - 1];
+    const chosen =
+      beforeVersion ?? afterStamp ?? candidates[candidates.length - 1];
 
     device = chosen.token.toLowerCase();
     for (const candidate of candidates) {
