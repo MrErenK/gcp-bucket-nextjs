@@ -87,7 +87,6 @@ function jobState(over: Partial<JobView>): JobView {
     received: 0,
     total: null,
     bytes: null,
-    sha256: null,
     error: null,
     queuedAt: 0,
     startedAt: null,
@@ -121,8 +120,6 @@ export const JOB_STATES: ReadonlyArray<JobView> = [
     received: 1_073_741_824,
     total: 1_073_741_824,
     bytes: 1_073_741_824,
-    sha256:
-      "9f2c41d7a8b35e60c1f4a2b7d90e3c58a1b6d24f8e07c39a5d1b6e840c2f7a91",
     endedAt: 0,
   }),
   jobState({

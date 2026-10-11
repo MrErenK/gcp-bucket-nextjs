@@ -214,7 +214,6 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                 query={query}
                 className="w-20 text-right"
               />
-              <TH className="w-40">SHA256</TH>
               <SortHeader
                 label="DOWNLOADS"
                 sortKey="downloads"
@@ -228,14 +227,14 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             {catalog.rows.length === 0 ? (
               <TR>
                 {empty ? (
-                  <TD colSpan={9} className="text-muted">
+                  <TD colSpan={8} className="text-muted">
                     NOTHING STORED --{" "}
                     <BracketLink href="/upload" className="-my-1">
                       upload
                     </BracketLink>
                   </TD>
                 ) : (
-                  <TD colSpan={9} className="text-muted">
+                  <TD colSpan={8} className="text-muted">
                     NO MATCHES
                   </TD>
                 )}
@@ -260,18 +259,6 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                     <Flags rom={rom} />
                   </TD>
                   <TDNumeric>{formatBytes(rom.sizeBytes) ?? ABSENT}</TDNumeric>
-                  <TD>
-                    {rom.sha256 ? (
-                      <CopyButton
-                        value={rom.sha256}
-                        label="Copy SHA256 checksum"
-                      >
-                        {rom.sha256.slice(0, 16)}
-                      </CopyButton>
-                    ) : (
-                      <span className="text-muted">{ABSENT}</span>
-                    )}
-                  </TD>
                   <TDNumeric>{formatCount(rom.downloads)}</TDNumeric>
                   <TD>
                     <div className="flex items-center gap-1">

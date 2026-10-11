@@ -185,7 +185,6 @@ export function romSearchText(rom: Rom): string {
       builtAt ? builtAt.replace(/-/g, "") : "",
       rom.builtTime ?? "",
       ...rom.flags,
-      rom.sha256 ?? "",
       rom.file,
     ]
       .filter(Boolean)

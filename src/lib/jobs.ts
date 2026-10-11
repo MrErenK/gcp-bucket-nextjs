@@ -84,7 +84,6 @@ export async function queueJob(input: {
     received: 0,
     total: null,
     bytes: null,
-    sha256: null,
     error: null,
     queuedAt: Date.now(),
     startedAt: null,
@@ -152,7 +151,6 @@ async function runJob(id: string): Promise<void> {
       job.state = "done";
       job.file = outcome.file;
       job.bytes = outcome.bytes;
-      job.sha256 = outcome.sha256;
       job.received = outcome.bytes;
       job.total = outcome.bytes;
       job.error = null;
@@ -242,7 +240,6 @@ function viewOf(job: Job, viewer?: string): JobView {
     received: job.received,
     total: job.total,
     bytes: job.bytes,
-    sha256: job.sha256,
     error: job.error,
     queuedAt: job.queuedAt,
     startedAt: job.startedAt,

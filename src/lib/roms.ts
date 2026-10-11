@@ -23,7 +23,6 @@ export type Rom = {
   flags: string[];
   unparsed: string[];
   sizeBytes: number | null;
-  sha256: string | null;
   downloads: number;
   url: string;
   absoluteUrl: string;
@@ -52,7 +51,6 @@ export async function loadRoms(): Promise<Rom[]> {
       flags: parsed.flags,
       unparsed: parsed.unparsed,
       sizeBytes: file.bytes,
-      sha256: record?.sha256 ?? null,
       downloads: record?.downloads ?? 0,
       url,
       absoluteUrl: `${SITE.url}${url}`,

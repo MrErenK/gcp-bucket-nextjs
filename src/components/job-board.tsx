@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/button";
-import { CopyButton } from "@/components/copy-button";
 import { Meter } from "@/components/meter";
 import { Table, TBody, TD, TDNumeric, TH, THead, TR } from "@/components/table";
 import { ABSENT } from "@/lib/format";
@@ -139,15 +138,6 @@ export function JobBoard({
                   <span className={job.state === "failed" ? "font-bold" : undefined}>
                     {jobStateLabel(job)}
                   </span>
-                  {job.sha256 ? (
-                    <span className="flex items-center gap-1 text-muted">
-                      <span aria-hidden>::</span>
-                      <span>sha256</span>
-                      <CopyButton value={job.sha256} label="Copy SHA256 checksum">
-                        {job.sha256.slice(0, 16)}
-                      </CopyButton>
-                    </span>
-                  ) : null}
                   {job.error ? (
                     <span className="block text-muted">-- {job.error}</span>
                   ) : null}

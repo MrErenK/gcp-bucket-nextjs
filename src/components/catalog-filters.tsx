@@ -115,7 +115,7 @@ export function CatalogFilters({
           name="q"
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder="name, device, flags, checksum"
+          placeholder="name, device, flags"
           autoComplete="off"
           spellCheck={false}
         />

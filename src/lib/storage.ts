@@ -1,4 +1,4 @@
-import { createHash, randomUUID, type Hash } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { lookup } from "node:dns/promises";
 import {
   link,
@@ -65,7 +65,7 @@ const V6_RANGES: ReadonlyArray<readonly [string, number]> = [
 ];
 
 export type FetchOutcome =
-  | { ok: true; file: string; bytes: number; sha256: string }
+  | { ok: true; file: string; bytes: number }
   | { ok: false; error: string };
 
 export type FetchProgress = {
@@ -390,7 +390,6 @@ function notZip(type: string | null): string {
 async function writeBody(
   body: ReadableStream<Uint8Array> | null,
   handle: FileHandle,
-  hash: Hash,
   name: string,
   declared: Declared,
   onProgress?: (progress: FetchProgress) => void,
@@ -423,7 +422,6 @@ async function writeBody(
       );
     }
 
-    hash.update(buffer);
     await handle.write(buffer);
     onProgress?.({ received: bytes, total: declared.total, file: name });
   }
@@ -538,14 +536,12 @@ export async function fetchIntoStorage(
 
   const tempPath = join(INCOMING_DIR, `${randomUUID()}.part`);
   const handle = await open(tempPath, "wx", 0o644);
-  const hash = createHash("sha256");
   let bytes = 0;
 
   try {
     bytes = await writeBody(
       response.body,
       handle,
-      hash,
       name,
       declared,
       onProgress,
@@ -575,10 +571,9 @@ export async function fetchIntoStorage(
     return { ok: false, error: "the file could not be moved into storage" };
   }
 
-  const sha256 = hash.digest("hex");
-  await recordFetch(name, { bytes, sha256 }).catch(() => undefined);
+  await recordFetch(name, { bytes }).catch(() => undefined);
 
-  return { ok: true, file: name, bytes, sha256 };
+  return { ok: true, file: name, bytes };
 }
 
 export async function listStored(): Promise<StoredFile[]> {

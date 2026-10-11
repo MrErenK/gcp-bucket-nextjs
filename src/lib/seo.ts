@@ -54,7 +54,6 @@ function romNode(rom: Rom): Record<string, unknown> {
   };
 
   if (rom.sizeBytes !== null) distribution.fileSize = rom.sizeBytes;
-  if (rom.sha256) distribution.sha256 = rom.sha256;
 
   const node: Record<string, unknown> = {
     "@type": "SoftwareApplication",

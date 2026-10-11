@@ -10,14 +10,12 @@ import { join } from "node:path";
 import { STORAGE_DIR } from "@/lib/upload-config";
 
 export type FileRecord = {
-  sha256: string | null;
   bytes: number | null;
   addedAt: string | null;
   downloads: number;
 };
 
 type RawEntry = {
-  sha256?: unknown;
   bytes?: unknown;
   addedAt?: unknown;
   downloads?: unknown;
@@ -45,10 +43,7 @@ function count(value: unknown): number {
 }
 
 function toRecord(entry: RawEntry): FileRecord {
-  const sha256 = string(entry.sha256);
-
   return {
-    sha256: sha256 && /^[0-9a-f]{64}$/.test(sha256) ? sha256 : null,
     bytes:
       typeof entry.bytes === "number" && Number.isFinite(entry.bytes)
         ? entry.bytes
@@ -83,7 +78,11 @@ async function readRaw(): Promise<Record<string, RawEntry>> {
 function render(files: Record<string, RawEntry>): string {
   const lines = Object.keys(files)
     .sort((left, right) => left.localeCompare(right))
-    .map((name) => `    ${JSON.stringify(name)}: ${JSON.stringify(files[name])}`);
+    .map((name) => {
+      const entry: Record<string, unknown> = { ...files[name] };
+      delete entry.sha256;
+      return `    ${JSON.stringify(name)}: ${JSON.stringify(entry)}`;
+    });
 
   if (lines.length === 0) return `{\n  "files": {}\n}\n`;
 
@@ -133,7 +132,7 @@ export async function readIndex(): Promise<Map<string, FileRecord>> {
 
 export async function recordFetch(
   name: string,
-  file: { bytes: number; sha256: string },
+  file: { bytes: number },
 ): Promise<void> {
   const present = await storedNames();
 
@@ -146,7 +145,6 @@ export async function recordFetch(
 
     files[name] = {
       ...files[name],
-      sha256: file.sha256,
       bytes: file.bytes,
       addedAt: new Date().toISOString(),
     };

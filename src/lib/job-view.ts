@@ -10,7 +10,6 @@ export type JobView = {
   received: number;
   total: number | null;
   bytes: number | null;
-  sha256: string | null;
   error: string | null;
   queuedAt: number;
   startedAt: number | null;
