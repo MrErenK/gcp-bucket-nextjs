@@ -17,5 +17,10 @@
     stroke="#000000"
     stroke-width="1"
   />
-  <path id="mark" fill="#000000" d="M4 3h8v2H6v2h6v2H6v2h6v2H4z" />
+  <path
+    id="mark"
+    fill="#000000"
+    fill-rule="evenodd"
+    d="M4 3h8v10H4z M6 5h4v2H6z M6 9h4v2H6z"
+  />
 </svg>

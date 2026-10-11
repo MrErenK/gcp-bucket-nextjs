@@ -6,10 +6,11 @@ export const contentType = "image/png";
 const UNIT = size.width / 16;
 
 const BARS = [
-  { id: "top", left: 4, top: 3, width: 8, height: 2 },
-  { id: "middle", left: 6, top: 7, width: 6, height: 2 },
-  { id: "bottom", left: 4, top: 11, width: 8, height: 2 },
   { id: "spine", left: 4, top: 3, width: 2, height: 10 },
+  { id: "top", left: 6, top: 3, width: 6, height: 2 },
+  { id: "middle", left: 6, top: 7, width: 6, height: 2 },
+  { id: "bottom", left: 6, top: 11, width: 6, height: 2 },
+  { id: "right", left: 10, top: 3, width: 2, height: 10 },
 ];
 
 export default function AppleIcon() {
