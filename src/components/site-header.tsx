@@ -11,7 +11,7 @@ export function SiteHeader() {
         <div className="flex items-baseline gap-2">
           <Link
             href="/"
-            className="text-xs font-bold tracking-wider transition-colors duration-75 hover:bg-invert hover:text-invert-foreground"
+            className="text-xs font-bold tracking-wider transition-colors duration-75 invert-hover"
           >
             {SITE.name}
           </Link>

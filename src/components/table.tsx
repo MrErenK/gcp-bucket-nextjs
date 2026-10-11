@@ -15,7 +15,7 @@ export function Table({
     <div className={cn("w-full overflow-x-auto", wrapperClassName)}>
       <table
         className={cn(
-          "w-full min-w-[34rem] border border-line text-left text-xs",
+          "w-full min-w-136 border border-line text-left text-xs",
           className,
         )}
         {...props}
@@ -51,7 +51,7 @@ export function TR({
   return (
     <tr
       className={cn(
-        hover && "hover:bg-invert hover:text-invert-foreground",
+        hover && "invert-hover",
         className,
       )}
       {...props}

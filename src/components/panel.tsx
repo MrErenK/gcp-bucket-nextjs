@@ -39,7 +39,7 @@ export function Card({
       className={cn(
         "border border-line p-2.5 sm:p-2",
         interactive &&
-          "transition-colors duration-75 hover:bg-invert hover:text-invert-foreground",
+          "transition-colors duration-75 invert-hover",
         className,
       )}
     >

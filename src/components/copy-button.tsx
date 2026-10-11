@@ -47,7 +47,7 @@ export function CopyButton({
         "cursor-pointer transition-colors duration-75",
         "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground",
         state === "idle"
-          ? "hover:bg-invert hover:text-invert-foreground"
+          ? "invert-hover"
           : "bg-invert text-invert-foreground",
         className,
       )}

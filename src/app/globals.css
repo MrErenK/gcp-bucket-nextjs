@@ -60,6 +60,17 @@
   --radius-4xl: 0px;
 }
 
+@utility invert-hover {
+  &:hover {
+    background-color: var(--invert-bg);
+    color: var(--invert-fg);
+
+    --fg: var(--invert-fg);
+    --fg-muted: var(--invert-fg);
+    --fg-muted-strong: var(--invert-fg);
+  }
+}
+
 @layer base {
   html {
     font-family: var(--font-mono);

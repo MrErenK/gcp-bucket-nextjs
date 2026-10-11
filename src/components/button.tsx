@@ -14,9 +14,9 @@ const variants: Record<Variant, string> = {
   solid:
     "border-line bg-invert text-invert-foreground hover:bg-background hover:text-foreground",
   outline:
-    "border-line bg-background text-foreground hover:bg-invert hover:text-invert-foreground",
+    "border-line bg-background text-foreground invert-hover",
   ghost:
-    "border-transparent bg-transparent text-foreground hover:bg-invert hover:text-invert-foreground",
+    "border-transparent bg-transparent text-foreground invert-hover",
 };
 
 const sizes: Record<Size, string> = {

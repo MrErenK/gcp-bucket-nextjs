@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 const interactive =
   "inline-flex items-center px-1 py-1 text-xs font-bold uppercase tracking-wider " +
   "transition-colors duration-75 " +
-  "hover:bg-invert hover:text-invert-foreground " +
+  "invert-hover " +
   "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground";
 
 export function BracketLink({
@@ -58,7 +58,7 @@ export function TextLink({
       className={cn(
         "underline decoration-1 underline-offset-2",
         "transition-colors duration-75",
-        "hover:bg-invert hover:text-invert-foreground hover:no-underline",
+        "invert-hover hover:no-underline",
         "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground",
         className,
       )}
@@ -79,7 +79,7 @@ export function ArrowLink({
       className={cn(
         "inline-flex items-center gap-1.5 px-1 py-1 text-xs font-bold uppercase tracking-wider",
         "transition-colors duration-75",
-        "hover:bg-invert hover:text-invert-foreground",
+        "invert-hover",
         "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-foreground",
         className,
       )}
