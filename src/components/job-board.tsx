@@ -66,12 +66,12 @@ export function JobBoard({
     <Table>
       <THead>
         <TR>
-          <TH className="w-44">JOB</TH>
-          <TH>FILE</TH>
-          <TH className="w-64">PROGRESS</TH>
-          <TH className="w-56">STATE</TH>
-          <TH className="w-16 text-right">AGE</TH>
-          <TH className="w-24"> </TH>
+          <TH className="w-36 sm:w-44">JOB</TH>
+          <TH className="w-40 sm:w-auto">FILE</TH>
+          <TH className="w-56 sm:w-64">PROGRESS</TH>
+          <TH className="w-40 sm:w-56">STATE</TH>
+          <TH className="hidden w-16 text-right sm:table-cell">AGE</TH>
+          <TH className="w-20 sm:w-24"> </TH>
         </TR>
       </THead>
       <TBody>
@@ -142,7 +142,9 @@ export function JobBoard({
                     <span className="block text-muted">-- {job.error}</span>
                   ) : null}
                 </TD>
-                <TDNumeric>{jobAge(job, clock)}</TDNumeric>
+                <TDNumeric className="hidden sm:table-cell">
+                  {jobAge(job, clock)}
+                </TDNumeric>
                 <TD>
                   {job.mine && isActive(job) ? (
                     <form action="/api/uploads/cancel" method="post">

@@ -207,7 +207,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                 query={query}
                 className="w-36"
               />
-              <TH className="w-56">TAGS</TH>
+              <TH className="hidden w-56 sm:table-cell">TAGS</TH>
               <SortHeader
                 label="SIZE"
                 sortKey="size"
@@ -255,7 +255,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                   <TD>
                     <BuiltAt rom={rom} now={now} />
                   </TD>
-                  <TD>
+                  <TD className="hidden sm:table-cell">
                     <Flags rom={rom} />
                   </TD>
                   <TDNumeric>{formatBytes(rom.sizeBytes) ?? ABSENT}</TDNumeric>

@@ -15,7 +15,7 @@ export function Table({
     <div className={cn("w-full overflow-x-auto", wrapperClassName)}>
       <table
         className={cn(
-          "w-full min-w-136 border border-line text-left text-xs",
+          "w-full min-w-0 border border-line text-left text-xs sm:min-w-136",
           className,
         )}
         {...props}

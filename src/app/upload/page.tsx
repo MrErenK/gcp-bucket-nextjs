@@ -96,7 +96,7 @@ export default async function Upload({ searchParams }: PageProps<"/upload">) {
             label="direct download link"
             hint=".zip"
             htmlFor="url"
-            className="min-w-64 flex-1"
+            className="w-full sm:w-auto sm:min-w-64 sm:flex-1"
           >
             <Input
               id="url"
@@ -164,7 +164,7 @@ export default async function Upload({ searchParams }: PageProps<"/upload">) {
               ) : (
                 listed.map((file) => (
                   <TR key={file.file} hover>
-                    <TD className="font-bold">{file.file}</TD>
+                    <TD className="font-bold wrap-anywhere">{file.file}</TD>
                     <TDNumeric>{formatBytes(file.bytes) ?? ABSENT}</TDNumeric>
                     <TD className="tabular-nums text-muted">
                       {file.modifiedAt.slice(0, 10)}
