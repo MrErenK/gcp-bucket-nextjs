@@ -11,7 +11,8 @@ import {
   TD,
   TDNumeric,
 } from "@/components/table";
-import { Field, Input, Textarea, Select, Checkbox, Label } from "@/components/input";
+import { Field, Input, Textarea, Checkbox, Label } from "@/components/input";
+import { Select } from "@/components/select";
 import { Panel, Card, SpecList } from "@/components/panel";
 import { Meter } from "@/components/meter";
 import { BracketLink, TextLink, ArrowLink } from "@/components/link";
@@ -310,11 +311,12 @@ export default function Home() {
           </Field>
 
           <Field label="format" hint="enum" htmlFor="spec-format">
-            <Select id="spec-format" name="spec-format" defaultValue="bin">
-              <option value="bin">bin</option>
-              <option value="pak">pak</option>
-              <option value="rom">rom</option>
-            </Select>
+            <Select
+              id="spec-format"
+              name="spec-format"
+              options={["bin", "pak", "rom"]}
+              defaultValue="bin"
+            />
           </Field>
 
           <Field

@@ -2,7 +2,6 @@ import type {
   InputHTMLAttributes,
   LabelHTMLAttributes,
   ReactNode,
-  SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from "react";
 import { cn } from "@/lib/cn";
@@ -31,18 +30,6 @@ export function Textarea({
 }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea className={cn(fieldChrome, "px-2 py-1.5 sm:py-1", className)} {...props} />
-  );
-}
-
-export function Select({
-  className,
-  ...props
-}: SelectHTMLAttributes<HTMLSelectElement>) {
-  return (
-    <select
-      className={cn(fieldChrome, "h-9 cursor-pointer px-1 sm:h-7", className)}
-      {...props}
-    />
   );
 }
 

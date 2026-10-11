@@ -3,7 +3,8 @@
 import { useEffect, useState, useTransition, type FormEvent } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/button";
-import { Field, Input, Select } from "@/components/input";
+import { Field, Input } from "@/components/input";
+import { Select } from "@/components/select";
 import {
   ALL,
   SEARCH_DEBOUNCE_MS,
@@ -126,15 +127,15 @@ export function CatalogFilters({
           id="device"
           name="device"
           value={device}
-          onChange={(event) => setDevice(event.target.value)}
-        >
-          <option value={ALL}>all devices</option>
-          {devices.map((option) => (
-            <option key={option.device} value={option.device}>
-              {option.device} ({option.count})
-            </option>
-          ))}
-        </Select>
+          onChange={setDevice}
+          options={[
+            { value: ALL, label: "all devices" },
+            ...devices.map((option) => ({
+              value: option.device,
+              label: `${option.device} (${option.count})`,
+            })),
+          ]}
+        />
       </Field>
 
       <Field label="variant" htmlFor="variant" className="w-full sm:w-32">
@@ -142,17 +143,12 @@ export function CatalogFilters({
           id="variant"
           name="variant"
           value={variant}
-          onChange={(event) =>
-            setVariant(event.target.value as RomVariant | typeof ALL)
-          }
-        >
-          <option value={ALL}>all</option>
-          {ROM_VARIANTS.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </Select>
+          onChange={(next) => setVariant(next as RomVariant | typeof ALL)}
+          options={[
+            { value: ALL, label: "all" },
+            ...ROM_VARIANTS.map((option) => ({ value: option, label: option })),
+          ]}
+        />
       </Field>
 
       <Field label="release" htmlFor="release" className="w-full sm:w-32">
@@ -160,17 +156,12 @@ export function CatalogFilters({
           id="release"
           name="release"
           value={release}
-          onChange={(event) =>
-            setRelease(event.target.value as RomRelease | typeof ALL)
-          }
-        >
-          <option value={ALL}>all</option>
-          {ROM_RELEASES.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </Select>
+          onChange={(next) => setRelease(next as RomRelease | typeof ALL)}
+          options={[
+            { value: ALL, label: "all" },
+            ...ROM_RELEASES.map((option) => ({ value: option, label: option })),
+          ]}
+        />
       </Field>
 
       <Field label="status" htmlFor="status" className="w-full sm:w-32">
@@ -178,15 +169,12 @@ export function CatalogFilters({
           id="status"
           name="status"
           value={status}
-          onChange={(event) => setStatus(event.target.value as StatusFilter)}
-        >
-          <option value={ALL}>any</option>
-          {STATUSES.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </Select>
+          onChange={(next) => setStatus(next as StatusFilter)}
+          options={[
+            { value: ALL, label: "any" },
+            ...STATUSES.map((option) => ({ value: option, label: option })),
+          ]}
+        />
       </Field>
 
       <div className="flex items-center gap-2">
