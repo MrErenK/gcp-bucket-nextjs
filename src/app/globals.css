@@ -5,33 +5,33 @@
 :root {
   color-scheme: light;
 
-  --bg: #ffffff;
-  --bg-subtle: #fafafa;
-  --fg: #000000;
-  --fg-muted: #737373;
-  --fg-muted-strong: #525252;
+  --bg: #e4e4e4;
+  --bg-subtle: #d9d9d9;
+  --fg: #2a2a2a;
+  --fg-muted: #616161;
+  --fg-muted-strong: #454545;
 
-  --line: #000000;
-  --line-subtle: #e5e5e5;
+  --line: #b3b3b3;
+  --line-subtle: #cccccc;
 
-  --invert-bg: #000000;
-  --invert-fg: #ffffff;
+  --invert-bg: #2b2b2b;
+  --invert-fg: #ebebeb;
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #000000;
-  --bg-subtle: #0a0a0a;
-  --fg: #ffffff;
-  --fg-muted: #a3a3a3;
-  --fg-muted-strong: #d4d4d4;
+  --bg: #121212;
+  --bg-subtle: #1c1c1c;
+  --fg: #d4d4d4;
+  --fg-muted: #949494;
+  --fg-muted-strong: #b8b8b8;
 
-  --line: #ffffff;
+  --line: #383838;
   --line-subtle: #262626;
 
-  --invert-bg: #ffffff;
-  --invert-fg: #000000;
+  --invert-bg: #d4d4d4;
+  --invert-fg: #121212;
 }
 
 @theme inline {

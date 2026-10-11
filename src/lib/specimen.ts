@@ -39,15 +39,15 @@ export const PALETTE: ReadonlyArray<{
   dark: string;
   role: string;
 }> = [
-  { token: "--bg", cls: "bg-background", light: "#ffffff", dark: "#000000", role: "page ground" },
-  { token: "--bg-subtle", cls: "bg-surface", light: "#fafafa", dark: "#0a0a0a", role: "panel inset, zebra" },
-  { token: "--fg", cls: "bg-foreground", light: "#000000", dark: "#ffffff", role: "primary text" },
-  { token: "--fg-muted", cls: "bg-muted", light: "#737373", dark: "#a3a3a3", role: "metadata, units" },
-  { token: "--fg-muted-strong", cls: "bg-muted-strong", light: "#525252", dark: "#d4d4d4", role: "secondary copy" },
-  { token: "--line", cls: "bg-line", light: "#000000", dark: "#ffffff", role: "structural border" },
-  { token: "--line-subtle", cls: "bg-line-subtle", light: "#e5e5e5", dark: "#262626", role: "internal divider" },
-  { token: "--invert-bg", cls: "bg-invert", light: "#000000", dark: "#ffffff", role: "inverted hover, solid fill" },
-  { token: "--invert-fg", cls: "bg-invert-foreground", light: "#ffffff", dark: "#000000", role: "text on inverted" },
+  { token: "--bg", cls: "bg-background", light: "#e4e4e4", dark: "#121212", role: "page ground" },
+  { token: "--bg-subtle", cls: "bg-surface", light: "#d9d9d9", dark: "#1c1c1c", role: "panel inset, zebra" },
+  { token: "--fg", cls: "bg-foreground", light: "#2a2a2a", dark: "#d4d4d4", role: "primary text" },
+  { token: "--fg-muted", cls: "bg-muted", light: "#616161", dark: "#949494", role: "metadata, units" },
+  { token: "--fg-muted-strong", cls: "bg-muted-strong", light: "#454545", dark: "#b8b8b8", role: "secondary copy" },
+  { token: "--line", cls: "bg-line", light: "#b3b3b3", dark: "#383838", role: "structural border" },
+  { token: "--line-subtle", cls: "bg-line-subtle", light: "#cccccc", dark: "#262626", role: "internal divider" },
+  { token: "--invert-bg", cls: "bg-invert", light: "#2b2b2b", dark: "#d4d4d4", role: "inverted hover, solid fill" },
+  { token: "--invert-fg", cls: "bg-invert-foreground", light: "#ebebeb", dark: "#121212", role: "text on inverted" },
 ];
 
 export const ARTIFACTS: ReadonlyArray<{
